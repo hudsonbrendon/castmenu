@@ -154,7 +154,9 @@ def cmd_build(a):
         ip = ipbin.patch(ip_tmpl, name="CASTMENU", product="CASTMENU", version="V1.000", date="20261015", company="CASTMENU")
         ipp = os.path.join(tmp, "IP.BIN"); open(ipp, "wb").write(ip)
         if os.path.isdir(out):
-            for f in os.listdir(out): os.remove(os.path.join(out, f))
+            for f in os.listdir(out):
+                try: os.remove(os.path.join(out, f))
+                except FileNotFoundError: pass   # macOS drops ._AppleDouble files together with their owner
         gdi.build(out, data, ipp)
     cfg = os.path.join(a.sd, "GDEMU.ini")
     if not os.path.exists(cfg):
