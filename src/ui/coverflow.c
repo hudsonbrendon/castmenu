@@ -22,7 +22,7 @@ static void cover_at(const game_t *g, float d, int is_center) {
     if (ad > 3.2f) return;
     float side = clampf(ad, 0, 1);                       /* 0 center .. 1 fully a side cover */
     float size = CF_SIZE + (CF_SIDE - CF_SIZE) * side;
-    float cx = SCREEN_W / 2 + (d < 0 ? -1 : 1) * (CF_SIZE / 2 + 30) * side + d * CF_GAP * (ad > 1 ? 1 : side) ;
+    float cx;
     if (ad <= 1) cx = SCREEN_W / 2 + d * (CF_SIZE / 2 + CF_GAP * 0.55f + 30);
     else cx = SCREEN_W / 2 + (d < 0 ? -1 : 1) * (CF_SIZE / 2 + CF_GAP * 0.55f + 30 + (ad - 1) * CF_GAP);
     float skew = 0.18f * size * side * (d < 0 ? 1 : -1);  /* perspective: far edge shorter */
