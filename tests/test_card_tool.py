@@ -15,7 +15,11 @@ def fake_game(folder, name, product, region="JU", cover=True):
         open(os.path.join(data, "0GDTEX.PVR"), "wb").write(b"PVRT" + (8 + 128).to_bytes(4, "little") + b"\x01\x01\x00\x00" + (8).to_bytes(2, "little") + (8).to_bytes(2, "little") + b"\xAA" * 128)
     ip = ipbin.patch(open(os.path.join(ROOT, "assets", "IP.BIN"), "rb").read(), name=name, product=product, region=region, date="19990909", vga=True)
     ipp = os.path.join(folder, "_ip.bin"); open(ipp, "wb").write(ip)
-    gdi.build(folder, data, ipp, volid=name[:8], boot_files=("1ST_READ.BIN", "0GDTEX.PVR"))
+    # retail-style 3-track GDI: files live in track03 itself
+    gdi._iso(gdi._mkisofs(), os.path.join(folder, "track01.iso"), data, ipp, name[:8], 0)
+    open(os.path.join(folder, "track02.raw"), "wb").write(b"\0" * 2352)
+    gdi._iso(gdi._mkisofs(), os.path.join(folder, "track03.iso"), data, ipp, name[:8], 45000)
+    open(os.path.join(folder, "disc.gdi"), "w").write("3\n1 0 4 2048 track01.iso 0\n2 600 0 2352 track02.raw 0\n3 45000 4 2048 track03.iso 0\n")
     shutil.rmtree(data); os.remove(ipp)
 
 with tempfile.TemporaryDirectory() as sd:
@@ -39,12 +43,16 @@ with tempfile.TemporaryDirectory() as sd:
     a = A(); a.sd = sd; a.out = None; a.menu_bin = menu_bin; a.themes = os.path.join(ROOT, "themes"); a.covers = None; a.ip_template = None
     cli.cmd_build(a)
     out = os.path.join(sd, "01")
-    assert sorted(os.listdir(out)) == ["disc.gdi", "track01.iso", "track02.raw", "track03.iso"], os.listdir(out)
+    assert sorted(os.listdir(out)) == ["disc.gdi", "track01.iso", "track02.raw", "track03.iso", "track04.raw", "track05.iso"], os.listdir(out)
+    assert open(os.path.join(out, "disc.gdi")).read().splitlines()[-1].startswith("5 544180 4 2048 track05.iso")
+    assert b"04.name=SHENMUE DISC 2" in gdi.read_hd_file(out, "LIST.INI")
+    assert gdi.read_hd_file(out, "1ST_READ.BIN") == open(menu_bin, "rb").read()
+    ip3 = open(os.path.join(out, "track03.iso"), "rb").read(0x8000); assert ip3[0x20:0x24] == b"%04X" % ipbin.crc16(ip3[0x40:0x50])
     menu = disc.read_gdi(os.path.join(out, "disc.gdi"))
     assert menu.ip.name == "CASTMENU", menu.ip
     # read LIST.INI back from the built image
     from tools.cast_card import iso9660
-    for track, lba, expect in (("track01.iso", 0, {"1ST_READ.BIN", "LIST.INI", "CASTMENU.INI", "COVERS", "THEMES"}), ("track03.iso", 45000, {"1ST_READ.BIN", "LIST.INI", "CASTMENU.INI"})):
+    for track, lba, expect in (("track01.iso", 0, {"1ST_READ.BIN", "LIST.INI", "CASTMENU.INI", "COVERS", "THEMES"}),):
         src = iso9660.FileSectorSource(os.path.join(out, track), lba)
         e = iso9660.find_file(src, "LIST.INI"); assert e, "LIST.INI on " + track
         txt = iso9660.read_file(src, e).decode("latin-1"); assert "04.name=SHENMUE DISC 2" in txt

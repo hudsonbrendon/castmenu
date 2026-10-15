@@ -23,6 +23,13 @@ def parse(hdr: bytes) -> IpBin:
                  device=device, disc=disc, vga=bool(pval & 0x10), is_gd=device.startswith("GD-ROM"),
                  boot=f(0x60, 16), company=f(0x70, 16), periph=periph)
 
+def crc16(buf: bytes) -> int:
+    n = 0xFFFF
+    for b in buf:
+        n ^= b << 8
+        for _ in range(8): n = ((n << 1) ^ 0x1021) if n & 0x8000 else (n << 1)
+    return n & 0xFFFF
+
 def patch(template: bytes, *, name="CASTMENU", product="T0000", version="V1.000", date="20261015",
           boot="1ST_READ.BIN", company="CASTMENU", region="JUE", vga=True) -> bytes:
     d = bytearray(template)
@@ -36,6 +43,7 @@ def patch(template: bytes, *, name="CASTMENU", product="T0000", version="V1.000"
     m = _re.match(r"[0-9A-Fa-f]+", d[0x38:0x40].decode("ascii", "replace")); periph = int(m.group(0), 16) if m else 0x0799A10
     periph = (periph | 0x10) if vga else (periph & ~0x10)
     put(0x38, 8, f"{periph:07X}")
+    put(0x20, 4, f"{crc16(bytes(d[0x40:0x50])):04X}")   # checksum of product number + version (as makeip)
     # region text blocks at 0x3700.. ("For JAPAN,TAIWAN,PHILIPINES." etc.) are left as-is: they are
     # only used by the BIOS when the area symbols above are set.
     return bytes(d)
