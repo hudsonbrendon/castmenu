@@ -52,3 +52,9 @@ Everything up to the launch screen runs in redream. The launch itself cannot: th
 real BIOS (`SR.BL=1`, jump to `0x8C00B500`), which the HLE BIOS does not implement, and there is no
 GDEMU to switch images. Those two paths (loader, `0x52` vendor commands, slow scan) need a real
 console + GDEMU ≥ 5.13.
+
+## CI / releases
+
+`.github/workflows/build.yml` builds the menu in the `kazade/dreamcast-sdk` container on every push,
+runs the host tests and uploads `1ST_READ.BIN` + a zip as artifacts. Pushing a tag `vX.Y.Z` also
+creates a GitHub Release with those files (bump `src/version.h` first).

@@ -1,0 +1,67 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: kazade/dreamcast-sdk:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Host deps (Pillow, mkisofs)
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq python3-pil genisoimage > /dev/null
+          ln -sf /usr/bin/genisoimage /usr/local/bin/mkisofs
+      - name: Build menu + loader
+        shell: bash
+        run: |
+          source /opt/toolchains/dc/kos/environ.sh
+          python3 tools/cast_card/mkassets.py
+          python3 tools/cast_card/mklang.py
+          make
+      - name: Host tests
+        shell: bash
+        run: |
+          cc -Isrc tests/test_list.c src/list.c src/ini.c src/ipbin.c src/settings.c -o /tmp/t && /tmp/t
+          python3 tests/test_card_tool.py
+          python3 tests/test_proto.py
+      - name: Package
+        run: |
+          V=${GITHUB_REF_NAME#v}
+          D=castmenu-$V
+          mkdir -p $D
+          cp 1ST_READ.BIN README.md LICENSE $D/
+          cp -r themes server docs $D/
+          mkdir -p $D/tools && cp -r tools/cast_card $D/tools/ && cp build.sh $D/
+          cp -r assets $D/assets
+          rm -rf $D/assets/romdisk
+          cp assets/romdisk/cast_ldr.bin $D/cast_ldr.bin
+          zip -qr $D.zip $D
+          echo "ZIP=$D.zip" >> $GITHUB_ENV
+      - uses: actions/upload-artifact@v4
+        with:
+          name: castmenu
+          path: |
+            1ST_READ.BIN
+            ${{ env.ZIP }}
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            1ST_READ.BIN
+            ${{ env.ZIP }}
+          generate_release_notes: true
+          body: |
+            Cast Menu ${{ github.ref_name }} para GDEMU (Sega Dreamcast).
+
+            **Instalar:** descompacte o zip e rode `python3 -m tools.cast_card build /Volumes/GDEMU`
+            (precisa de Python 3 + Pillow + mkisofs). O `1ST_READ.BIN` é o menu já compilado.
+            O servidor do Cast Chat / Cast AI está em `server/cast_server.py`.
+
+            Não testado em hardware real: loader, comandos GDEMU, rede e microfone. Ver docs/REVERSE_ENGINEERING.md §7.

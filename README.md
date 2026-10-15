@@ -1,5 +1,8 @@
 # Cast Menu — menu aberto para GDEMU (Sega Dreamcast)
 
+[![build](https://github.com/hudsonbrendon/castmenu/actions/workflows/build.yml/badge.svg)](https://github.com/hudsonbrendon/castmenu/actions/workflows/build.yml)
+[![release](https://img.shields.io/github/v/release/hudsonbrendon/castmenu)](https://github.com/hudsonbrendon/castmenu/releases)
+
 Alternativa aberta ao GDMENU e ao Dream Menu, feita a partir da engenharia reversa do GDMENU 0.6
 com REA + Ghidra (`docs/REVERSE_ENGINEERING.md`). Interface renderizada no PVR com **coverflow**
 elegante e fluido, lista e grade, **categorias inteligentes** (gênero e plataforma: Atomiswave,
@@ -11,6 +14,8 @@ e **de voz** pelo microfone do Dreamcast), **Cast AI** (perguntas por texto ou v
 
 Compatível com cartões já montados pelo GDMENU Card Manager (`LIST.INI`) e com a ferramenta
 própria `cast_card`, que extrai capas das imagens, gera sinopses/categorias e a pasta `01/`.
+
+Binários prontos em [Releases](https://github.com/hudsonbrendon/castmenu/releases) (gerados pelo CI a cada tag `v*`).
 
 ```
 ./build.sh                                   # compila (Docker + KallistiOS)
