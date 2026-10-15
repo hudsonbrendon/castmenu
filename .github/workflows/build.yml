@@ -12,10 +12,10 @@ jobs:
     container: kazade/dreamcast-sdk:latest
     steps:
       - uses: actions/checkout@v4
-      - name: Host deps (Pillow, mkisofs)
+      - name: Host deps (Pillow, mkisofs, zip)
         run: |
-          apt-get update -qq
-          apt-get install -y -qq python3-pil genisoimage > /dev/null
+          dnf install -y -q zip > /dev/null
+          pip3 install -q pillow
           ln -sf /usr/bin/genisoimage /usr/local/bin/mkisofs
       - name: Build menu + loader
         shell: bash
