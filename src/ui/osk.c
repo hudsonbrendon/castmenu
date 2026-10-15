@@ -48,7 +48,7 @@ void osk_draw(void) {
     if (!active) return;
     theme_t *t = &g_theme;
     float a = ease_out(anim);
-    float h = 212, y = SCREEN_H - h + 30 * (1 - a), x = 24, w = SCREEN_W - 48;
+    float h = 212, y = BOTTOM_Y + 36 - h + 30 * (1 - a), x = SAFE_X, w = SCREEN_W - 2 * SAFE_X;
     draw_rect(0, 0, SCREEN_W, SCREEN_H, RGBA(0, 0, 0, (int)(110 * a)));
     draw_shadow(x, y, w, h, 14, ALPHA(0x000000, (int)(160 * a)));
     draw_rect_round_grad(x, y, w, h, 12, col_lighten(ALPHA(t->panel, 255), 0.06f), col_darken(ALPHA(t->panel, 255), 0.15f));

@@ -3,11 +3,11 @@ import math
 from PIL import Image, ImageDraw, ImageFilter
 
 # Dreamcast palette: swirl orange, the four controller buttons, console shell and logotype grey.
-DC = dict(orange="#F26522", red="#E23D3D", blue="#2D6BD1", yellow="#F2C229", green="#3DB55A", shell="#E9E9E5", grey="#8A8C8E", ink="#3A3A3C")
+DC = dict(orange="#F26522", red="#E23D3D", blue="#2D6BD1", yellow="#F2C229", green="#3DB55A", shell="#E9E9E5", grey="#66696D", ink="#26272A")
 BUTTONS = dict(badge_j=DC["red"], badge_u=DC["blue"], badge_e=DC["green"], badge_gd=DC["yellow"], badge_cd=DC["grey"])
 
 THEMES = {
- "dreamcast":      dict(name="Dreamcast", bg="#F2F2EF", panel="#E6FFFFFF", panel_alt="#E6ECECE8", accent=DC["orange"], accent2=DC["blue"], glow="#40F26522", accent_dim="#F9CDB3", text=DC["ink"], text_dim=DC["grey"], text_hi="#1A1A1C", sel_bg=DC["orange"], sel_text="#FFFFFF", shadow="#28000000", vignette=20, grad=((245,245,242),(214,214,210)), swirl=(242,101,34), orbs=[(540,90,170,(242,101,34)),(110,420,160,(45,107,209))], **BUTTONS),
+ "dreamcast":      dict(name="Dreamcast", bg="#F2F2EF", panel="#F0FFFFFF", panel_alt="#F0E4E4E0", accent=DC["orange"], accent2=DC["blue"], glow="#40F26522", accent_dim="#F9CDB3", text=DC["ink"], text_dim=DC["grey"], text_hi="#141416", sel_bg=DC["orange"], sel_text="#FFFFFF", shadow="#30000000", vignette=16, grad=((245,245,242),(214,214,210)), swirl=(242,101,34), orbs=[(540,90,170,(242,101,34)),(110,420,160,(45,107,209))], **BUTTONS),
  "dreamcast-dark": dict(name="Dreamcast Dark", bg="#1C1C1E", panel="#CC2A2A2E", panel_alt="#CC38383E", accent=DC["orange"], accent2=DC["blue"], glow="#70F26522", accent_dim="#7A3A1A", text="#ECECEA", text_dim="#A8AAAD", text_hi="#FFFFFF", sel_bg=DC["orange"], sel_text="#1C1C1E", grad=((28,28,30),(50,50,56)), swirl=(242,101,34), orbs=[(540,90,180,(242,101,34)),(120,400,200,(45,107,209))], **BUTTONS),
  "controller":     dict(name="Controller", bg="#2B2B30", panel="#CC35353B", panel_alt="#CC45454C", accent=DC["orange"], accent2=DC["green"], glow="#60F26522", accent_dim="#7A3A1A", text="#F2F2F0", text_dim="#B0B0B4", text_hi="#FFFFFF", sel_bg=DC["blue"], sel_text="#FFFFFF", grad=((43,43,48),(70,70,78)), buttons=True, orbs=[(120,120,150,(226,61,61)),(520,120,150,(45,107,209)),(120,380,150,(242,194,41)),(520,380,150,(61,181,90))], **BUTTONS),
  "ocean":          dict(name="Ocean", bg="#07253F", panel="#CC0B3558", panel_alt="#CC12456E", accent="#2EC8FF", accent2=DC["orange"], glow="#8020B8FF", accent_dim="#1A6E99", text="#E6F4FF", text_dim="#8FBAD6", text_hi="#FFFFFF", sel_bg="#2EC8FF", sel_text="#04203A", grad=((5,30,56),(10,70,120)), waves=(46,200,255), orbs=[(500,120,200,(46,200,255)),(120,420,220,(30,120,200))], **BUTTONS),

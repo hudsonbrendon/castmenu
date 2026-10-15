@@ -164,13 +164,13 @@ static void status_line(float rx, float y) {
 void chat_draw(void) {
     theme_t *t = &g_theme;
     draw_rect_grad(0, 0, SCREEN_W, 64, ALPHA(t->bg, 200), ALPHA(t->bg, 0));
-    draw_logo(24, 12, 32, 255);
-    draw_text_shadow(&g_font_big, 66, 16, t->text_hi, ALPHA(0x000000, 90), "Cast");
-    draw_text_shadow(&g_font_big, 66 + text_width(&g_font_big, "Cast") + 6, 16, t->accent, ALPHA(0x000000, 90), "Chat");
-    status_line(SCREEN_W - 24, 24);
+    draw_logo(SAFE_X, SAFE_TOP - 6, 32, 255);
+    draw_text_shadow(&g_font_big, SAFE_X + 42, SAFE_TOP, t->text_hi, ALPHA(0x000000, 90), "Cast");
+    draw_text_shadow(&g_font_big, SAFE_X + 42 + text_width(&g_font_big, "Cast") + 6, SAFE_TOP, t->accent, ALPHA(0x000000, 90), "Chat");
+    status_line(SCREEN_W - SAFE_X, SAFE_TOP + 6);
     float dy = enter_dy();
     /* left: tabs + list */
-    float lx = 24, ly = 64 + dy, lw = 196, lh = 366;
+    float lx = SAFE_X, ly = CONTENT_Y + dy, lw = 190, lh = CONTENT_H;
     panel(lx, ly, lw, lh);
     const char *tabs[2] = { tr(S_ROOMS), tr(S_FRIENDS) };
     for (int i = 0; i < 2; i++) {
@@ -203,7 +203,7 @@ void chat_draw(void) {
     if (tab == 0 && !nrooms) draw_text_wrap(&g_font_small, lx + 16, ly + 50, lw - 32, 15, t->text_dim, chatnet_online() ? "..." : tr(S_OFFLINE));
     draw_clear_clip();
     /* right: conversation */
-    float rx = 232, ry = 64 + dy, rw = SCREEN_W - 24 - rx, rh = 366;
+    float rx = SAFE_X + 190 + 12, ry = CONTENT_Y + dy, rw = SCREEN_W - SAFE_X - rx, rh = CONTENT_H;
     panel(rx, ry, rw, rh);
     if (cur_conv < 0) {
         draw_text_center(&g_font, rx + rw / 2, ry + 150, t->text_dim, tr(S_SELECT_FRIEND));

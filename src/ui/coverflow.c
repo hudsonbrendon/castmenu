@@ -7,10 +7,10 @@
 #include <string.h>
 #include <stdio.h>
 
-#define CF_CY 212.0f       /* vertical center of the covers */
-#define CF_SIZE 184.0f     /* center cover size */
-#define CF_SIDE 130.0f     /* side cover size */
-#define CF_GAP 118.0f      /* horizontal spacing between side covers */
+#define CF_CY 196.0f       /* vertical center of the covers */
+#define CF_SIZE 176.0f     /* center cover size */
+#define CF_SIDE 124.0f     /* side cover size */
+#define CF_GAP 134.0f      /* horizontal spacing between side covers (no overlap) */
 #define CF_FLOOR (CF_CY + CF_SIZE / 2 + 2)
 
 void coverflow_reset(int cursor) { (void)cursor; }
@@ -72,7 +72,7 @@ void coverflow_draw(int cursor, float *pos) {
     /* floor: darker band with a soft horizon line */
     draw_rect_grad(0, CF_FLOOR - 40, SCREEN_W, 40, ALPHA(t->bg, 0), ALPHA(col_darken(t->bg, 0.3f), 110));
     draw_rect_grad(0, CF_FLOOR, SCREEN_W, 120, ALPHA(col_darken(t->bg, 0.35f), 170), ALPHA(col_darken(t->bg, 0.35f), 0));
-    hairline(60, CF_FLOOR, SCREEN_W - 120);
+    hairline(SAFE_X + 28, CF_FLOOR, SCREEN_W - 2 * SAFE_X - 56);
     if (!n) { draw_text_center(&g_font, SCREEN_W / 2, CF_CY - 10, t->text_dim, tr(S_NO_GAMES)); return; }
     /* draw far-to-near: left side from far, right side from far, center last */
     int center = (int)floorf(*pos + 0.5f);
@@ -84,13 +84,15 @@ void coverflow_draw(int cursor, float *pos) {
     /* title + meta */
     const game_t *g = list_view_item(cursor);
     if (g) {
-        float ty = CF_FLOOR + 54;
-        const font_t *tf = text_width(&g_font_display, g->name) > 540 ? &g_font_big : &g_font_display;
-        float tw = text_width(tf, g->name);
+        float ty = CF_FLOOR + 40;
+        const font_t *tf = text_width(&g_font_display, g->name) > 500 ? &g_font_big : &g_font_display;
+        float tw = text_width(tf, g->name); if (tw > 500) tw = 500;
+        draw_set_clip((int)SCREEN_W / 2 - 250, (int)ty - 4, 500, 52);
         draw_text_shadow(tf, SCREEN_W / 2 - tw / 2, ty + (tf == &g_font_big ? 8 : 0), t->text_hi, ALPHA(0x000000, 120), g->name);
-        /* badges centered under the title */
+        draw_clear_clip();
+        /* badges centered under the title, on the category line */
         float bw = strlen(g->region) * 22 + 34 + (g->vga ? 42 : 0) + (g->disc[0] ? 46 : 0);
-        region_badges(SCREEN_W / 2 - bw / 2, ty + 44, g);
-        if (g->favorite) draw_text(&g_font, SCREEN_W / 2 + bw / 2 + 6, ty + 42, 0xFFFFD166, "\x2a");
+        region_badges(SCREEN_W / 2 - bw / 2, BOTTOM_Y - 38, g);
+        if (g->favorite) draw_text(&g_font, SCREEN_W / 2 + bw / 2 + 6, BOTTOM_Y - 40, 0xFFFFD166, "\x2a");
     }
 }

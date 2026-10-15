@@ -10,7 +10,7 @@ static game_t *cur; static char synopsis[2400]; static int has_syn; static float
 void details_open(game_t *g) {
     cur = g; scroll = scroll_target = 0;
     has_syn = list_synopsis(g, lang_codes[lang_current()], synopsis, sizeof synopsis) == 0 && synopsis[0];
-    lines = draw_text_wrap(&g_font, 0, -1, 480, 19, 0, has_syn ? synopsis : tr(S_NO_SYNOPSIS));
+    lines = draw_text_wrap(&g_font, 0, -1, 500, 19, 0, has_syn ? synopsis : tr(S_NO_SYNOPSIS));
 }
 game_t *details_game(void) { return cur; }
 
@@ -33,15 +33,15 @@ void details_draw(void) {
     if (!cur) return;
     float a = ease_out(ui_enter);
     draw_rect(0, 0, SCREEN_W, SCREEN_H, RGBA(0, 0, 0, (int)(140 * a)));
-    float w = 560, h = 372, x = (SCREEN_W - w) / 2, y = 54 + 14 * (1 - a);
+    float w = 560, h = BOTTOM_Y - 10 - 50, x = (SCREEN_W - w) / 2, y = 50 + 14 * (1 - a);
     draw_shadow(x, y, w, h, 18, ALPHA(0x000000, (int)(170 * a)));
     draw_glow(x + w / 2, y, w * 0.6f, col_scale_alpha(t->glow, 0.5f * a));
     draw_rect_round_grad(x, y, w, h, 12, col_lighten(ALPHA(t->panel, 255), 0.06f), col_darken(ALPHA(t->panel, 255), 0.12f));
     draw_rect_round_outline(x, y, w, h, 12, ALPHA(t->accent, 170));
     draw_text_center(&g_font_big, SCREEN_W / 2, y + 12, t->accent, tr(S_GAME_DETAILS));
     /* header: cover + facts */
-    draw_cover(cur, x + 20, y + 48, 112, 0);
-    float fx = x + 150, fy = y + 46;
+    draw_cover(cur, x + 20, y + 46, 104, 0);
+    float fx = x + 142, fy = y + 44;
     float bw = strlen(cur->region) * 22 + 34 + (cur->vga ? 42 : 0) + (cur->disc[0] ? 46 : 0);
     draw_text_clipped(&g_font_big, fx, fy, w - 170 - bw - 10, t->text_hi, cur->name); fy += 30;
     char year[8], d[16], regions[48] = "", pt[24], discs[4];
@@ -56,18 +56,18 @@ void details_draw(void) {
     };
     for (unsigned i = 0; i < sizeof rows / sizeof rows[0]; i++) {
         draw_text(&g_font_small, fx, fy + 2, t->text_dim, tr(rows[i].k));
-        draw_text(&g_font_small, fx + 110, fy + 2, t->text, rows[i].v);
-        fy += 17;
+        draw_text_clipped(&g_font_small, fx + 112, fy + 2, x + w - 20 - (fx + 112), t->text, rows[i].v);
+        fy += 16;
     }
     region_badges(x + w - 20 - bw, y + 48, cur);
     if (cur->favorite) draw_text(&g_font, x + w - 34, y + 44, 0xFFFFD166, "\x2a");
     /* synopsis */
-    float sy = y + 172;
+    float sy = fy + 10;
     hairline(x + 20, sy, w - 40);
     section_label(x + 20, sy + 8, tr(S_SYNOPSIS));
     float cy = sy + 30, ch = h - (cy - y) - 36;
     draw_set_clip((int)x + 16, (int)cy, (int)w - 32, (int)ch);
-    draw_text_wrap(&g_font, x + 28, cy - scroll, 480, 19, has_syn ? t->text : ALPHA(t->text_dim, 200), has_syn ? synopsis : tr(S_NO_SYNOPSIS));
+    draw_text_wrap(&g_font, x + 28, cy - scroll, 500, 19, has_syn ? t->text : ALPHA(t->text_dim, 200), has_syn ? synopsis : tr(S_NO_SYNOPSIS));
     draw_clear_clip();
     draw_rect_grad(x + 16, cy, w - 32, 10, ALPHA(t->panel, 255), ALPHA(t->panel, 0));
     draw_rect_grad(x + 16, cy + ch - 12, w - 32, 12, ALPHA(t->panel, 0), ALPHA(t->panel, 255));

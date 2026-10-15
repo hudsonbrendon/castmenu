@@ -22,10 +22,10 @@ static void defaults(void) {
     theme_t *t = &g_theme;
     memset(t, 0, sizeof *t);
     strcpy(t->id, "default"); strcpy(t->name, "Dreamcast"); strcpy(t->author, "Cast Menu");
-    t->bg = 0xFFF2F2EF; t->panel = 0xE6FFFFFF; t->panel_alt = 0xE6ECECE8; t->accent = 0xFFF26522; t->accent_dim = 0xFFF9CDB3;
-    t->text = 0xFF3A3A3C; t->text_dim = 0xFF8A8C8E; t->text_hi = 0xFF1A1A1C; t->sel_bg = 0xFFF26522; t->sel_text = 0xFFFFFFFF;
-    t->badge_j = 0xFFE23D3D; t->badge_u = 0xFF2D6BD1; t->badge_e = 0xFF3DB55A; t->badge_gd = 0xFFF2C229; t->badge_cd = 0xFF8A8C8E; t->shadow = 0x28000000; t->accent2 = 0xFF2D6BD1; t->glow = 0x40F26522;
-    t->layout = 0; t->panel_radius = 8; t->bg_dim = 0; t->cover_frame = 1; t->font_scale = 100; t->orbs = 1; t->vignette = 20;
+    t->bg = 0xFFF2F2EF; t->panel = 0xF0FFFFFF; t->panel_alt = 0xF0E4E4E0; t->accent = 0xFFF26522; t->accent_dim = 0xFFF9CDB3;
+    t->text = 0xFF26272A; t->text_dim = 0xFF66696D; t->text_hi = 0xFF141416; t->sel_bg = 0xFFF26522; t->sel_text = 0xFFFFFFFF;
+    t->badge_j = 0xFFE23D3D; t->badge_u = 0xFF2D6BD1; t->badge_e = 0xFF3DB55A; t->badge_gd = 0xFFF2C229; t->badge_cd = 0xFF8A8C8E; t->shadow = 0x30000000; t->accent2 = 0xFF2D6BD1; t->glow = 0x40F26522;
+    t->layout = 0; t->panel_radius = 8; t->bg_dim = 0; t->cover_frame = 1; t->font_scale = 100; t->orbs = 1; t->vignette = 16;
 }
 
 static int cb(void *u, const char *sec, const char *k, const char *v) {

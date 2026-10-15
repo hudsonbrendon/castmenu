@@ -20,6 +20,6 @@ void launch_game(const game_t *g) {
         .disc_type = g->is_gd, .menu_slot = 1,
     };
     gdemu_img_set(g->slot);
-    thd_sleep(250);
+    thd_sleep(600);   /* give GDEMU time to mount the new image before the BIOS re-reads the TOC */
     loader_run(&p);
 }

@@ -11,10 +11,10 @@ TTF = os.path.join(ROOT, "assets", "fonts", "Dreamcast.ttf")   # NiseSegaDreamca
 
 def fonts():
     os.makedirs(os.path.join(RD, "font"), exist_ok=True)
-    mkfont.build(TTF, 17, os.path.join(RD, "font", "ui"), stroke=0)
-    mkfont.build(TTF, 25, os.path.join(RD, "font", "ui_big"), stroke=1)
-    mkfont.build(TTF, 13, os.path.join(RD, "font", "ui_small"), stroke=0)
-    mkfont.build(TTF, 42, os.path.join(RD, "font", "ui_display"), stroke=1, atlas=(512, 512))
+    mkfont.build(TTF, 18, os.path.join(RD, "font", "ui"), stroke=0)
+    mkfont.build(TTF, 26, os.path.join(RD, "font", "ui_big"), stroke=1)
+    mkfont.build(TTF, 14, os.path.join(RD, "font", "ui_small"), stroke=0)
+    mkfont.build(TTF, 42, os.path.join(RD, "font", "ui_display"), stroke=2, atlas=(512, 512))
 
 BRAND = os.path.join(ROOT, "assets", "brand", "icon_transparent.png")
 

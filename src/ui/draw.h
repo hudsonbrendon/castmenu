@@ -21,6 +21,12 @@ typedef struct {
 #define ALPHA(c, a)   (((c) & 0x00FFFFFF) | ((uint32_t)(a) << 24))
 #define SCREEN_W 640
 #define SCREEN_H 480
+/* TV-safe area: CRTs crop ~5% per edge */
+#define SAFE_X   32.0f
+#define SAFE_TOP 20.0f
+#define BOTTOM_Y 424.0f   /* hint bar hairline; text sits at +16 */
+#define CONTENT_Y 70.0f
+#define CONTENT_H 338.0f  /* CONTENT_Y + CONTENT_H = 408 */
 
 void draw_init(void);
 void draw_frame_begin(void);                /* opaque list */
@@ -69,6 +75,7 @@ float text_width_spaced(const font_t *f, float spacing, const char *s);
 void draw_text_clipped(const font_t *f, float x, float y, float max_w, uint32_t argb, const char *s);
 void draw_text_center(const font_t *f, float cx, float y, uint32_t argb, const char *s);
 void draw_text_right(const font_t *f, float rx, float y, uint32_t argb, const char *s);
+void draw_text_right_clipped(const font_t *f, float rx, float y, float max_w, uint32_t argb, const char *s);
 void draw_text_shadow(const font_t *f, float x, float y, uint32_t argb, uint32_t shadow, const char *s);
 void draw_set_clip(int x, int y, int w, int h);
 void draw_clear_clip(void);

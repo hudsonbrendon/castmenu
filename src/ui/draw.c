@@ -255,6 +255,13 @@ void draw_text_clipped(const font_t *f, float x, float y, float max_w, uint32_t 
 }
 void draw_text_center(const font_t *f, float cx, float y, uint32_t argb, const char *s) { draw_text(f, cx - text_width(f, s) / 2, y, argb, s); }
 void draw_text_right(const font_t *f, float rx, float y, uint32_t argb, const char *s) { draw_text(f, rx - text_width(f, s), y, argb, s); }
+void draw_text_right_clipped(const font_t *f, float rx, float y, float max_w, uint32_t argb, const char *s) {
+    if (text_width(f, s) <= max_w) { draw_text_right(f, rx, y, argb, s); return; }
+    char buf[128]; strncpy(buf, s, sizeof buf - 1); buf[sizeof buf - 1] = 0;
+    float ell = text_width(f, "..."); int n = strlen(buf);
+    while (n > 0 && text_width(f, buf) + ell > max_w) buf[--n] = 0;
+    strcat(buf, "..."); draw_text_right(f, rx, y, argb, buf);
+}
 
 void draw_set_clip(int x, int y, int w, int h) { clip_on = 1; clip_x = x; clip_y = y; clip_w = w; clip_h = h; }
 void draw_clear_clip(void) { clip_on = 0; }

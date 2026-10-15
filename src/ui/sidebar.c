@@ -31,23 +31,24 @@ void sidebar_draw(float base_alpha) {
     theme_t *t = &g_theme;
     float a = ease_out(ui_enter) * base_alpha;
     draw_rect(0, 0, SCREEN_W, SCREEN_H, RGBA(0, 0, 0, (int)(120 * a)));
-    float w = 300, x = -w + w * ease_out(ui_enter);
+    float w = 300 + SAFE_X, x = -w + w * ease_out(ui_enter);
     /* vertical wordmark rail */
-    draw_rect_grad_h(x, 0, 48, SCREEN_H, ALPHA(col_darken(t->bg, 0.4f), 240), ALPHA(col_darken(t->bg, 0.4f), 200));
-    draw_rect(x + 47, 0, 1, SCREEN_H, ALPHA(t->accent, 120));
-    draw_logo(x + 8, SCREEN_H - 48, 32, (int)(255 * a));
+    draw_rect_grad_h(x, 0, SAFE_X + 40, SCREEN_H, ALPHA(col_darken(t->bg, 0.4f), 240), ALPHA(col_darken(t->bg, 0.4f), 200));
+    draw_rect(x + SAFE_X + 39, 0, 1, SCREEN_H, ALPHA(t->accent, 120));
+    draw_logo(x + SAFE_X + 4, BOTTOM_Y - 20, 32, (int)(255 * a));
     /* panel */
-    float px = x + 56, pw = w - 56;
-    draw_shadow(px, 10, pw, SCREEN_H - 20, 16, ALPHA(0x000000, (int)(160 * a)));
-    draw_rect_round_grad(px, 10, pw, SCREEN_H - 20, 12, col_lighten(ALPHA(t->panel, 255), 0.06f), col_darken(ALPHA(t->panel, 255), 0.12f));
-    draw_rect_round_outline(px, 10, pw, SCREEN_H - 20, 12, ALPHA(t->accent, 160));
+    float px = x + SAFE_X + 48, pw = w - SAFE_X - 48;
+    float py = SAFE_TOP - 4, ph = BOTTOM_Y + 30 - py;
+    draw_shadow(px, py, pw, ph, 16, ALPHA(0x000000, (int)(160 * a)));
+    draw_rect_round_grad(px, py, pw, ph, 12, col_lighten(ALPHA(t->panel, 255), 0.06f), col_darken(ALPHA(t->panel, 255), 0.12f));
+    draw_rect_round_outline(px, py, pw, ph, 12, ALPHA(t->accent, 160));
     const settings_t *s = settings_get();
     draw_avatar(px + 16, 26, 44);
     draw_text(&g_font, px + 70, 30, t->text_hi, s->nick);
     char lc[32]; snprintf(lc, sizeof lc, "%lu %s", (unsigned long)s->launches, tr(S_GAMES_LOWER));
     draw_text(&g_font_small, px + 70, 50, t->text_dim, lc);
     hairline(px + 16, 82, pw - 32);
-    draw_text(&g_font_big, px + 16, 92, t->text_hi, tr(S_RECENT));
+    draw_text_clipped(&g_font_big, px + 16, 92, pw - 32, t->text_hi, tr(S_RECENT));
     if (!n) draw_text(&g_font_small, px + 16, 130, t->text_dim, tr(S_NEVER_PLAYED));
     for (int i = 0; i < n && i < 5; i++) {
         float y = 128 + i * 62; int is = i == sel;
@@ -58,5 +59,5 @@ void sidebar_draw(float base_alpha) {
         char pt[24]; fmt_playtime(s->playtime[items[i]->slot < 1000 ? items[i]->slot : 0], pt, sizeof pt);
         draw_text(&g_font_small, px + 72, y + 32, is ? ALPHA(t->sel_text, 190) : t->text_dim, pt);
     }
-    draw_hints(px + pw / 2, SCREEN_H - 28, tr(S_HINT_SIDEBAR), (int)(200 * a));
+    draw_hints(px + pw / 2, BOTTOM_Y + 12, tr(S_HINT_SIDEBAR), (int)(200 * a));
 }

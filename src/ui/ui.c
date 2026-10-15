@@ -39,19 +39,18 @@ static const game_t *launch_target;
 static int exit_flag;
 static char avatars[16][AVATAR_LEN]; static int n_avatars;
 
-#define LIST_X 24.0f
-#define LIST_Y 70.0f
-#define LIST_W 352.0f
-#define LIST_H 366.0f
-#define ROW_H 28.0f
+#define LIST_X SAFE_X
+#define LIST_Y CONTENT_Y
+#define LIST_W 336.0f
+#define LIST_H CONTENT_H
+#define ROW_H 26.0f
 #define LIST_ROWS 12
-#define PANEL_X 396.0f
-#define PANEL_W 220.0f
-#define GRID_COLS 4
+#define PANEL_X (SAFE_X + LIST_W + 16)
+#define PANEL_W (SCREEN_W - SAFE_X - PANEL_X)
+#define GRID_COLS 5
 #define GRID_ROWS 3
-#define GRID_CELL 148.0f
-#define GRID_PAD 12.0f
-#define BOTTOM_Y 446.0f
+#define GRID_CELL 104.0f
+#define GRID_PAD 10.0f
 
 static int view_mode(void) { return settings_get()->view; }   /* 0 coverflow, 1 list, 2 grid */
 static void go(state_t s) { prev_state = state; state = s; ui_enter = 0; }
@@ -76,7 +75,7 @@ void ui_boot_progress(int pct, const char *msg) {
     draw_rect_round_outline(bx, by, bw, 8, 4, ALPHA(t->text_hi, 20));
     if (f > 0) { draw_rect_round_grad(bx, by, bw * f, 8, 4, col_lighten(t->accent, 0.25f), t->accent); draw_glow(bx + bw * f, by + 4, 16, t->glow); }
     draw_text_center(&g_font_small, SCREEN_W / 2, 330, t->text_dim, boot_msg);
-    draw_text_center(&g_font_small, SCREEN_W / 2, BOTTOM_Y + 8, ALPHA(t->text_dim, 120), "v" CAST_VERSION);
+    draw_text_center(&g_font_small, SCREEN_W / 2, BOTTOM_Y + 10, ALPHA(t->text_dim, 120), "v" CAST_VERSION);
     draw_frame_end();
 }
 
@@ -90,9 +89,9 @@ static void draw_detail_panel(const game_t *g) {
     float x = PANEL_X, y = LIST_Y + enter_dy();
     panel(x, y, PANEL_W, LIST_H);
     if (!g) { draw_text_center(&g_font, x + PANEL_W / 2, y + 160, t->text_dim, tr(S_NO_GAMES)); return; }
-    float cs = 132;
-    draw_cover(g, x + (PANEL_W - cs) / 2, y + 16, cs, 1);
-    float ty = y + 16 + cs + 38;
+    float cs = 120;
+    draw_cover(g, x + (PANEL_W - cs) / 2, y + 14, cs, 1);
+    float ty = y + 14 + cs + 34;
     draw_set_clip((int)x + 8, (int)ty - 2, (int)PANEL_W - 16, 24);
     draw_text_clipped(&g_font, x + 14, ty, PANEL_W - 28, t->text_hi, g->name);
     draw_clear_clip();
@@ -106,8 +105,10 @@ static void draw_detail_panel(const game_t *g) {
     };
     for (unsigned i = 0; i < sizeof rows / sizeof rows[0]; i++) {
         if (!rows[i].v) continue;
+        if (ty + 16 > y + LIST_H - 48) break;              /* keep clear of the button */
         draw_text(&g_font_small, x + 14, ty, t->text_dim, rows[i].k);
-        draw_text_right(&g_font_small, x + PANEL_W - 14, ty, t->text, rows[i].v);
+        float kw = text_width(&g_font_small, rows[i].k);
+        draw_text_right_clipped(&g_font_small, x + PANEL_W - 14, ty, PANEL_W - 28 - kw - 8, t->text, rows[i].v);
         ty += 16;
     }
     float by = y + LIST_H - 40, bw = PANEL_W - 28;
@@ -158,7 +159,7 @@ static void draw_list(void) {
 static void draw_grid(void) {
     theme_t *t = &g_theme;
     if (!g_list.view_count) { draw_text_center(&g_font, SCREEN_W / 2, 220, t->text_dim, tr(S_NO_GAMES)); return; }
-    float gx = (SCREEN_W - GRID_COLS * GRID_CELL - (GRID_COLS - 1) * GRID_PAD) / 2, gy = 66 + enter_dy();
+    float gx = (SCREEN_W - GRID_COLS * GRID_CELL - (GRID_COLS - 1) * GRID_PAD) / 2, gy = CONTENT_Y - 2 + enter_dy();
     int row0 = cursor / GRID_COLS - 1; if (row0 < 0) row0 = 0;
     int max_row = (g_list.view_count + GRID_COLS - 1) / GRID_COLS - GRID_ROWS; if (max_row < 0) max_row = 0;
     if (row0 > max_row) row0 = max_row;
@@ -176,25 +177,25 @@ static void draw_grid(void) {
         float cx = x - grow, cy = y - grow, cs = GRID_CELL + 2 * grow;
         if (sel) { draw_glow(cx + cs / 2, cy + cs / 2, cs * 0.85f, t->glow); draw_shadow(cx, cy, cs, cs, 14, t->shadow); }
         draw_rect_round_grad(cx, cy, cs, cs, 8, col_lighten(t->panel, 0.08f), col_darken(t->panel, 0.15f));
-        float cov = cs - 30;
+        float cov = cs - 24;
         const texture_t *c = settings_get()->cover_mode ? cover_get(g->slot) : NULL;
         draw_set_clip((int)cx, (int)cy, (int)cs, (int)cs);
         if (c) draw_tex(c, cx, cy, cs, cs, 0xFFFFFFFF);
         else {
             draw_rect_grad4(cx, cy, cs, cs, col_lighten(t->accent_dim, 0.1f), t->accent_dim, col_darken(t->accent_dim, 0.3f), col_darken(t->panel, 0.2f));
             char ini[2] = { g->name[0] ? g->name[0] : '?', 0 };
-            draw_text_scaled(&g_font_display, cx + cs / 2 - text_width_scaled(&g_font_display, 1.6f, ini) / 2, cy + cov / 2 - g_font_display.line_h * 0.8f, 1.6f, ALPHA(t->text_hi, 50), ini);
+            draw_text_scaled(&g_font_display, cx + cs / 2 - text_width_scaled(&g_font_display, 1.2f, ini) / 2, cy + cov / 2 - g_font_display.line_h * 0.6f, 1.2f, ALPHA(t->text_hi, 50), ini);
         }
-        draw_rect_grad(cx, cy + cov - 36, cs, 36 + 30, ALPHA(0x000000, 0), ALPHA(0x000000, 210));
+        draw_rect_grad(cx, cy + cov - 30, cs, 30 + 24, ALPHA(0x000000, 0), ALPHA(0x000000, 210));
         draw_rect_grad(cx, cy, cs, cs * 0.4f, ALPHA(0xFFFFFF, 20), ALPHA(0xFFFFFF, 0));
         draw_clear_clip(); draw_set_clip(cx0, cy0, cw, ch);
         draw_rect_round_outline(cx, cy, cs, cs, 8, sel ? t->accent : ALPHA(t->text_hi, 18));
         draw_set_clip((int)cx, (int)cy, (int)cs, (int)cs);
-        draw_text_clipped(&g_font_small, cx + 8, cy + cs - 24, cs - 16, sel ? 0xFFFFFFFF : ALPHA(0xFFFFFF, 220), g->name); /* caption sits on a dark gradient in every theme */
+        draw_text_clipped(&g_font_small, cx + 6, cy + cs - 20, cs - 12, sel ? 0xFFFFFFFF : ALPHA(0xFFFFFF, 220), g->name); /* caption sits on a dark gradient in every theme */
         draw_clear_clip(); draw_set_clip(cx0, cy0, cw, ch);
         float bx = cx + 6;
-        for (const char *r = g->region; *r; r++) { char s[2] = { *r, 0 }; draw_badge(bx, cy + 6, *r == 'J' ? t->badge_j : *r == 'U' ? t->badge_u : t->badge_e, s); bx += 20; }
-        if (g->favorite) draw_text(&g_font_small, cx + cs - 18, cy + 6, 0xFFFFD166, "\x2a");
+        for (const char *r = g->region; *r; r++) { char s[2] = { *r, 0 }; draw_badge(bx, cy + 5, *r == 'J' ? t->badge_j : *r == 'U' ? t->badge_u : t->badge_e, s); bx += 19; }
+        if (g->favorite) draw_text(&g_font_small, cx + cs - 16, cy + 4, 0xFFFFD166, "\x2a");
         if (sel) draw_rect_round(cx + 6, cy + cs - 8, cs - 12, 2, 1, ALPHA(t->accent, 200));
     }
     draw_clear_clip();
@@ -251,10 +252,10 @@ static void draw_profile_bar(void) {
     settings_t *s = settings_get();
     draw_rect_grad(0, 0, SCREEN_W, 64, ALPHA(t->bg, 200), ALPHA(t->bg, 0));
     if (s->nick[0] && strcmp(s->nick, "Player")) {
-        draw_avatar(24, 12, 38);
-        draw_text_shadow(&g_font_big, 72, 18, t->text_hi, ALPHA(0x000000, 90), s->nick);
-        if (chat_unread()) { char u[8]; snprintf(u, sizeof u, "%d", chat_unread()); float ux = 72 + text_width(&g_font_big, s->nick) + 14; draw_circle(ux, 30, 9, t->badge_j); draw_text_center(&g_font_small, ux, 23, 0xFFFFFFFF, u); }
-    } else draw_wordmark(24, 12, 255);
+        draw_avatar(SAFE_X, SAFE_TOP - 6, 38);
+        draw_text_shadow(&g_font_big, SAFE_X + 48, SAFE_TOP, t->text_hi, ALPHA(0x000000, 90), s->nick);
+        if (chat_unread()) { char u[8]; snprintf(u, sizeof u, "%d", chat_unread()); float ux = SAFE_X + 48 + text_width(&g_font_big, s->nick) + 14; draw_circle(ux, SAFE_TOP + 12, 9, t->badge_j); draw_text_center(&g_font_small, ux, SAFE_TOP + 5, 0xFFFFFFFF, u); }
+    } else draw_wordmark(SAFE_X, SAFE_TOP - 6, 255);
     draw_topbar_status();
 }
 static void draw_category_bar(void) {
@@ -262,13 +263,16 @@ static void draw_category_bar(void) {
     /* slingshot: label slides in from the side it came from */
     float a = ease_out(cat_anim), off = (1 - a) * 40 * cat_dir;
     const char *name = cat_label(g_list.category);
-    draw_text_shadow(&g_font, 36 + off, 406, ALPHA(t->text, (int)(255 * (0.3f + 0.7f * a))), ALPHA(0x000000, 100), name);
-    float nw = text_width(&g_font, name);
-    draw_rect_round(36 + off, 426, nw * a, 2, 1, t->accent);
+    float cy = BOTTOM_Y - 40;
+    draw_set_clip((int)SAFE_X, (int)cy - 2, 200, 24);
+    draw_text_shadow(&g_font, SAFE_X + off, cy, ALPHA(t->text, (int)(255 * (0.3f + 0.7f * a))), ALPHA(0x000000, 100), name);
+    draw_clear_clip();
+    float nw = text_width(&g_font, name); if (nw > 196) nw = 196;
+    draw_rect_round(SAFE_X + off, cy + 20, nw * a, 2, 1, t->accent);
     int total = list_category_total();
-    for (int i = 0; i < total && i < 14; i++) draw_circle(36 + i * 9 + 3, 435, i == g_list.category ? 3 : 2, i == g_list.category ? t->accent : ALPHA(t->text_dim, 110));
+    for (int i = 0; i < total && i < 14; i++) draw_circle(SAFE_X + i * 9 + 3, cy + 29, i == g_list.category ? 3 : 2, i == g_list.category ? t->accent : ALPHA(t->text_dim, 110));
     char pos[24]; snprintf(pos, sizeof pos, "%d/%d", g_list.view_count ? cursor + 1 : 0, g_list.view_count);
-    draw_text_shadow(&g_font, SCREEN_W - 36 - text_width(&g_font, pos), 406, t->text, ALPHA(0x000000, 100), pos);
+    draw_text_shadow(&g_font, SCREEN_W - SAFE_X - text_width(&g_font, pos), cy, t->text, ALPHA(0x000000, 100), pos);
 }
 static void browse_draw(void) {
     draw_frame_begin(); draw_background(); draw_frame_tr(); draw_background_tr();
@@ -358,8 +362,8 @@ static void opt_change(opt_t o, int dir) {
     default: break;
     }
 }
-#define SET_X 24.0f
-#define SET_W 372.0f
+#define SET_X SAFE_X
+#define SET_W 360.0f
 #define SET_ROW 24.0f
 #define SET_HDR 26.0f
 static float opt_row_y(opt_t o) {
@@ -423,7 +427,7 @@ static void settings_draw(void) {
     draw_rect_grad(x + 2, y + 2, w - 4, 10, ALPHA(t->bg, 150), ALPHA(t->bg, 0));
     draw_rect_grad(x + 2, y + LIST_H - 12, w - 4, 10, ALPHA(t->bg, 0), ALPHA(t->bg, 150));
     /* info card */
-    float ix = SET_X + SET_W + 16, iw = SCREEN_W - 24 - ix, iy = y;
+    float ix = SET_X + SET_W + 16, iw = SCREEN_W - SAFE_X - ix, iy = y;
     panel(ix, iy, iw, LIST_H);
     section_label(ix + 14, iy + 14, tr(S_HELP_SETTINGS));
     draw_set_clip((int)ix + 4, (int)iy + 4, (int)iw - 8, (int)LIST_H - 8);
@@ -463,7 +467,7 @@ static void card(float x, float y, float w, float h, const char *title, const kv
     for (int i = 0; i < n; i++) {
         float ry = y + 36 + i * 20;
         draw_text(&g_font_small, x + 14, ry + 1, t->text_dim, tr(rows[i].k));
-        draw_text_right(&g_font_small, x + w - 14, ry + 1, t->text, rows[i].v);
+        draw_text_right_clipped(&g_font_small, x + w - 14, ry + 1, w - 28 - text_width(&g_font_small, tr(rows[i].k)) - 8, t->text, rows[i].v);
         if (i < n - 1) draw_rect(x + 14, ry + 17, w - 28, 1, ALPHA(t->text_dim, 30));
     }
 }
@@ -482,21 +486,21 @@ static void sysinfo_draw(void) {
     const kv_t gd[] = { { S_GDEMU_FW, fw }, { S_GDEMU_BOOT, bl } };
     const kv_t con[] = { { S_BIOS, bios }, { S_SYS_REGION, sys.region }, { S_BROADCAST, sys.broadcast }, { S_CABLE, sys.cable }, { S_LANGUAGE, lang }, { S_NETWORK, ipl } };
     const kv_t st[] = { { S_GAMES, cnt }, { S_FAVORITES, favs }, { S_LAUNCHES, n } };
-    float y = LIST_Y + enter_dy(), gap = 12, cw = (SCREEN_W - 48 - gap) / 2;
-    card(24, y, cw, 92, tr(S_SEC_GDEMU), gd, 2, sys.gdemu.valid ? 1 : 0);
-    card(24, y + 92 + gap, cw, 110, tr(S_SEC_STATS), st, 3, -1);
-    card(24 + cw + gap, y, cw, 214, tr(S_SEC_CONSOLE), con, 6, -1);
-    float ay = y + 214 + gap, ah = LIST_H - 214 - gap;
-    panel(24, ay, SCREEN_W - 48, ah);
-    draw_glow(SCREEN_W - 90, ay + ah / 2, 120, col_scale_alpha(t->glow, 0.5f));
-    draw_logo(40, ay + 18, 44, 255);
-    draw_text(&g_font_big, 96, ay + 14, t->text_dim, "Cast Menu");
-    draw_text(&g_font_small, 96 + text_width(&g_font_big, "Cast Menu") + 16, ay + 24, t->accent, "v" CAST_VERSION);
-    draw_text(&g_font_small, 96, ay + 44, t->text_dim, "Menu aberto para GDEMU. MIT. github.com/hudsonbrendon/castmenu");
-    draw_text(&g_font_small, 96, ay + 60, ALPHA(t->text_dim, 170), "neuroacid (GDMENU) \xb7 Deunan (GDEMU) \xb7 KallistiOS \xb7 megavolt85 \xb7 mrneo240");
-    float tx = 96;
+    float y = LIST_Y + enter_dy(), gap = 12, cw = (SCREEN_W - 2 * SAFE_X - gap) / 2;
+    card(SAFE_X, y, cw, 90, tr(S_SEC_GDEMU), gd, 2, sys.gdemu.valid ? 1 : 0);
+    card(SAFE_X, y + 90 + gap, cw, 108, tr(S_SEC_STATS), st, 3, -1);
+    card(SAFE_X + cw + gap, y, cw, 210, tr(S_SEC_CONSOLE), con, 6, -1);
+    float ay = y + 210 + gap, ah = LIST_H - 210 - gap;
+    panel(SAFE_X, ay, SCREEN_W - 2 * SAFE_X, ah);
+    draw_logo(SAFE_X + 14, ay + 14, 40, 255);
+    float lx = SAFE_X + 68;
+    draw_text(&g_font_big, lx, ay + 10, t->text_dim, "Cast Menu");
+    draw_text(&g_font_small, lx + text_width(&g_font_big, "Cast Menu") + 12, ay + 20, t->accent, "v" CAST_VERSION);
+    draw_text_clipped(&g_font_small, lx, ay + 38, SCREEN_W - 2 * SAFE_X - 80, t->text_dim, "Menu aberto para GDEMU. MIT. github.com/hudsonbrendon/castmenu");
+    draw_text_clipped(&g_font_small, lx, ay + 54, SCREEN_W - 2 * SAFE_X - 80, ALPHA(t->text_dim, 170), "neuroacid (GDMENU) \xb7 Deunan (GDEMU) \xb7 KallistiOS \xb7 megavolt85 \xb7 mrneo240");
+    float tx = lx;
     const char *tags[] = { "KallistiOS 2.3", "SH-4", "PVR", "GDEMU 5.13+", "BBA / DreamPi" };
-    for (int i = 0; i < 5; i++) { float w = text_width(&g_font_small, tags[i]) + 14; draw_rect_round(tx, ay + 86, w, 18, 9, ALPHA(t->panel_alt, 255)); draw_rect_round_outline(tx, ay + 86, w, 18, 9, ALPHA(t->accent, 80)); draw_text(&g_font_small, tx + 7, ay + 88, t->accent, tags[i]); tx += w + 8; }
+    for (int i = 0; i < 5; i++) { float w = text_width(&g_font_small, tags[i]) + 14; if (tx + w > SCREEN_W - SAFE_X - 14) break; draw_rect_round(tx, ay + 76, w, 18, 9, ALPHA(t->panel_alt, 255)); draw_rect_round_outline(tx, ay + 76, w, 18, 9, ALPHA(t->accent, 80)); draw_text(&g_font_small, tx + 7, ay + 78, t->accent, tags[i]); tx += w + 8; }
     if (sys.gdemu.valid && (sys.gdemu.fw_major < 5 || (sys.gdemu.fw_major == 5 && sys.gdemu.fw_minor < 13))) {
         float ww = text_width(&g_font_small, tr(S_NEED_FW)) + 24;
         draw_rect_round((SCREEN_W - ww) / 2, BOTTOM_Y - 32, ww, 22, 11, ALPHA(t->badge_j, 230));

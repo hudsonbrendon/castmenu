@@ -3,6 +3,7 @@
 #include "anim.h"
 #include "../settings.h"
 #include "../net/netif.h"
+#include "osk.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -22,7 +23,7 @@ void panel(float x, float y, float w, float h) {
     theme_t *t = &g_theme;
     draw_shadow(x, y, w, h, 10, t->shadow);
     draw_rect_round_grad(x, y, w, h, t->panel_radius, col_lighten(t->panel, 0.06f), col_darken(t->panel, 0.12f));
-    draw_rect_round_outline(x, y, w, h, t->panel_radius, ALPHA(t->accent, 70));
+    draw_rect_round_outline(x, y, w, h, t->panel_radius, ALPHA(t->accent, 110));
     draw_rect_grad_h(x + t->panel_radius, y + 1, w / 2 - t->panel_radius, 1, ALPHA(t->text_hi, 0), ALPHA(t->text_hi, 80));
     draw_rect_grad_h(x + w / 2, y + 1, w / 2 - t->panel_radius, 1, ALPHA(t->text_hi, 80), ALPHA(t->text_hi, 0));
 }
@@ -71,6 +72,8 @@ void draw_hints(float cx, float cy, const char *hints, int alpha) {
         widths[i] = gw + 4 + text_width(&g_font_small, sp ? sp + 1 : "") + 12;
         total += widths[i];
     }
+    float avail = SCREEN_W - 40, pad = 12;          /* the hint bar may use a bit more than the safe area */
+    while (total > avail && pad > 6) { total -= n * 2; pad -= 2; for (int i = 0; i < n; i++) widths[i] -= 2; }
     float x = cx - total / 2;
     for (int i = 0; i < n; i++) {
         char *sp = strchr(items[i], ' '); char b[12] = { 0 };
@@ -142,26 +145,26 @@ void draw_topbar_status(void) {
     time_t now = time(NULL); struct tm *tm = localtime(&now); char clock[8];
     snprintf(clock, sizeof clock, "%02d:%02d", tm ? tm->tm_hour : 0, tm ? tm->tm_min : 0);
     float cw = text_width(&g_font_big, clock);
-    draw_text_shadow(&g_font_big, SCREEN_W - 24 - cw, 18, t->text_hi, ALPHA(0x000000, 90), clock);
+    draw_text_shadow(&g_font_big, SCREEN_W - SAFE_X - cw, SAFE_TOP + 2, t->text_hi, ALPHA(0x000000, 90), clock);
     /* signal bars */
     net_status_t ns = net_status();
     int bars = ns.state == NET_UP ? (ns.ping_ms < 0 ? 4 : ns.ping_ms < 120 ? 4 : ns.ping_ms < 250 ? 3 : ns.ping_ms < 500 ? 2 : 1) : 0;
-    float bx = SCREEN_W - 24 - cw - 40;
+    float bx = SCREEN_W - SAFE_X - cw - 40;
     for (int i = 0; i < 4; i++) {
         float h = 5 + i * 4;
         uint32_t c = i < bars ? (ns.state == NET_UP ? t->badge_e : t->text_dim) : ALPHA(t->text_dim, 70);
         if (ns.state == NET_CONNECTING) c = ALPHA(t->accent, 120 + (int)(100 * sinf(ui_t * 5 + i)));
-        draw_rect_round(bx + i * 7, 40 - h, 5, h, 1.5f, c);
+        draw_rect_round(bx + i * 7, SAFE_TOP + 24 - h, 5, h, 1.5f, c);
     }
-    if (bars) draw_glow(bx + 12, 34, 18, col_scale_alpha(ALPHA(t->badge_e, 255), 0.35f));
+    if (bars) draw_glow(bx + 12, SAFE_TOP + 18, 18, col_scale_alpha(ALPHA(t->badge_e, 255), 0.35f));
 }
 void draw_topbar(const char *title, const char *subtitle) {
     theme_t *t = &g_theme;
     draw_rect_grad(0, 0, SCREEN_W, 64, ALPHA(t->bg, 200), ALPHA(t->bg, 0));
-    draw_logo(24, 12, 32, 255);
-    draw_text_spaced(&g_font_small, 66, 10, 2.0f, t->text_dim, "CAST MENU");
-    draw_text_shadow(&g_font_big, 66, 22, t->text_hi, ALPHA(0x000000, 90), title);
-    if (subtitle) draw_text(&g_font_small, 66 + text_width(&g_font_big, title) + 12, 30, t->text_dim, subtitle);
+    draw_logo(SAFE_X, SAFE_TOP - 6, 32, 255);
+    draw_text_spaced(&g_font_small, SAFE_X + 42, SAFE_TOP - 8, 2.0f, t->text_dim, "CAST MENU");
+    draw_text_shadow(&g_font_big, SAFE_X + 42, SAFE_TOP + 4, t->text_hi, ALPHA(0x000000, 90), title);
+    if (subtitle) draw_text_clipped(&g_font_small, SAFE_X + 42 + text_width(&g_font_big, title) + 12, SAFE_TOP + 12, 300, t->text_dim, subtitle);
 }
 float chip(float rx, float y, uint32_t bg, uint32_t fg, const char *s) {
     float w = text_width(&g_font_small, s) + 14;
@@ -170,12 +173,11 @@ float chip(float rx, float y, uint32_t bg, uint32_t fg, const char *s) {
     draw_text(&g_font_small, rx - w + 7, y + 2, fg, s);
     return w + 6;
 }
-#define BOTTOM_Y 446.0f
 void draw_bottombar(const char *hint) {
     theme_t *t = &g_theme;
     draw_rect_grad(0, BOTTOM_Y - 20, SCREEN_W, SCREEN_H - BOTTOM_Y + 20, ALPHA(t->bg, 0), ALPHA(t->bg, 230));
-    hairline(24, BOTTOM_Y - 2, SCREEN_W - 48);
-    if (toast_t <= 0) draw_hints(SCREEN_W / 2, BOTTOM_Y + 16, hint, 255);
+    hairline(SAFE_X, BOTTOM_Y - 2, SCREEN_W - 2 * SAFE_X);
+    if (toast_t <= 0 && !osk_active()) draw_hints(SCREEN_W / 2, BOTTOM_Y + 16, hint, 255);
 }
 void draw_badge(float x, float y, uint32_t bg, const char *txt) {
     float w = text_width(&g_font_small, txt) + 10;
@@ -201,12 +203,13 @@ void draw_cover(const game_t *g, float x, float y, float size, int reflect) {
     draw_shadow(x, y + 4, size, size, 8, t->shadow);
     if (c) draw_tex(c, x, y, size, size, 0xFFFFFFFF);
     else {
-        draw_rect_grad4(x, y, size, size, col_lighten(t->accent_dim, 0.1f), t->accent_dim, col_darken(t->accent_dim, 0.3f), col_darken(t->panel, 0.2f));
-        draw_glow(x + size * 0.75f, y + size * 0.25f, size * 0.6f, col_scale_alpha(t->glow, 0.5f));
+        /* placeholder: console-shell card, faint swirl, big initial */
+        draw_rect_round_grad(x, y, size, size, 4, col_lighten(ALPHA(t->panel_alt, 255), 0.05f), col_darken(ALPHA(t->panel_alt, 255), 0.12f));
+        if (t->logo_tex.ptr) draw_tex(&t->logo_tex, x + size * 0.30f, y + size * 0.08f, size * 0.62f, size * 0.62f, ALPHA(0xFFFFFF, 40));
         char ini[3] = { g->name[0] ? g->name[0] : '?', 0 };
-        float sc = size / 72.0f;
-        draw_text_scaled(&g_font_display, x + size / 2 - text_width_scaled(&g_font_display, sc, ini) / 2, y + size / 2 - g_font_display.line_h * sc / 2, sc, ALPHA(t->text_hi, 70), ini);
-        if (size >= 96) draw_text(&g_font_small, x + 8, y + size - 20, ALPHA(t->text, 90), tr(S_NO_COVER));
+        float sc = size / 96.0f;
+        draw_text_scaled(&g_font_display, x + size * 0.08f, y + size * 0.42f, sc, ALPHA(t->text_dim, 200), ini);
+        if (size >= 120) draw_text_clipped(&g_font_small, x + 8, y + size - 20, size - 16, ALPHA(t->text_dim, 170), tr(S_NO_COVER));
     }
     draw_rect_grad(x, y, size, size * 0.45f, ALPHA(0xFFFFFF, 26), ALPHA(0xFFFFFF, 0));
     if (t->cover_frame) draw_rect_round_outline(x, y, size, size, 2, ALPHA(t->text_hi, 50));

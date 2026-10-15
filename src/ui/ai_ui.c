@@ -46,23 +46,20 @@ int ai_update(const input_t *in) {
 void ai_draw(void) {
     theme_t *t = &g_theme;
     draw_rect_grad(0, 0, SCREEN_W, 64, ALPHA(t->bg, 200), ALPHA(t->bg, 0));
-    draw_logo(24, 12, 32, 255);
-    draw_text_shadow(&g_font_big, 66, 16, t->text_hi, ALPHA(0x000000, 90), "Cast");
-    draw_text_shadow(&g_font_big, 66 + text_width(&g_font_big, "Cast") + 6, 16, t->accent, ALPHA(0x000000, 90), "AI");
+    draw_logo(SAFE_X, SAFE_TOP - 6, 32, 255);
+    draw_text_shadow(&g_font_big, SAFE_X + 42, SAFE_TOP, t->text_hi, ALPHA(0x000000, 90), "Cast");
+    draw_text_shadow(&g_font_big, SAFE_X + 42 + text_width(&g_font_big, "Cast") + 6, SAFE_TOP, t->accent, ALPHA(0x000000, 90), "AI");
     /* status strip */
     net_status_t ns = net_status(); char srv[48]; strncpy(srv, settings_get()->server, sizeof srv - 1); srv[sizeof srv - 1] = 0;
-    float sx = 200;
-    draw_text(&g_font_small, sx, 26, t->text_dim, tr(S_SERVER)); draw_text(&g_font_small, sx + text_width(&g_font_small, tr(S_SERVER)) + 8, 26, t->text, srv);
     const char *st = chatnet_online() ? tr(S_CONNECTED) : ns.state == NET_CONNECTING || ns.state == NET_UP ? tr(S_CONNECTING) : tr(S_OFFLINE);
-    char pg[24]; snprintf(pg, sizeof pg, "%s %d ms", tr(S_PING), ns.ping_ms < 0 ? 0 : ns.ping_ms);
-    float rx = SCREEN_W - 24; float pw = text_width(&g_font_small, pg);
-    draw_text(&g_font_small, rx - pw, 26, t->text_dim, pg);
-    float stw = text_width(&g_font_small, st);
-    draw_text(&g_font_small, rx - pw - 24 - stw, 26, chatnet_online() ? t->badge_e : t->badge_gd, st);
-    draw_text(&g_font_small, rx - pw - 24 - stw - 8 - text_width(&g_font_small, tr(S_STATUS)), 26, t->text_dim, tr(S_STATUS));
+    float rx = SCREEN_W - SAFE_X;
+    if (chatnet_online() && ns.ping_ms >= 0) { char pg[24]; snprintf(pg, sizeof pg, "%d ms", ns.ping_ms); draw_text_right(&g_font_small, rx, SAFE_TOP + 8, t->text_dim, pg); rx -= text_width(&g_font_small, pg) + 16; }
+    draw_text_right(&g_font_small, rx, SAFE_TOP + 8, chatnet_online() ? t->badge_e : t->badge_gd, st); rx -= text_width(&g_font_small, st) + 14;
+    draw_circle(rx, SAFE_TOP + 15, 4, chatnet_online() ? t->badge_e : t->badge_gd); rx -= 18;
+    draw_text_right_clipped(&g_font_small, rx, SAFE_TOP + 8, 170, t->text, srv);
     float dy = enter_dy();
     /* left info card */
-    float lx = 24, ly = 64 + dy, lw = 190, lh = 366;
+    float lx = SAFE_X, ly = CONTENT_Y + dy, lw = 180, lh = CONTENT_H;
     panel(lx, ly, lw, lh);
     int nl = draw_text_wrap(&g_font, lx + 14, ly + 14, lw - 28, 19, t->text, tr(S_AI_INTRO));
     float y = ly + 14 + nl * 19 + 8;
@@ -72,9 +69,8 @@ void ai_draw(void) {
     const char *keys[4][2] = { { "Y", tr(S_VOICE_MSG) }, { "X", tr(S_ASK_HERE) }, { "A", tr(S_SEND) }, { "B", tr(S_BACK) } };
     for (int i = 0; i < 4; i++) { draw_button_glyph(lx + 14, y + 9, keys[i][0], 255); draw_text_clipped(&g_font_small, lx + 40, y + 2, lw - 54, t->text, keys[i][1]); y += 26; }
     /* spiral watermark */
-    draw_ring(SCREEN_W - 90, 200, 60, ALPHA(t->accent, 25)); draw_ring(SCREEN_W - 90, 200, 40, ALPHA(t->accent, 20)); draw_ring(SCREEN_W - 90, 200, 20, ALPHA(t->accent, 15));
     /* conversation */
-    float rx0 = 226, ry = 64 + dy, rw = SCREEN_W - 24 - rx0, rh = 300;
+    float rx0 = SAFE_X + 180 + 12, ry = CONTENT_Y + dy, rw = SCREEN_W - SAFE_X - rx0, rh = CONTENT_H - 66;
     panel(rx0, ry, rw, rh);
     draw_set_clip((int)rx0 + 4, (int)ry + 8, (int)rw - 8, (int)rh - 16);
     float yy = ry + rh - 12;
