@@ -22,7 +22,9 @@ Per-game overrides live next to the image: `name.txt`, `cover.png`, `genre.txt`,
 Neo Geo CD / Ports & Homebrew are also auto-detected from the title), `synopsis.txt` or
 `synopsis.<pt|en|es|de|fr|it>.txt`. On the card root: `avatars/*.png` (profile pictures) and
 `server.txt` (`host:port` of the Cast Chat server). A folder of `<PRODUCT>.png` files can be
-passed with `--covers`. Translations: `assets/lang/strings.tsv` (UTF-8, one column per language),
+passed with `--covers`. Alternative loader: drop GDMENU's `loader.bin` on the card root (or a GDMENU `1ST_READ.BIN`/track file
+inside `gdmenu/`); the card tool lifts it from the romdisk and ships it as `loader.bin`, selectable in
+Settings → Loader (`GDMENU`). Launch then follows GDMENU's exact sequence (`arch_exec`). Translations: `assets/lang/strings.tsv` (UTF-8, one column per language),
 compiled by `tools/cast_card/mklang.py` during `./build.sh`.
 
 Layout of the repo:

@@ -287,7 +287,7 @@ static void browse_draw(void) {
 }
 
 /* ---------- settings ---------- */
-typedef enum { O_NICK, O_AVATAR, O_REGION, O_VGA, O_IGR, O_INTRO, O_LICENSE, O_THEME, O_VIEW, O_LANG, O_SORT, O_REGIONF, O_MULTI, O_COVERS, O_CHAT, O_AI, O_SERVER, O_NETAUTO, O_CONNECT, O_SAVER, O_SCAN, O_SAVE, O_RESET, O_SYSINFO, O_EXIT, O_COUNT } opt_t;
+typedef enum { O_NICK, O_AVATAR, O_REGION, O_VGA, O_IGR, O_INTRO, O_LICENSE, O_LOADER, O_THEME, O_VIEW, O_LANG, O_SORT, O_REGIONF, O_MULTI, O_COVERS, O_CHAT, O_AI, O_SERVER, O_NETAUTO, O_CONNECT, O_SAVER, O_SCAN, O_SAVE, O_RESET, O_SYSINFO, O_EXIT, O_COUNT } opt_t;
 static char nick_edit[NICK_LEN], server_edit[SERVER_LEN]; static int osk_opt;
 static int opt_is_toggle(opt_t o, int *val) {
     settings_t *s = settings_get();
@@ -310,6 +310,7 @@ static void opt_value(opt_t o, char *out, int cap) {
     case O_SORT: snprintf(out, cap, "%s", list_sort_name(g_list.sort)); break;
     case O_REGIONF: snprintf(out, cap, "%s", g_list.filter_region == 'J' ? tr(S_JAPAN) : g_list.filter_region == 'U' ? tr(S_USA) : g_list.filter_region == 'E' ? tr(S_EUROPE) : tr(S_ALL)); break;
     case O_SERVER: snprintf(out, cap, "%s", s->server); break;
+    case O_LOADER: snprintf(out, cap, "%s", s->loader_kind ? (launch_gdmenu_loader_present() ? tr(S_LOADER_GDMENU) : tr(S_LOADER_MISSING)) : tr(S_LOADER_CAST)); break;
     case O_SAVER: if (s->screensaver_min) snprintf(out, cap, "%d %s", s->screensaver_min, tr(S_MINUTES)); else snprintf(out, cap, "%s", tr(S_OFF)); break;
     case O_SCAN: snprintf(out, cap, "%d ms", s->scan_delay_ms); break;
     case O_CONNECT: { net_status_t ns = net_status(); snprintf(out, cap, "%s", chatnet_online() ? tr(S_CONNECTED) : ns.state == NET_CONNECTING ? tr(S_CONNECTING) : ns.state == NET_NO_ADAPTER ? tr(S_NO_ADAPTER) : tr(S_OFFLINE)); } break;
@@ -317,11 +318,11 @@ static void opt_value(opt_t o, char *out, int cap) {
     }
 }
 static const char *opt_label(opt_t o) {
-    static const str_id ids[O_COUNT] = { S_NICKNAME, S_AVATAR, S_REGION_FREE, S_FORCE_VGA, S_IGR, S_BOOT_INTRO, S_SEGA_LICENSE, S_THEME, S_DEFAULT_VIEW, S_LANGUAGE, S_SORT, S_REGION, S_HIDE_MULTIDISC, S_COVERS, S_CAST_CHAT, S_CAST_AI, S_SERVER, S_NETWORK, S_CONNECT, S_SCREENSAVER, S_SCAN_DELAY, S_SAVE, S_RESET_SETTINGS, S_SYSINFO, S_EXIT_TO_BIOS };
+    static const str_id ids[O_COUNT] = { S_NICKNAME, S_AVATAR, S_REGION_FREE, S_FORCE_VGA, S_IGR, S_BOOT_INTRO, S_SEGA_LICENSE, S_LOADER_KIND, S_THEME, S_DEFAULT_VIEW, S_LANGUAGE, S_SORT, S_REGION, S_HIDE_MULTIDISC, S_COVERS, S_CAST_CHAT, S_CAST_AI, S_SERVER, S_NETWORK, S_CONNECT, S_SCREENSAVER, S_SCAN_DELAY, S_SAVE, S_RESET_SETTINGS, S_SYSINFO, S_EXIT_TO_BIOS };
     return tr(ids[o]);
 }
 static const char *opt_desc(opt_t o) {
-    static const str_id ids[O_COUNT] = { S_D_NICK, S_D_AVATAR, S_D_REGION, S_D_VGA, S_D_IGR, S_D_INTRO, S_D_LICENSE, S_D_THEME, S_D_VIEW, S_D_LANG, S_D_SORT, S_D_REGIONF, S_D_MULTI, S_D_COVERS, S_D_CHAT, S_D_AI, S_D_NET, S_D_NET, S_D_NET, S_D_SAVER, S_D_SCAN, S_D_SAVE, S_D_RESET, S_D_SYSINFO, S_D_EXIT };
+    static const str_id ids[O_COUNT] = { S_D_NICK, S_D_AVATAR, S_D_REGION, S_D_VGA, S_D_IGR, S_D_INTRO, S_D_LICENSE, S_D_LOADER_KIND, S_D_THEME, S_D_VIEW, S_D_LANG, S_D_SORT, S_D_REGIONF, S_D_MULTI, S_D_COVERS, S_D_CHAT, S_D_AI, S_D_NET, S_D_NET, S_D_NET, S_D_SAVER, S_D_SCAN, S_D_SAVE, S_D_RESET, S_D_SYSINFO, S_D_EXIT };
     return tr(ids[o]);
 }
 static str_id opt_section(opt_t o) {
@@ -341,6 +342,7 @@ static void opt_change(opt_t o, int dir) {
     case O_IGR: s->igr ^= 1; break;
     case O_INTRO: s->boot_intro ^= 1; break;
     case O_LICENSE: s->sega_license ^= 1; break;
+    case O_LOADER: s->loader_kind ^= 1; break;
     case O_THEME: { int n = theme_count(); s->theme = (s->theme + dir + n) % n; theme_load(s->theme); } break;
     case O_VIEW: s->view = (s->view + dir + 3) % 3; break;
     case O_LANG: s->lang = (s->lang + dir + LANG_COUNT) % LANG_COUNT; break;

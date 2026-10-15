@@ -174,3 +174,8 @@ ONLINE_OFF	offline	offline	desconectado	offline	hors ligne	offline
 WELCOME	Bem-vindo	Welcome	Bienvenido	Willkommen	Bienvenue	Benvenuto
 CATEGORY	CATEGORIA	CATEGORY	CATEGORÍA	KATEGORIE	CATÉGORIE	CATEGORIA
 HOURS	h	h	h	Std	h	h
+LOADER_KIND	LOADER	LOADER	LOADER	LOADER	LOADER	LOADER
+D_LOADER_KIND	Cast: loader aberto. GDMENU: o loader.bin original do GDMENU, se estiver no cartão (use se um jogo não iniciar).	Cast: the open loader. GDMENU: GDMENU's original loader.bin when present on the card (use it if a game does not boot).	Cast: loader abierto. GDMENU: el loader.bin original de GDMENU si está en la tarjeta (úsalo si un juego no arranca).	Cast: offener Loader. GDMENU: das originale loader.bin von GDMENU, falls auf der Karte (falls ein Spiel nicht startet).	Cast : loader ouvert. GDMENU : le loader.bin d'origine de GDMENU s'il est sur la carte (si un jeu ne démarre pas).	Cast: loader aperto. GDMENU: il loader.bin originale di GDMENU se presente sulla scheda (se un gioco non parte).
+LOADER_CAST	CAST	CAST	CAST	CAST	CAST	CAST
+LOADER_GDMENU	GDMENU	GDMENU	GDMENU	GDMENU	GDMENU	GDMENU
+LOADER_MISSING	GDMENU (ausente)	GDMENU (missing)	GDMENU (falta)	GDMENU (fehlt)	GDMENU (absent)	GDMENU (assente)

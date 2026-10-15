@@ -13,7 +13,7 @@ Card root extras: avatars/*.png (profile pictures), server.txt (host:port of the
 """
 import argparse, os, re, shutil, sys, tempfile
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
-from tools.cast_card import disc, ipbin, gdi, tex, themes, platforms
+from tools.cast_card import disc, ipbin, gdi, tex, themes, platforms, romfs
 LANGS = ["pt", "en", "es", "de", "fr", "it"]
 from PIL import Image
 
@@ -97,9 +97,24 @@ def write_avatars(sd, data_dir):
         img = Image.open(os.path.join(src, f)).convert("RGB").resize((64, 64), Image.LANCZOS)
         open(os.path.join(d, name + ".tex"), "wb").write(tex.encode(img, "rgb565"))
 
-def build_data(items, data_dir, menu_bin, themes_dir, custom_covers=None, sd=None, server=None):
+def find_gdmenu_loader(sd):
+    """GDMENU's own loader.bin: sd/loader.bin, or lifted from a GDMENU image in sd/gdmenu/ or sd/01-gdmenu-full/."""
+    direct = os.path.join(sd, "loader.bin")
+    if os.path.exists(direct): return open(direct, "rb").read()
+    for d in ("gdmenu", "01-gdmenu-full", "GDMENU"):
+        folder = os.path.join(sd, d)
+        if not os.path.isdir(folder): continue
+        for f in sorted(os.listdir(folder)):
+            if f.lower().endswith((".iso", ".bin")):
+                blob = romfs.extract(open(os.path.join(folder, f), "rb").read(), "loader.bin")
+                if blob: return blob
+    return None
+
+def build_data(items, data_dir, menu_bin, themes_dir, custom_covers=None, sd=None, server=None, gdmenu_loader=None):
     os.makedirs(os.path.join(data_dir, "covers"), exist_ok=True)
     shutil.copy(menu_bin, os.path.join(data_dir, "1ST_READ.BIN"))
+    if gdmenu_loader:
+        open(os.path.join(data_dir, "loader.bin"), "wb").write(gdmenu_loader); print("  loader.bin do GDMENU incluido (Ajustes > Loader > GDMENU)")
     if sd and not server:
         st = os.path.join(sd, "server.txt")
         if os.path.exists(st): server = open(st).read().strip()
@@ -149,7 +164,8 @@ def cmd_build(a):
     out = a.out or os.path.join(a.sd, "01")
     with tempfile.TemporaryDirectory() as tmp:
         data = os.path.join(tmp, "data"); os.makedirs(data)
-        build_data(items, data, menu_bin, a.themes or os.path.join(ROOT, "themes"), a.covers, sd=a.sd, server=getattr(a, "server", None))
+        gl = open(a.gdmenu_loader, "rb").read() if getattr(a, "gdmenu_loader", None) else find_gdmenu_loader(a.sd)
+        build_data(items, data, menu_bin, a.themes or os.path.join(ROOT, "themes"), a.covers, sd=a.sd, server=getattr(a, "server", None), gdmenu_loader=gl)
         ip_tmpl = open(a.ip_template or os.path.join(ROOT, "assets", "IP.BIN"), "rb").read()
         ip = ipbin.patch(ip_tmpl, name="CASTMENU", product="CASTMENU", version="V1.000", date="20261015", company="CASTMENU")
         ipp = os.path.join(tmp, "IP.BIN"); open(ipp, "wb").write(ip)
@@ -195,7 +211,7 @@ def main():
     p = argparse.ArgumentParser(prog="castmenu-card", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sp = p.add_subparsers(dest="cmd", required=True)
     s = sp.add_parser("scan"); s.add_argument("sd"); s.set_defaults(fn=cmd_scan)
-    b = sp.add_parser("build"); b.add_argument("sd"); b.add_argument("--out"); b.add_argument("--menu-bin"); b.add_argument("--themes"); b.add_argument("--covers", help="dir with <PRODUCT>.png custom covers"); b.add_argument("--ip-template"); b.add_argument("--server", help="host:port of the Cast Chat server (or sd/server.txt)"); b.set_defaults(fn=cmd_build)
+    b = sp.add_parser("build"); b.add_argument("sd"); b.add_argument("--out"); b.add_argument("--menu-bin"); b.add_argument("--themes"); b.add_argument("--covers", help="dir with <PRODUCT>.png custom covers"); b.add_argument("--ip-template"); b.add_argument("--server", help="host:port of the Cast Chat server (or sd/server.txt)"); b.add_argument("--gdmenu-loader", help="GDMENU loader.bin (or a GDMENU 1ST_READ.BIN/track file) to ship as the alternative loader"); b.set_defaults(fn=cmd_build)
     ad = sp.add_parser("add"); ad.add_argument("sd"); ad.add_argument("images", nargs="+"); ad.set_defaults(fn=cmd_add)
     so = sp.add_parser("sort"); so.add_argument("sd"); so.set_defaults(fn=cmd_sort)
     a = p.parse_args(); a.fn(a)

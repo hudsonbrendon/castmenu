@@ -185,5 +185,5 @@ does not ship CodeBreaker support.
 | PVR cover decode (twiddled RGB565 256²), `.tex` covers | redream |
 | VQ-compressed covers                   | code path written from the PVR format spec, untested |
 | GDEMU `0x52` commands, slow scan       | protocol matches openMenu's working SDK; untested here (no GDEMU) |
-| Open loader (`ldr/`)                   | byte-for-byte reproduction of the observed patch table; **untested on hardware** |
+| Open loader (`ldr/`)                   | byte-for-byte reproduction of the observed patch table; **first hardware run (2026-10-15) boots the menu, game launch under investigation**; Settings → Loader can switch to GDMENU's own `loader.bin` lifted by the card tool |
 | CodeBreaker (`cb_loader.bin`)          | not implemented |

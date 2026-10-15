@@ -4,3 +4,4 @@
 #include "list.h"
 void launch_game(const game_t *g) __attribute__((noreturn));
 void launch_exit_to_bios(void) __attribute__((noreturn));
+int  launch_gdmenu_loader_present(void);   /* /cd/loader.bin shipped by the card tool */
