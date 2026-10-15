@@ -10,7 +10,7 @@
 #define CF_CY 196.0f       /* vertical center of the covers */
 #define CF_SIZE 176.0f     /* center cover size */
 #define CF_SIDE 124.0f     /* side cover size */
-#define CF_GAP 134.0f      /* horizontal spacing between side covers (no overlap) */
+#define CF_GAP 88.0f       /* horizontal spacing between side covers (deck overlap) */
 #define CF_FLOOR (CF_CY + CF_SIZE / 2 + 2)
 
 void coverflow_reset(int cursor) { (void)cursor; }
@@ -22,6 +22,7 @@ static void cover_at(const game_t *g, float d, int is_center) {
     if (ad > 3.2f) return;
     float side = clampf(ad, 0, 1);                       /* 0 center .. 1 fully a side cover */
     float size = CF_SIZE + (CF_SIDE - CF_SIZE) * side;
+    if (ad > 1) size *= 1 - 0.07f * clampf(ad - 1, 0, 2);   /* deeper covers shrink a little */
     float cx;
     if (ad <= 1) cx = SCREEN_W / 2 + d * (CF_SIZE / 2 + CF_GAP * 0.55f + 30);
     else cx = SCREEN_W / 2 + (d < 0 ? -1 : 1) * (CF_SIZE / 2 + CF_GAP * 0.55f + 30 + (ad - 1) * CF_GAP);
@@ -76,6 +77,7 @@ void coverflow_draw(int cursor, float *pos) {
     if (!n) { draw_text_center(&g_font, SCREEN_W / 2, CF_CY - 10, t->text_dim, tr(S_NO_GAMES)); return; }
     /* draw far-to-near: left side from far, right side from far, center last */
     int center = (int)floorf(*pos + 0.5f);
+    /* far to near: the translucent list keeps submission order, so nearer covers land on top */
     for (int k = 3; k >= 1; k--) {
         int i = center - k; if (i >= 0 && i < n) cover_at(list_view_item(i), i - *pos, 0);
         i = center + k; if (i >= 0 && i < n) cover_at(list_view_item(i), i - *pos, 0);
