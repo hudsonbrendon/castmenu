@@ -7,9 +7,9 @@
 #include <string.h>
 #include <stdio.h>
 
-#define CF_CY 235.0f       /* vertical center of the covers */
-#define CF_SIZE 200.0f     /* center cover size */
-#define CF_SIDE 140.0f     /* side cover size */
+#define CF_CY 212.0f       /* vertical center of the covers */
+#define CF_SIZE 184.0f     /* center cover size */
+#define CF_SIDE 130.0f     /* side cover size */
 #define CF_GAP 118.0f      /* horizontal spacing between side covers */
 #define CF_FLOOR (CF_CY + CF_SIZE / 2 + 2)
 
@@ -84,13 +84,13 @@ void coverflow_draw(int cursor, float *pos) {
     /* title + meta */
     const game_t *g = list_view_item(cursor);
     if (g) {
-        float ty = CF_FLOOR + 62;
-        draw_text_shadow(&g_font_display, SCREEN_W / 2 - text_width(&g_font_display, g->name) / 2 * (text_width(&g_font_display, g->name) > 560 ? 0 : 1), ty, t->text_hi, ALPHA(0x000000, 120), text_width(&g_font_display, g->name) > 560 ? "" : g->name);
-        if (text_width(&g_font_display, g->name) > 560) draw_text_center(&g_font_big, SCREEN_W / 2, ty + 10, t->text_hi, g->name);
-        float bx = SCREEN_W / 2 - 60; (void)bx;
+        float ty = CF_FLOOR + 54;
+        const font_t *tf = text_width(&g_font_display, g->name) > 540 ? &g_font_big : &g_font_display;
+        float tw = text_width(tf, g->name);
+        draw_text_shadow(tf, SCREEN_W / 2 - tw / 2, ty + (tf == &g_font_big ? 8 : 0), t->text_hi, ALPHA(0x000000, 120), g->name);
         /* badges centered under the title */
         float bw = strlen(g->region) * 22 + 34 + (g->vga ? 42 : 0) + (g->disc[0] ? 46 : 0);
-        region_badges(SCREEN_W / 2 - bw / 2, ty + 50, g);
-        if (g->favorite) draw_text(&g_font, SCREEN_W / 2 + bw / 2 + 6, ty + 48, 0xFFFFD166, "\x2a");
+        region_badges(SCREEN_W / 2 - bw / 2, ty + 44, g);
+        if (g->favorite) draw_text(&g_font, SCREEN_W / 2 + bw / 2 + 6, ty + 42, 0xFFFFD166, "\x2a");
     }
 }

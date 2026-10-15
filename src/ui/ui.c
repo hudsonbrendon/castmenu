@@ -263,13 +263,13 @@ static void draw_category_bar(void) {
     /* slingshot: label slides in from the side it came from */
     float a = ease_out(cat_anim), off = (1 - a) * 40 * cat_dir;
     const char *name = cat_label(g_list.category);
-    draw_text_shadow(&g_font, 40 + off, 404, ALPHA(t->text, (int)(255 * (0.3f + 0.7f * a))), ALPHA(0x000000, 100), name);
+    draw_text_shadow(&g_font, 36 + off, 406, ALPHA(t->text, (int)(255 * (0.3f + 0.7f * a))), ALPHA(0x000000, 100), name);
     float nw = text_width(&g_font, name);
-    draw_rect_round(40 + off, 424, nw * a, 2, 1, t->accent);
+    draw_rect_round(36 + off, 426, nw * a, 2, 1, t->accent);
     int total = list_category_total();
-    for (int i = 0; i < total && i < 12; i++) draw_circle(40 + i * 10 + 3, 434, i == g_list.category ? 3 : 2, i == g_list.category ? t->accent : ALPHA(t->text_dim, 110));
+    for (int i = 0; i < total && i < 14; i++) draw_circle(36 + i * 9 + 3, 435, i == g_list.category ? 3 : 2, i == g_list.category ? t->accent : ALPHA(t->text_dim, 110));
     char pos[24]; snprintf(pos, sizeof pos, "%d/%d", g_list.view_count ? cursor + 1 : 0, g_list.view_count);
-    draw_text_shadow(&g_font, SCREEN_W - 40 - text_width(&g_font, pos), 404, t->text, ALPHA(0x000000, 100), pos);
+    draw_text_shadow(&g_font, SCREEN_W - 36 - text_width(&g_font, pos), 406, t->text, ALPHA(0x000000, 100), pos);
 }
 static void browse_draw(void) {
     draw_frame_begin(); draw_background(); draw_frame_tr(); draw_background_tr();
