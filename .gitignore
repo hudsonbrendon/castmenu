@@ -1,0 +1,12 @@
+*.o
+*.elf
+romdisk.img
+romdisk_tmp.*
+1ST_READ.BIN
+ldr/cast_ldr.bin
+assets/romdisk/
+src/vmu_icon.c
+__pycache__/
+.DS_Store
+src/ui/lang_table.c
+src/ui/lang_ids.h

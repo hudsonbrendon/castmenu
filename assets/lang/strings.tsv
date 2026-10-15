@@ -1,0 +1,176 @@
+id	pt	en	es	de	fr	it
+GAMES	JOGOS	GAMES	JUEGOS	SPIELE	JEUX	GIOCHI
+FAVORITES	FAVORITOS	FAVORITES	FAVORITOS	FAVORITEN	FAVORIS	PREFERITI
+SETTINGS	AJUSTES	SETTINGS	AJUSTES	EINSTELLUNGEN	RÉGLAGES	IMPOSTAZIONI
+SYSINFO	SISTEMA	SYSTEM	SISTEMA	SYSTEM	SYSTÈME	SISTEMA
+EXIT_Q	Sair para o menu do console?	Exit to the console menu?	¿Salir al menú de la consola?	Zum Konsolenmenü zurückkehren?	Quitter vers le menu de la console ?	Uscire al menu della console?
+YES	SIM	YES	SÍ	JA	OUI	SÌ
+NO	NÃO	NO	NO	NEIN	NON	NO
+LOADING	CARREGANDO	LOADING	CARGANDO	LADEN	CHARGEMENT	CARICAMENTO
+READING_LIST	LENDO LISTA DE JOGOS	READING GAME LIST	LEYENDO LISTA DE JUEGOS	SPIELELISTE WIRD GELESEN	LECTURE DE LA LISTE	LETTURA LISTA GIOCHI
+NO_GAMES	Nenhum jogo encontrado	No games found	No se encontraron juegos	Keine Spiele gefunden	Aucun jeu trouvé	Nessun gioco trovato
+SORT	ORDENAR	SORT	ORDENAR	SORTIEREN	TRIER	ORDINA
+FILTER	FILTRO	FILTER	FILTRO	FILTER	FILTRE	FILTRO
+ALL	TODOS	ALL	TODOS	ALLE	TOUS	TUTTI
+PLAY	INICIAR	LAUNCH	INICIAR	STARTEN	LANCER	AVVIA
+BACK	VOLTAR	BACK	VOLVER	ZURÜCK	RETOUR	INDIETRO
+MENU	MENU	MENU	MENÚ	MENÜ	MENU	MENU
+FAV	FAVORITO	FAVORITE	FAVORITO	FAVORIT	FAVORI	PREFERITO
+VIEW	VISUAL	VIEW	VISTA	ANSICHT	AFFICHAGE	VISTA
+REGION	REGIÃO	REGION	REGIÓN	REGION	RÉGION	REGIONE
+DATE	DATA	DATE	FECHA	DATUM	DATE	DATA
+VERSION	VERSÃO	VERSION	VERSIÓN	VERSION	VERSION	VERSIONE
+DISC	DISCO	DISC	DISCO	DISC	DISQUE	DISCO
+FOLDER	PASTA	FOLDER	CARPETA	ORDNER	DOSSIER	CARTELLA
+PRODUCT	CÓDIGO	PRODUCT	CÓDIGO	PRODUKT	PRODUIT	CODICE
+VGA	VGA	VGA	VGA	VGA	VGA	VGA
+GDROM	GD-ROM	GD-ROM	GD-ROM	GD-ROM	GD-ROM	GD-ROM
+CDROM	CD-ROM	CD-ROM	CD-ROM	CD-ROM	CD-ROM	CD-ROM
+GENRE	GÊNERO	GENRE	GÉNERO	GENRE	GENRE	GENERE
+PLAYERS	JOGADORES	PLAYERS	JUGADORES	SPIELER	JOUEURS	GIOCATORI
+CHOOSE_DISC	Escolha o disco	Choose disc	Elige el disco	Disc wählen	Choisir le disque	Scegli il disco
+REGION_FREE	REGION FREE	REGION FREE	REGION FREE	REGION FREE	REGION FREE	REGION FREE
+FORCE_VGA	FORÇAR VGA	FORCE VGA	FORZAR VGA	VGA ERZWINGEN	FORCER VGA	FORZA VGA
+IGR	RESET NO JOGO	IN-GAME RESET	RESET EN EL JUEGO	IN-GAME-RESET	RESET EN JEU	RESET IN GIOCO
+BOOT_INTRO	ANIMAÇÃO DE BOOT	BOOT ANIMATION	ANIMACIÓN DE INICIO	BOOT-ANIMATION	ANIMATION DE DÉMARRAGE	ANIMAZIONE DI AVVIO
+SEGA_LICENSE	TELA SEGA LICENSE	SEGA LICENSE SCREEN	PANTALLA SEGA LICENSE	SEGA-LIZENZBILD	ÉCRAN SEGA LICENSE	SCHERMATA SEGA LICENSE
+THEME	TEMA	THEME	TEMA	THEMA	THÈME	TEMA
+DEFAULT_VIEW	VISUAL PADRÃO	DEFAULT VIEW	VISTA PREDETERMINADA	STANDARDANSICHT	AFFICHAGE PAR DÉFAUT	VISTA PREDEFINITA
+LIST	LISTA	LIST	LISTA	LISTE	LISTE	ELENCO
+GRID	GRADE	GRID	CUADRÍCULA	RASTER	GRILLE	GRIGLIA
+COVERFLOW	COVERFLOW	COVERFLOW	COVERFLOW	COVERFLOW	COVERFLOW	COVERFLOW
+LANGUAGE	IDIOMA	LANGUAGE	IDIOMA	SPRACHE	LANGUE	LINGUA
+SCREENSAVER	PROTETOR DE TELA	SCREENSAVER	SALVAPANTALLAS	BILDSCHIRMSCHONER	ÉCONOMISEUR	SALVASCHERMO
+HIDE_MULTIDISC	OCULTAR DISCOS EXTRAS	HIDE EXTRA DISCS	OCULTAR DISCOS EXTRA	WEITERE DISCS AUSBLENDEN	MASQUER DISQUES SUPPL.	NASCONDI DISCHI EXTRA
+COVERS	CAPAS	COVERS	CARÁTULAS	COVER	JAQUETTES	COPERTINE
+SAVE	SALVAR NO VMU	SAVE TO VMU	GUARDAR EN VMU	AUF VMU SPEICHERN	SAUVEGARDER SUR VMU	SALVA SU VMU
+SAVED	Salvo no VMU	Saved to VMU	Guardado en VMU	Auf VMU gespeichert	Sauvegardé sur VMU	Salvato su VMU
+SAVE_FAIL	Falha ao salvar (VMU?)	Save failed (VMU?)	Error al guardar (¿VMU?)	Speichern fehlgeschlagen (VMU?)	Échec de sauvegarde (VMU ?)	Salvataggio fallito (VMU?)
+ON	LIGADO	ON	ACTIVADO	AN	ACTIVÉ	ATTIVO
+OFF	DESLIGADO	OFF	DESACTIVADO	AUS	DÉSACTIVÉ	DISATTIVO
+MINUTES	MIN	MIN	MIN	MIN	MIN	MIN
+GDEMU_FW	FIRMWARE	FIRMWARE	FIRMWARE	FIRMWARE	FIRMWARE	FIRMWARE
+GDEMU_BOOT	BOOTLOADER	BOOTLOADER	BOOTLOADER	BOOTLOADER	BOOTLOADER	BOOTLOADER
+BIOS	BIOS	BIOS	BIOS	BIOS	BIOS	BIOS
+SYS_REGION	REGIÃO	REGION	REGIÓN	REGION	RÉGION	REGIONE
+BROADCAST	SINAL	SIGNAL	SEÑAL	SIGNAL	SIGNAL	SEGNALE
+CABLE	CABO DE VÍDEO	VIDEO CABLE	CABLE DE VÍDEO	VIDEOKABEL	CÂBLE VIDÉO	CAVO VIDEO
+LAUNCHES	JOGOS INICIADOS	GAMES LAUNCHED	JUEGOS INICIADOS	GESTARTETE SPIELE	JEUX LANCÉS	GIOCHI AVVIATI
+ABOUT	SOBRE	ABOUT	ACERCA DE	ÜBER	À PROPOS	INFO
+NEED_FW	Atualize o GDEMU para 5.13.0 ou superior	Update GDEMU to 5.13.0 or higher	Actualiza GDEMU a 5.13.0 o superior	GDEMU auf 5.13.0 oder höher aktualisieren	Mettez GDEMU à jour vers 5.13.0 ou plus	Aggiorna GDEMU alla 5.13.0 o superiore
+HINT_BROWSE	L ANTERIOR|B ÚLTIMOS JOGADOS|X AJUSTES|A INICIAR|Y DETALHES|START SISTEMA|R PRÓXIMO	L PREVIOUS|B LAST PLAYED|X SETTINGS|A LAUNCH|Y DETAILS|START SYSTEM|R NEXT	L ANTERIOR|B ÚLTIMOS|X AJUSTES|A INICIAR|Y DETALLES|START SISTEMA|R SIGUIENTE	L ZURÜCK|B ZULETZT|X EINSTELLUNGEN|A STARTEN|Y DETAILS|START SYSTEM|R WEITER	L PRÉCÉDENT|B RÉCENTS|X RÉGLAGES|A LANCER|Y DÉTAILS|START SYSTÈME|R SUIVANT	L PRECEDENTE|B RECENTI|X IMPOSTAZIONI|A AVVIA|Y DETTAGLI|START SISTEMA|R SUCCESSIVO
+HINT_SETTINGS	A ALTERAR|B VOLTAR|START SALVAR	A CHANGE|B BACK|START SAVE	A CAMBIAR|B VOLVER|START GUARDAR	A ÄNDERN|B ZURÜCK|START SPEICHERN	A MODIFIER|B RETOUR|START SAUVER	A MODIFICA|B INDIETRO|START SALVA
+LAUNCHING	INICIANDO	LAUNCHING	INICIANDO	WIRD GESTARTET	LANCEMENT	AVVIO
+EXIT_TO_BIOS	SAIR PARA A BIOS	EXIT TO BIOS	SALIR A LA BIOS	ZUM BIOS	QUITTER VERS LE BIOS	ESCI AL BIOS
+SCAN_DELAY	ESPERA NO SCAN	SCAN DELAY	ESPERA DEL ESCANEO	SCAN-VERZÖGERUNG	DÉLAI DE SCAN	ATTESA SCANSIONE
+RESET_SETTINGS	RESTAURAR PADRÕES	RESET TO DEFAULTS	RESTAURAR VALORES	ZURÜCKSETZEN	RÉINITIALISER	RIPRISTINA
+RECENT	ÚLTIMOS JOGADOS	LAST PLAYED	ÚLTIMOS JUGADOS	ZULETZT GESPIELT	DERNIERS JOUÉS	ULTIMI GIOCATI
+NO_GDEMU	GDEMU não detectado	GDEMU not detected	GDEMU no detectado	GDEMU nicht erkannt	GDEMU non détecté	GDEMU non rilevato
+SEC_LOADER	LOADER	LOADER	LOADER	LOADER	LOADER	LOADER
+SEC_VISUAL	VISUAL	VISUAL	VISUAL	DARSTELLUNG	AFFICHAGE	ASPETTO
+SEC_LIBRARY	BIBLIOTECA	LIBRARY	BIBLIOTECA	BIBLIOTHEK	BIBLIOTHÈQUE	LIBRERIA
+SEC_SYSTEM	SISTEMA	SYSTEM	SISTEMA	SYSTEM	SYSTÈME	SISTEMA
+SEC_PROFILE	PERFIL	PROFILE	PERFIL	PROFIL	PROFIL	PROFILO
+SEC_ONLINE	ONLINE	ONLINE	EN LÍNEA	ONLINE	EN LIGNE	ONLINE
+D_REGION	Ignora a trava regional do jogo. Deixe ligado para rodar jogos de qualquer região.	Bypasses the game's region lock. Keep it on to run games from any region.	Ignora el bloqueo regional. Déjalo activado para jugar títulos de cualquier región.	Umgeht die Regionalsperre. Eingeschaltet lassen, um Spiele jeder Region zu starten.	Ignore le verrou régional. Laissez activé pour lancer des jeux de toute région.	Ignora il blocco regionale. Lascialo attivo per avviare giochi di ogni regione.
+D_VGA	Força o modo VGA mesmo em jogos que não o suportam oficialmente.	Forces VGA mode even on games that do not officially support it.	Fuerza el modo VGA incluso en juegos sin soporte oficial.	Erzwingt VGA auch bei Spielen ohne offizielle Unterstützung.	Force le mode VGA même sur les jeux non compatibles officiellement.	Forza la modalità VGA anche sui giochi senza supporto ufficiale.
+D_IGR	Segure A+B+X+Y+START dentro do jogo para voltar ao menu.	Hold A+B+X+Y+START in game to return to the menu.	Mantén A+B+X+Y+START en el juego para volver al menú.	A+B+X+Y+START im Spiel halten, um zum Menü zurückzukehren.	Maintenez A+B+X+Y+START en jeu pour revenir au menu.	Tieni premuto A+B+X+Y+START nel gioco per tornare al menu.
+D_INTRO	Mostra a animação de abertura do Dreamcast antes do jogo.	Shows the Dreamcast boot animation before the game.	Muestra la animación de inicio del Dreamcast antes del juego.	Zeigt die Dreamcast-Startanimation vor dem Spiel.	Affiche l'animation de démarrage de la Dreamcast avant le jeu.	Mostra l'animazione di avvio del Dreamcast prima del gioco.
+D_LICENSE	Mostra a tela de licença da Sega antes do jogo.	Shows the Sega license screen before the game.	Muestra la pantalla de licencia de Sega antes del juego.	Zeigt das Sega-Lizenzbild vor dem Spiel.	Affiche l'écran de licence Sega avant le jeu.	Mostra la schermata di licenza Sega prima del gioco.
+D_THEME	Esquema de cores e fundo. Temas extras ficam em /themes no cartão.	Color scheme and background. Extra themes live in /themes on the card.	Colores y fondo. Los temas extra van en /themes de la tarjeta.	Farben und Hintergrund. Weitere Themen liegen in /themes auf der Karte.	Couleurs et fond. Les thèmes supplémentaires sont dans /themes sur la carte.	Colori e sfondo. I temi extra stanno in /themes sulla scheda.
+D_VIEW	Como a biblioteca abre: coverflow, lista com detalhes ou grade de capas.	How the library opens: coverflow, list with details or a grid of covers.	Cómo se abre la biblioteca: coverflow, lista con detalles o cuadrícula.	Wie die Bibliothek startet: Coverflow, Liste mit Details oder Raster.	Ouverture de la bibliothèque : coverflow, liste détaillée ou grille.	Come si apre la libreria: coverflow, elenco con dettagli o griglia.
+D_SORT	Ordem dos jogos na biblioteca.	Order of the games in the library.	Orden de los juegos en la biblioteca.	Reihenfolge der Spiele in der Bibliothek.	Ordre des jeux dans la bibliothèque.	Ordine dei giochi nella libreria.
+D_FAVONLY	Mostra apenas os jogos favoritos.	Shows only favorite games.	Muestra solo los juegos favoritos.	Zeigt nur Favoriten.	Affiche uniquement les favoris.	Mostra solo i preferiti.
+D_RECENT	Mostra apenas os últimos jogos iniciados.	Shows only the last games launched.	Muestra solo los últimos juegos iniciados.	Zeigt nur die zuletzt gestarteten Spiele.	Affiche uniquement les derniers jeux lancés.	Mostra solo gli ultimi giochi avviati.
+D_REGIONF	Filtra a biblioteca por região do disco.	Filters the library by disc region.	Filtra la biblioteca por región del disco.	Filtert die Bibliothek nach Disc-Region.	Filtre la bibliothèque par région du disque.	Filtra la libreria per regione del disco.
+D_MULTI	Mostra só o disco 1 dos jogos com vários discos. Os outros aparecem ao iniciar.	Shows only disc 1 of multi-disc games. The others appear when launching.	Muestra solo el disco 1 de los juegos multidisco. Los demás aparecen al iniciar.	Zeigt nur Disc 1 bei Mehr-Disc-Spielen. Die anderen erscheinen beim Start.	N'affiche que le disque 1 des jeux multi-disques. Les autres apparaissent au lancement.	Mostra solo il disco 1 dei giochi multidisco. Gli altri appaiono all'avvio.
+D_COVERS	Carrega capas de /covers (ou da própria imagem do jogo).	Loads covers from /covers (or from the game image itself).	Carga carátulas de /covers (o de la propia imagen del juego).	Lädt Cover aus /covers (oder aus dem Spielabbild).	Charge les jaquettes depuis /covers (ou l'image du jeu).	Carica le copertine da /covers (o dall'immagine del gioco).
+D_LANG	Idioma do menu e das sinopses.	Menu and synopsis language.	Idioma del menú y las sinopsis.	Sprache für Menü und Beschreibungen.	Langue du menu et des synopsis.	Lingua del menu e delle sinossi.
+D_SAVER	Desliga a tela após o tempo sem atividade.	Blanks the screen after this much idle time.	Apaga la pantalla tras este tiempo sin actividad.	Schaltet den Bildschirm nach dieser Leerlaufzeit ab.	Éteint l'écran après ce délai d'inactivité.	Spegne lo schermo dopo questo tempo di inattività.
+D_SCAN	Tempo que o GDEMU espera entre trocas de imagem na varredura lenta.	How long GDEMU waits between image switches during the slow scan.	Tiempo que GDEMU espera entre cambios de imagen en el escaneo lento.	Wartezeit des GDEMU zwischen Abbildwechseln beim langsamen Scan.	Délai d'attente du GDEMU entre deux images lors du scan lent.	Attesa del GDEMU tra i cambi di immagine nella scansione lenta.
+D_SAVE	Grava ajustes, perfil e favoritos no VMU (CASTMENU.SYS).	Writes settings, profile and favorites to the VMU (CASTMENU.SYS).	Guarda ajustes, perfil y favoritos en la VMU (CASTMENU.SYS).	Speichert Einstellungen, Profil und Favoriten auf der VMU (CASTMENU.SYS).	Enregistre réglages, profil et favoris sur la VMU (CASTMENU.SYS).	Salva impostazioni, profilo e preferiti sulla VMU (CASTMENU.SYS).
+D_RESET	Volta tudo ao padrão. Favoritos e tempo de jogo são mantidos.	Resets everything to defaults. Favorites and play time are kept.	Restaura todo. Se conservan favoritos y tiempo de juego.	Setzt alles zurück. Favoriten und Spielzeit bleiben erhalten.	Réinitialise tout. Favoris et temps de jeu sont conservés.	Ripristina tutto. Preferiti e tempo di gioco sono mantenuti.
+D_SYSINFO	Versão do GDEMU, BIOS, região e cabo.	GDEMU version, BIOS, region and cable.	Versión de GDEMU, BIOS, región y cable.	GDEMU-Version, BIOS, Region und Kabel.	Version GDEMU, BIOS, région et câble.	Versione GDEMU, BIOS, regione e cavo.
+D_EXIT	Sai para o menu do console.	Exits to the console menu.	Sale al menú de la consola.	Beendet zum Konsolenmenü.	Quitte vers le menu de la console.	Esce al menu della console.
+D_NICK	Seu nome no Cast Chat e no perfil.	Your name in Cast Chat and on the profile.	Tu nombre en Cast Chat y en el perfil.	Dein Name im Cast Chat und im Profil.	Votre nom dans Cast Chat et le profil.	Il tuo nome in Cast Chat e nel profilo.
+D_AVATAR	Imagem do perfil. Coloque PNGs em /avatars no cartão.	Profile picture. Put PNGs in /avatars on the card.	Imagen de perfil. Pon PNGs en /avatars de la tarjeta.	Profilbild. PNGs in /avatars auf der Karte ablegen.	Image de profil. Placez des PNG dans /avatars sur la carte.	Immagine del profilo. Metti dei PNG in /avatars sulla scheda.
+D_NET	Conecta pelo adaptador BBA/LAN ou pelo modem via DreamPi (Wi-Fi).	Connects through the BBA/LAN adapter or the modem via DreamPi (Wi-Fi).	Conecta por el adaptador BBA/LAN o por el módem vía DreamPi (Wi-Fi).	Verbindet über BBA/LAN-Adapter oder Modem via DreamPi (WLAN).	Connexion via l'adaptateur BBA/LAN ou le modem via DreamPi (Wi-Fi).	Connette tramite adattatore BBA/LAN o modem via DreamPi (Wi-Fi).
+D_CHAT	Salas públicas, amigos, mensagens privadas e de voz.	Public rooms, friends, private and voice messages.	Salas públicas, amigos, mensajes privados y de voz.	Öffentliche Räume, Freunde, private und Sprachnachrichten.	Salons publics, amis, messages privés et vocaux.	Stanze pubbliche, amici, messaggi privati e vocali.
+D_AI	Pergunte sobre jogos, dicas e tutoriais. Fale ou digite.	Ask about games, tips and tutorials. Speak or type.	Pregunta sobre juegos, trucos y tutoriales. Habla o escribe.	Frag nach Spielen, Tipps und Anleitungen. Sprich oder tipp.	Posez des questions sur les jeux, astuces et tutos. Parlez ou écrivez.	Chiedi di giochi, consigli e tutorial. Parla o scrivi.
+HINT_DIALOG	A CONFIRMAR|B CANCELAR	A CONFIRM|B CANCEL	A CONFIRMAR|B CANCELAR	A BESTÄTIGEN|B ABBRECHEN	A CONFIRMER|B ANNULER	A CONFERMA|B ANNULLA
+HINT_SYSINFO	B VOLTAR	B BACK	B VOLVER	B ZURÜCK	B RETOUR	B INDIETRO
+HINT_LETTER	A IR|X FILTRAR|B VOLTAR	A GO|X FILTER|B BACK	A IR|X FILTRAR|B VOLVER	A GEHE ZU|X FILTER|B ZURÜCK	A ALLER|X FILTRER|B RETOUR	A VAI|X FILTRA|B INDIETRO
+HINT_DISC	A INICIAR|B VOLTAR	A LAUNCH|B BACK	A INICIAR|B VOLVER	A STARTEN|B ZURÜCK	A LANCER|B RETOUR	A AVVIA|B INDIETRO
+HINT_DETAILS	UP/DOWN ROLAR|A INICIAR|Y FAVORITO|B VOLTAR	UP/DOWN SCROLL|A LAUNCH|Y FAVORITE|B BACK	UP/DOWN DESPLAZAR|A INICIAR|Y FAVORITO|B VOLVER	UP/DOWN SCROLLEN|A STARTEN|Y FAVORIT|B ZURÜCK	UP/DOWN DÉFILER|A LANCER|Y FAVORI|B RETOUR	UP/DOWN SCORRI|A AVVIA|Y PREFERITO|B INDIETRO
+HINT_SIDEBAR	A INICIAR|B FECHAR	A LAUNCH|B CLOSE	A INICIAR|B CERRAR	A STARTEN|B SCHLIESSEN	A LANCER|B FERMER	A AVVIA|B CHIUDI
+HINT_CHAT	A ABRIR|X ESCREVER|Y SEGURE: VOZ|L/R ABA|B VOLTAR	A OPEN|X WRITE|Y HOLD: VOICE|L/R TAB|B BACK	A ABRIR|X ESCRIBIR|Y MANTÉN: VOZ|L/R PESTAÑA|B VOLVER	A ÖFFNEN|X SCHREIBEN|Y HALTEN: SPRACHE|L/R TAB|B ZURÜCK	A OUVRIR|X ÉCRIRE|Y MAINTENIR : VOIX|L/R ONGLET|B RETOUR	A APRI|X SCRIVI|Y TIENI: VOCE|L/R SCHEDA|B INDIETRO
+HINT_AI	X ESCREVER|Y SEGURE: PERGUNTA POR VOZ|B VOLTAR	X WRITE|Y HOLD: VOICE QUESTION|B BACK	X ESCRIBIR|Y MANTÉN: PREGUNTA POR VOZ|B VOLVER	X SCHREIBEN|Y HALTEN: SPRACHFRAGE|B ZURÜCK	X ÉCRIRE|Y MAINTENIR : QUESTION VOCALE|B RETOUR	X SCRIVI|Y TIENI: DOMANDA VOCALE|B INDIETRO
+HINT_OSK	A DIGITAR|B APAGAR|X ESPAÇO|START ENVIAR|L/R MAIÚSC|Y CANCELAR	A TYPE|B DELETE|X SPACE|START SEND|L/R SHIFT|Y CANCEL	A ESCRIBIR|B BORRAR|X ESPACIO|START ENVIAR|L/R MAYÚS|Y CANCELAR	A TIPPEN|B LÖSCHEN|X LEERTASTE|START SENDEN|L/R SHIFT|Y ABBRECHEN	A SAISIR|B EFFACER|X ESPACE|START ENVOYER|L/R MAJ|Y ANNULER	A SCRIVI|B CANCELLA|X SPAZIO|START INVIA|L/R MAIUSC|Y ANNULLA
+GOTO_LETTER	IR PARA LETRA	GO TO LETTER	IR A LA LETRA	ZU BUCHSTABE	ALLER À LA LETTRE	VAI ALLA LETTERA
+PRESS_A	PRESSIONE A	PRESS A	PULSA A	A DRÜCKEN	APPUYEZ SUR A	PREMI A
+LIBRARY	BIBLIOTECA	LIBRARY	BIBLIOTECA	BIBLIOTHEK	BIBLIOTHÈQUE	LIBRERIA
+DETAILS	DETALHES	DETAILS	DETALLES	DETAILS	DÉTAILS	DETTAGLI
+SEC_GDEMU	GDEMU	GDEMU	GDEMU	GDEMU	GDEMU	GDEMU
+SEC_CONSOLE	CONSOLE	CONSOLE	CONSOLA	KONSOLE	CONSOLE	CONSOLE
+SEC_CAST	CAST MENU	CAST MENU	CAST MENU	CAST MENU	CAST MENU	CAST MENU
+SEC_STATS	ESTATÍSTICAS	STATISTICS	ESTADÍSTICAS	STATISTIK	STATISTIQUES	STATISTICHE
+FAV_ADDED	Adicionado aos favoritos	Added to favorites	Añadido a favoritos	Zu Favoriten hinzugefügt	Ajouté aux favoris	Aggiunto ai preferiti
+FAV_REMOVED	Removido dos favoritos	Removed from favorites	Quitado de favoritos	Aus Favoriten entfernt	Retiré des favoris	Rimosso dai preferiti
+NO_COVER	SEM CAPA	NO COVER	SIN CARÁTULA	KEIN COVER	SANS JAQUETTE	SENZA COPERTINA
+GAMES_LOWER	jogos	games	juegos	Spiele	jeux	giochi
+HELP_SETTINGS	Descrição	Description	Descripción	Beschreibung	Description	Descrizione
+GAME_DETAILS	Detalhes do jogo	Game details	Detalles del juego	Spieldetails	Détails du jeu	Dettagli del gioco
+PUBLISHER	Produtora	Publisher	Desarrolladora	Hersteller	Éditeur	Produttore
+YEAR	Ano	Year	Año	Jahr	Année	Anno
+RELEASED_IN	Lançado em	Released in	Lanzado en	Erschienen in	Sorti en	Uscito in
+DISCS	Discos	Discs	Discos	Discs	Disques	Dischi
+PLAY_TIME	Tempo de jogo	Play time	Tiempo de juego	Spielzeit	Temps de jeu	Tempo di gioco
+SYNOPSIS	Sinopse	Synopsis	Sinopsis	Beschreibung	Synopsis	Sinossi
+NO_SYNOPSIS	Sem sinopse neste idioma. Adicione synopsis.<idioma>.txt na pasta do jogo.	No synopsis in this language. Add synopsis.<lang>.txt to the game folder.	Sin sinopsis en este idioma. Añade synopsis.<idioma>.txt en la carpeta del juego.	Keine Beschreibung in dieser Sprache. Lege synopsis.<sprache>.txt im Spielordner ab.	Pas de synopsis dans cette langue. Ajoutez synopsis.<langue>.txt au dossier du jeu.	Nessuna sinossi in questa lingua. Aggiungi synopsis.<lingua>.txt nella cartella del gioco.
+NEVER_PLAYED	Nunca jogado	Never played	Nunca jugado	Nie gespielt	Jamais joué	Mai giocato
+JAPAN	Japão	Japan	Japón	Japan	Japon	Giappone
+USA	EUA	USA	EE. UU.	USA	États-Unis	USA
+EUROPE	Europa	Europe	Europa	Europa	Europe	Europa
+CAT_ALL	Todos os jogos	All games	Todos los juegos	Alle Spiele	Tous les jeux	Tutti i giochi
+CAT_FAVORITES	Favoritos	Favorites	Favoritos	Favoriten	Favoris	Preferiti
+CAT_RECENT	Últimos jogados	Last played	Últimos jugados	Zuletzt gespielt	Derniers joués	Ultimi giocati
+CAT_ATOMISWAVE	Atomiswave	Atomiswave	Atomiswave	Atomiswave	Atomiswave	Atomiswave
+CAT_CPS	CPS1 / CPS2	CPS1 / CPS2	CPS1 / CPS2	CPS1 / CPS2	CPS1 / CPS2	CPS1 / CPS2
+CAT_NEOGEO	Neo Geo CD	Neo Geo CD	Neo Geo CD	Neo Geo CD	Neo Geo CD	Neo Geo CD
+CAT_HOMEBREW	Ports e Homebrew	Ports & Homebrew	Ports y Homebrew	Ports & Homebrew	Ports et Homebrew	Port e Homebrew
+NICKNAME	APELIDO	NICKNAME	APODO	SPITZNAME	PSEUDO	NICKNAME
+AVATAR	AVATAR	AVATAR	AVATAR	AVATAR	AVATAR	AVATAR
+NETWORK	REDE	NETWORK	RED	NETZWERK	RÉSEAU	RETE
+SERVER	SERVIDOR	SERVER	SERVIDOR	SERVER	SERVEUR	SERVER
+CONNECT	CONECTAR	CONNECT	CONECTAR	VERBINDEN	CONNECTER	CONNETTI
+CONNECTED	Conectado	Connected	Conectado	Verbunden	Connecté	Connesso
+CONNECTING	Conectando...	Connecting...	Conectando...	Verbinde...	Connexion...	Connessione...
+OFFLINE	Sem conexão	Offline	Sin conexión	Offline	Hors ligne	Offline
+NO_ADAPTER	Nenhum adaptador de rede encontrado	No network adapter found	No se encontró adaptador de red	Kein Netzwerkadapter gefunden	Aucun adaptateur réseau trouvé	Nessun adattatore di rete trovato
+CAST_CHAT	CAST CHAT	CAST CHAT	CAST CHAT	CAST CHAT	CAST CHAT	CAST CHAT
+CAST_AI	CAST AI	CAST AI	CAST AI	CAST AI	CAST AI	CAST AI
+ROOMS	Salas	Rooms	Salas	Räume	Salons	Stanze
+FRIENDS	Amigos	Friends	Amigos	Freunde	Amis	Amici
+PRIVATE	Privado	Private	Privado	Privat	Privé	Privato
+SELECT_FRIEND	Selecione um amigo ou uma sala	Select a friend or a room	Selecciona un amigo o una sala	Wähle einen Freund oder Raum	Choisissez un ami ou un salon	Seleziona un amico o una stanza
+ADD_FRIEND	Adicionar amigo	Add friend	Añadir amigo	Freund hinzufügen	Ajouter un ami	Aggiungi amico
+VOICE_MSG	Mensagem de voz	Voice message	Mensaje de voz	Sprachnachricht	Message vocal	Messaggio vocale
+RECORDING	Gravando... solte Y para enviar	Recording... release Y to send	Grabando... suelta Y para enviar	Aufnahme... Y loslassen zum Senden	Enregistrement... relâchez Y pour envoyer	Registrazione... rilascia Y per inviare
+NO_MIC	Microfone não encontrado	Microphone not found	Micrófono no encontrado	Mikrofon nicht gefunden	Microphone introuvable	Microfono non trovato
+SENT	Enviado	Sent	Enviado	Gesendet	Envoyé	Inviato
+PLAYING	Tocando...	Playing...	Reproduciendo...	Wiedergabe...	Lecture...	Riproduzione...
+TYPE_HERE	Digite sua mensagem...	Type your message...	Escribe tu mensaje...	Nachricht eingeben...	Écrivez votre message...	Scrivi il tuo messaggio...
+ASK_HERE	Digite sua pergunta...	Type your question...	Escribe tu pregunta...	Frage eingeben...	Écrivez votre question...	Scrivi la tua domanda...
+AI_INTRO	Pergunte sobre jogos, dicas, tutoriais ou apenas converse.	Ask about games, tips, tutorials or just chat.	Pregunta sobre juegos, trucos, tutoriales o solo charla.	Frag nach Spielen, Tipps, Anleitungen oder plaudere einfach.	Posez des questions sur les jeux, astuces, tutos ou discutez.	Chiedi di giochi, consigli, tutorial o semplicemente chiacchiera.
+AI_WARN	O Cast AI pode cometer erros. Confira informações importantes.	Cast AI can make mistakes. Check important information.	Cast AI puede cometer errores. Verifica la información importante.	Cast AI kann Fehler machen. Wichtige Infos prüfen.	Cast AI peut se tromper. Vérifiez les informations importantes.	Cast AI può sbagliare. Verifica le informazioni importanti.
+SHORTCUTS	ATALHOS	SHORTCUTS	ATAJOS	TASTEN	RACCOURCIS	SCORCIATOIE
+THINKING	Pensando...	Thinking...	Pensando...	Denke nach...	Réflexion...	Sto pensando...
+PING	Ping	Ping	Ping	Ping	Ping	Ping
+STATUS	Status	Status	Estado	Status	Statut	Stato
+SEND	ENVIAR	SEND	ENVIAR	SENDEN	ENVOYER	INVIA
+SPACE	ESPAÇO	SPACE	ESPACIO	LEERTASTE	ESPACE	SPAZIO
+ONLINE_ON	online	online	en línea	online	en ligne	online
+ONLINE_OFF	offline	offline	desconectado	offline	hors ligne	offline
+WELCOME	Bem-vindo	Welcome	Bienvenido	Willkommen	Bienvenue	Benvenuto
+CATEGORY	CATEGORIA	CATEGORY	CATEGORÍA	KATEGORIE	CATÉGORIE	CATEGORIA
+HOURS	h	h	h	Std	h	h
