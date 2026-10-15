@@ -42,7 +42,26 @@ void input_poll(input_t *in) {
     maple_device_t *kb = maple_enum_type(0, MAPLE_FUNC_KEYBOARD);
     in->kbd_char = 0;
     if (kb) {
-        int ch = kbd_queue_pop(kb, 1); if (ch > 0 && ch < 256) in->kbd_char = ch;
+        /* raw scancode + modifiers; translate only printable keys ourselves (xlat mode hands back
+         * raw codes for arrows, which collide with ASCII letters) */
+        int raw = kbd_queue_pop(kb, 0);
+        if (raw > 0) {
+            int key = raw & 0xFF, shift = (raw >> 8) & (KBD_MOD_LSHIFT | KBD_MOD_RSHIFT);
+            static const char digits[] = "1234567890", digits_sh[] = "!@#$%^&*()";
+            if (key >= KBD_KEY_A && key <= KBD_KEY_Z) in->kbd_char = (shift ? 'A' : 'a') + key - KBD_KEY_A;
+            else if (key >= KBD_KEY_1 && key <= KBD_KEY_0) in->kbd_char = (shift ? digits_sh : digits)[key - KBD_KEY_1];
+            else if (key == KBD_KEY_SPACE) in->kbd_char = ' ';
+            else if (key == KBD_KEY_ENTER) in->kbd_char = '\n';
+            else if (key == KBD_KEY_BACKSPACE) in->kbd_char = 8;
+            else if (key == KBD_KEY_ESCAPE) in->kbd_char = 27;
+            else if (key == KBD_KEY_MINUS) in->kbd_char = shift ? '_' : '-';
+            else if (key == KBD_KEY_PERIOD) in->kbd_char = shift ? '>' : '.';
+            else if (key == KBD_KEY_COMMA) in->kbd_char = shift ? '<' : ',';
+            else if (key == KBD_KEY_SLASH) in->kbd_char = shift ? '?' : '/';
+            else if (key == KBD_KEY_SEMICOLON) in->kbd_char = shift ? ':' : ';';
+            else if (key == KBD_KEY_PLUS) in->kbd_char = shift ? '+' : '=';
+            else if (key == KBD_KEY_QUOTE) in->kbd_char = shift ? '"' : '\'';
+        }
         kbd_state_t *ks = maple_dev_status(kb);
         if (ks) {
 #define KD(k) (ks->key_states[k].is_down)

@@ -376,8 +376,10 @@ static void settings_update(void) {
     }
     if (in.repeat & BTN_UP) sel_settings = (sel_settings + O_COUNT - 1) % O_COUNT;
     if (in.repeat & BTN_DOWN) sel_settings = (sel_settings + 1) % O_COUNT;
-    if (in.pressed & (BTN_A | BTN_RIGHT)) opt_change(sel_settings, 1);
-    if (in.pressed & BTN_LEFT) opt_change(sel_settings, -1);
+    int text_or_action = sel_settings == O_NICK || sel_settings == O_SERVER || opt_is_action(sel_settings);
+    if (in.pressed & BTN_A) opt_change(sel_settings, 1);
+    if ((in.pressed & BTN_RIGHT) && !text_or_action) opt_change(sel_settings, 1);
+    if ((in.pressed & BTN_LEFT) && !text_or_action) opt_change(sel_settings, -1);
     if (in.pressed & BTN_START) opt_change(O_SAVE, 1);
     if (in.pressed & BTN_B) { go(ST_BROWSE); list_rebuild_view(); browse_clamp(); }
     float ry = opt_row_y(sel_settings), vis = LIST_H - 24;

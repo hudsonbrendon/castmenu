@@ -67,7 +67,7 @@ void draw_hints(float cx, float cy, const char *hints, int alpha) {
         char *sp = strchr(items[i], ' '); int bl = sp ? sp - items[i] : (int)strlen(items[i]);
         char b[12] = { 0 }; memcpy(b, items[i], bl > 11 ? 11 : bl);
         float gw = bl == 1 && strchr("ABXY", b[0]) ? 20 : text_width(&g_font_small, b) + 14;
-        widths[i] = gw + 4 + text_width(&g_font_small, sp ? sp + 1 : "") + 16;
+        widths[i] = gw + 4 + text_width(&g_font_small, sp ? sp + 1 : "") + 12;
         total += widths[i];
     }
     float x = cx - total / 2;

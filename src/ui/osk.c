@@ -21,7 +21,7 @@ int osk_update(const input_t *in) {
     /* physical keyboard */
     if (in->kbd_char) {
         if (in->kbd_char == '\n' || in->kbd_char == '\r') { active = 0; return 1; }
-        if (in->kbd_char == 8) { if (len) buf[len - 1] = 0; }
+        if (in->kbd_char == 8) { if (len) buf[len - 1] = 0; else { active = 0; return -1; } }
         else if (in->kbd_char == 27) { active = 0; return -1; }
         else if (in->kbd_char >= 32 && len < cap - 1) { buf[len] = in->kbd_char; buf[len + 1] = 0; }
         return 0;   /* a typed character must not double as a mapped button (y = cancel, space = send) */
