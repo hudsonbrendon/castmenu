@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/brand/wordmark_1086.png" width="560" alt="Cast Menu"></p>
+
 # Cast Menu — menu aberto para GDEMU (Sega Dreamcast)
 
 [![build](https://github.com/hudsonbrendon/castmenu/actions/workflows/build.yml/badge.svg)](https://github.com/hudsonbrendon/castmenu/actions/workflows/build.yml)

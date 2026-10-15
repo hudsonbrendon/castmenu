@@ -109,7 +109,7 @@ void draw_background_tr(void) {
 void draw_logo(float x, float y, float size, int alpha) {
     theme_t *t = &g_theme;
     draw_glow(x + size / 2, y + size / 2, size * 1.1f, col_scale_alpha(t->glow, alpha / 255.0f));
-    if (t->logo_tex.ptr) { draw_tex(&t->logo_tex, x, y, size, size, ALPHA(0xFFFFFF, alpha)); return; }
+    if (t->logo_tex.ptr) { float g = size * 0.12f; draw_tex(&t->logo_tex, x - g, y - g, size + 2 * g, size + 2 * g, ALPHA(0xFFFFFF, alpha)); return; }
     draw_rect_round_grad(x, y, size, size, size / 4, ALPHA(col_lighten(t->accent, 0.2f), alpha), ALPHA(t->accent, alpha));
     draw_ring(x + size / 2, y + size / 2, size * 0.3f, ALPHA(0xFFFFFF, alpha));
     draw_circle(x + size / 2, y + size / 2, size * 0.09f, ALPHA(0xFFFFFF, alpha));

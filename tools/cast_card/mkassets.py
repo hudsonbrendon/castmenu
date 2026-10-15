@@ -16,11 +16,15 @@ def fonts():
     mkfont.build(TTF, 12, os.path.join(RD, "font", "ui_small"), "SemiBold")
     mkfont.build(TTF, 40, os.path.join(RD, "font", "ui_display"), "ExtraBold", atlas=(512, 512))
 
+BRAND = os.path.join(ROOT, "assets", "brand", "icon_transparent.png")
+
 def logo(path, size=64):
-    img = Image.new("RGBA", (size, size), (0, 0, 0, 0)); d = ImageDraw.Draw(img)
-    d.rounded_rectangle([0, 0, size - 1, size - 1], radius=size // 5, fill=(91, 140, 255, 255))
-    d.ellipse([size * 0.2, size * 0.2, size * 0.8, size * 0.8], outline=(255, 255, 255, 255), width=max(2, size // 12))
-    d.ellipse([size * 0.42, size * 0.42, size * 0.58, size * 0.58], fill=(255, 255, 255, 255))
+    """Brand icon (assets/brand) -> ARGB4444 .tex; falls back to a drawn placeholder."""
+    if os.path.exists(BRAND): img = Image.open(BRAND).convert("RGBA").resize((size, size), Image.LANCZOS)
+    else:
+        img = Image.new("RGBA", (size, size), (0, 0, 0, 0)); d = ImageDraw.Draw(img)
+        d.rounded_rectangle([0, 0, size - 1, size - 1], radius=size // 5, fill=(46, 200, 255, 255))
+        d.ellipse([size * 0.2, size * 0.2, size * 0.8, size * 0.8], outline=(255, 255, 255, 255), width=max(2, size // 12))
     with open(path, "wb") as f: f.write(tex.encode(img, "argb4444"))
 
 def theme_packs():
@@ -29,6 +33,7 @@ def theme_packs():
         d = os.path.join(ROOT, "themes", tid); os.makedirs(d, exist_ok=True)
         themes.write_ini(spec, os.path.join(d, "theme.ini"))
         themes.render_bg(spec).save(os.path.join(d, "bg.png"))
+        if os.path.exists(BRAND): Image.open(BRAND).convert("RGBA").resize((64, 64), Image.LANCZOS).save(os.path.join(d, "logo.png"))
     dd = os.path.join(RD, "themes", "default"); os.makedirs(dd, exist_ok=True)
     spec = dict(themes.THEMES["ocean"], name="Ocean")
     themes.write_ini(spec, os.path.join(dd, "theme.ini"))
@@ -36,12 +41,18 @@ def theme_packs():
     logo(os.path.join(dd, "logo.tex"))
 
 def vmu_icon():
-    """32x32 4-bit paletted icon as KOS vmu_pkg expects (ARGB4444 palette)."""
-    img = Image.new("P", (32, 32)); d = ImageDraw.Draw(img)
-    pal = [(0, 0, 0), (91, 140, 255), (255, 255, 255), (14, 15, 20)] + [(0, 0, 0)] * 12
-    img.putpalette(sum(pal, ()))
-    d.rounded_rectangle([1, 1, 30, 30], radius=6, fill=1)
-    d.ellipse([7, 7, 24, 24], outline=2, width=3); d.ellipse([13, 13, 18, 18], fill=2)
+    """32x32 4-bit paletted icon as KOS vmu_pkg expects (ARGB4444 palette): brand icon on navy."""
+    bg = (7, 37, 63)
+    if os.path.exists(BRAND):
+        src = Image.open(BRAND).convert("RGBA").resize((28, 28), Image.LANCZOS)
+        canvas = Image.new("RGB", (32, 32), bg); canvas.paste(src, (2, 2), src)
+        img = canvas.quantize(colors=16, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
+        pal = [tuple(img.getpalette()[i * 3:i * 3 + 3]) for i in range(16)]
+    else:
+        img = Image.new("P", (32, 32)); d = ImageDraw.Draw(img)
+        pal = [bg, (46, 200, 255), (255, 255, 255), (14, 15, 20)] + [(0, 0, 0)] * 12
+        img.putpalette(sum(pal, ()))
+        d.rounded_rectangle([1, 1, 30, 30], radius=6, fill=1); d.ellipse([7, 7, 24, 24], outline=2, width=3)
     px = img.tobytes()
     data = bytes((px[i] << 4) | px[i + 1] for i in range(0, 1024, 2))
     pal16 = [0xF000 | (r >> 4) << 8 | (g >> 4) << 4 | (b >> 4) for (r, g, b) in pal]
