@@ -33,7 +33,16 @@ def scan(sd):
         try:
             info = disc.read_image(img)
         except Exception as e:
-            items.append(dict(slot=n, folder=folder, error=str(e))); continue
+            # unreadable image (odd CDI layout): still list it, from name.txt/serial.txt, so GDEMU can boot it
+            nt, st = os.path.join(folder, "name.txt"), os.path.join(folder, "serial.txt")
+            if os.path.exists(nt):
+                title = open(nt, encoding="utf-8", errors="replace").read().strip() or os.path.basename(folder)
+                serial = open(st).read().strip() if os.path.exists(st) else ""
+                items.append(dict(slot=n, folder=folder, image=img, ip=ipbin.fallback(title, serial), cover=None, name=title, warning=str(e)))
+                print(f"  !! {os.path.basename(folder)}: {e} (listed from name.txt)")
+            else:
+                items.append(dict(slot=n, folder=folder, error=str(e)))
+            continue
         title = info.ip.name
         nt = os.path.join(folder, "name.txt")
         if os.path.exists(nt):
@@ -63,7 +72,7 @@ def list_ini(items, menu_name="CASTMENU", server=None):
 
 def write_meta(items):
     for it in items:
-        if "error" in it: continue
+        if "error" in it or "warning" in it: continue
         with open(os.path.join(it["folder"], "name.txt"), "w", encoding="utf-8") as f: f.write(it["name"])
         with open(os.path.join(it["folder"], "serial.txt"), "w") as f: f.write(it["ip"].product)
 

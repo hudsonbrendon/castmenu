@@ -58,7 +58,9 @@ def _find_sig(path, chunk=32 << 20):
                 abs_pos = base - len(tail) + pos
                 for ss, doff in ((2048, 0), (2352, 16), (2336, 8), (2352, 24)):
                     if (abs_pos - doff) % ss == 0: return abs_pos, ss, doff
-                pos = buf.find(SIG, pos + 1)
+                # sessions before the data track may use other sector sizes, so the track is not
+                # aligned to the file start; the header sector alone is enough for IP.BIN fields
+                return abs_pos, 2352, 16
             tail = buf[-len(SIG):]; base += len(data)
     return -1, 0, 0
 

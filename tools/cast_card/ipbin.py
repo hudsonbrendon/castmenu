@@ -39,3 +39,11 @@ def patch(template: bytes, *, name="CASTMENU", product="T0000", version="V1.000"
     # region text blocks at 0x3700.. ("For JAPAN,TAIWAN,PHILIPINES." etc.) are left as-is: they are
     # only used by the BIOS when the area symbols above are set.
     return bytes(d)
+
+
+def fallback(name, product=""):
+    """Minimal IP.BIN record for images we cannot read (listed from name.txt)."""
+    class _IP: pass
+    ip = _IP(); ip.name = name[:64]; ip.product = product.replace(" ", "").replace("-", "")[:10]; ip.region = "JUE"; ip.disc = "1/1"
+    ip.version = "V1.000"; ip.date = "19990909"; ip.vga = True; ip.is_gd = False; ip.disc_num = "1"; ip.disc_total = "1"
+    return ip
