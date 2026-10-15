@@ -44,15 +44,22 @@ def read_gdi(gdi_path):
         if cover: break
     return DiscInfo(gdi_path, "gdi", ipbin.parse(ip), cover)
 
-def _find_sig(path, limit=64 << 20):
-    """Locate the first IP.BIN signature at a plausible sector boundary."""
+def _find_sig(path, chunk=32 << 20):
+    """Locate the first IP.BIN signature at a plausible sector boundary. Scans the whole
+    file in chunks (DiscJuggler images put the data track after the audio session, hundreds of MB in)."""
     with open(path, "rb") as f:
-        data = f.read(limit)
-    pos = data.find(SIG)
-    while pos >= 0:
-        for ss, doff in ((2048, 0), (2352, 16), (2336, 8), (2352, 24)):
-            if (pos - doff) % ss == 0: return pos, ss, doff
-        pos = data.find(SIG, pos + 1)
+        base = 0; tail = b""
+        while True:
+            data = f.read(chunk)
+            if not data: break
+            buf = tail + data
+            pos = buf.find(SIG)
+            while pos >= 0:
+                abs_pos = base - len(tail) + pos
+                for ss, doff in ((2048, 0), (2352, 16), (2336, 8), (2352, 24)):
+                    if (abs_pos - doff) % ss == 0: return abs_pos, ss, doff
+                pos = buf.find(SIG, pos + 1)
+            tail = buf[-len(SIG):]; base += len(data)
     return -1, 0, 0
 
 def read_cdi_or_iso(path):
