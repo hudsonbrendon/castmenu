@@ -20,12 +20,14 @@ _stage2:
     mov.l   bss_end, r2
     sub     r0, r2
     shlr2   r2
+    tst     r2, r2             ! empty .bss: skip (dt on 0 would wrap and wipe all of RAM)
+    bt      2f
     mov     #0, r1
-1:  dt      r2
-    mov.l   r1, @r0
+1:  mov.l   r1, @r0
+    dt      r2
     bf/s    1b
     add     #4, r0
-    mov.l   stack_top, r15
+2:  mov.l   stack_top, r15
     mov.l   main_addr, r0
     jmp     @r0
     nop
