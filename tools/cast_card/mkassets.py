@@ -7,14 +7,14 @@ from PIL import Image, ImageDraw
 
 ROOT = os.path.join(os.path.dirname(__file__), "..", "..")
 RD = os.path.join(ROOT, "assets", "romdisk")
-TTF = os.path.join(ROOT, "assets", "fonts", "Inter.ttf")
+TTF = os.path.join(ROOT, "assets", "fonts", "Dreamcast.ttf")   # NiseSegaDreamcast, the Dreamcast logotype lookalike
 
 def fonts():
     os.makedirs(os.path.join(RD, "font"), exist_ok=True)
-    mkfont.build(TTF, 16, os.path.join(RD, "font", "ui"), "Medium")
-    mkfont.build(TTF, 24, os.path.join(RD, "font", "ui_big"), "Bold")
-    mkfont.build(TTF, 12, os.path.join(RD, "font", "ui_small"), "SemiBold")
-    mkfont.build(TTF, 40, os.path.join(RD, "font", "ui_display"), "ExtraBold", atlas=(512, 512))
+    mkfont.build(TTF, 17, os.path.join(RD, "font", "ui"), stroke=0)
+    mkfont.build(TTF, 25, os.path.join(RD, "font", "ui_big"), stroke=1)
+    mkfont.build(TTF, 13, os.path.join(RD, "font", "ui_small"), stroke=0)
+    mkfont.build(TTF, 42, os.path.join(RD, "font", "ui_display"), stroke=1, atlas=(512, 512))
 
 BRAND = os.path.join(ROOT, "assets", "brand", "icon_transparent.png")
 
@@ -35,14 +35,14 @@ def theme_packs():
         themes.render_bg(spec).save(os.path.join(d, "bg.png"))
         if os.path.exists(BRAND): Image.open(BRAND).convert("RGBA").resize((64, 64), Image.LANCZOS).save(os.path.join(d, "logo.png"))
     dd = os.path.join(RD, "themes", "default"); os.makedirs(dd, exist_ok=True)
-    spec = dict(themes.THEMES["ocean"], name="Ocean")
+    spec = dict(themes.THEMES["dreamcast"], name="Dreamcast")
     themes.write_ini(spec, os.path.join(dd, "theme.ini"))
     with open(os.path.join(dd, "bg.tex"), "wb") as f: f.write(tex.encode(themes.render_bg(spec).resize((512, 512)), "rgb565"))
     logo(os.path.join(dd, "logo.tex"))
 
 def vmu_icon():
     """32x32 4-bit paletted icon as KOS vmu_pkg expects (ARGB4444 palette): brand icon on navy."""
-    bg = (7, 37, 63)
+    bg = (242, 242, 239)
     if os.path.exists(BRAND):
         src = Image.open(BRAND).convert("RGBA").resize((28, 28), Image.LANCZOS)
         canvas = Image.new("RGB", (32, 32), bg); canvas.paste(src, (2, 2), src)

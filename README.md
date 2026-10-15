@@ -11,7 +11,8 @@ elegante e fluido, lista e grade, **categorias inteligentes** (gênero e platafo
 CPS1/CPS2, Neo Geo CD, Ports e Homebrew), **detalhes com sinopse**, **perfil com avatar**,
 **sidebar de últimos jogados com tempo de jogo**, **Cast Chat** (salas, amigos, mensagens privadas
 e **de voz** pelo microfone do Dreamcast), **Cast AI** (perguntas por texto ou voz), **6 idiomas**
-(pt, en, es, de, fr, it), temas Ocean / Night / Classic e mais, relógio e sinal de rede, e um
+(pt, en, es, de, fr, it), visual com as cores do controle do Dreamcast (temas Dreamcast, Dreamcast Dark,
+Controller e mais), tipografia do logotipo Dreamcast, relógio e sinal de rede, e um
 **bootloader aberto** com Region Free, Force VGA, In-Game Reset, pular animação de boot e tela SEGA.
 
 Compatível com cartões já montados pelo GDMENU Card Manager (`LIST.INI`) e com a ferramenta
@@ -32,10 +33,10 @@ No Cast Chat: **X** escrever · **Y** segurar para gravar voz · **L/R** salas /
 | | |
 |---|---|
 | ![coverflow](docs/screenshots/coverflow.png) | ![detalhes](docs/screenshots/details.png) |
-| ![últimos jogados](docs/screenshots/sidebar.png) | ![categorias](docs/screenshots/category.png) |
-| ![ajustes](docs/screenshots/settings.png) | ![teclado](docs/screenshots/osk.png) |
-| ![Cast Chat](docs/screenshots/chat.png) | ![Cast AI](docs/screenshots/ai.png) |
+| ![últimos jogados](docs/screenshots/sidebar.png) | ![ajustes](docs/screenshots/settings.png) |
 | ![lista](docs/screenshots/list.png) | ![grade](docs/screenshots/grid.png) |
+| ![sistema](docs/screenshots/sysinfo.png) | ![Cast Chat](docs/screenshots/chat.png) |
+| ![tema Controller](docs/screenshots/theme-controller.png) | ![tema Dreamcast Dark](docs/screenshots/theme-dreamcast-dark.png) |
 
 Mais em `docs/screenshots/` (capturas do redream).
 

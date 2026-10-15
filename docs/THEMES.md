@@ -45,6 +45,8 @@ orbs=1              ; drifting glow orbs on the background
 vignette=90         ; 0..255 edge darkening
 ```
 
-Nine themes ship in `themes/`: ocean (default, embedded), night, classic, cast-dark, cast-light,
-dreamcast, synthwave, terminal, sega-blue. `tools/cast_card/themes.py` generates their backgrounds;
+Eight themes ship in `themes/`: dreamcast (default, embedded: console shell white, swirl orange,
+logotype grey), dreamcast-dark, controller, ocean, night, synthwave, terminal, sega-blue. Every theme
+keeps the region/format badges and the button glyphs on the real controller colours: `badge_j` = A red,
+`badge_u` = B blue, `badge_e` = Y green, `badge_gd` = X yellow (`tools/cast_card/themes.py`, `BUTTONS`). `tools/cast_card/themes.py` generates their backgrounds;
 edit the PNGs freely.

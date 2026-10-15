@@ -21,11 +21,11 @@ uint32_t parse_color(const char *s) {
 static void defaults(void) {
     theme_t *t = &g_theme;
     memset(t, 0, sizeof *t);
-    strcpy(t->id, "default"); strcpy(t->name, "Ocean"); strcpy(t->author, "Cast Menu");
-    t->bg = 0xFF07253F; t->panel = 0xCC0B3558; t->panel_alt = 0xCC12456E; t->accent = 0xFF2EC8FF; t->accent_dim = 0xFF1A6E99;
-    t->text = 0xFFE6F4FF; t->text_dim = 0xFF8FBAD6; t->text_hi = 0xFFFFFFFF; t->sel_bg = 0xFF2EC8FF; t->sel_text = 0xFF04203A;
-    t->badge_j = 0xFFE54B4B; t->badge_u = 0xFF3B82F6; t->badge_e = 0xFF22C55E; t->badge_gd = 0xFFF59E0B; t->badge_cd = 0xFF64748B; t->shadow = 0x80000000; t->accent2 = 0xFF7EF2E0; t->glow = 0x8020B8FF;
-    t->layout = 0; t->panel_radius = 8; t->bg_dim = 0; t->cover_frame = 1; t->font_scale = 100; t->orbs = 1; t->vignette = 90;
+    strcpy(t->id, "default"); strcpy(t->name, "Dreamcast"); strcpy(t->author, "Cast Menu");
+    t->bg = 0xFFF2F2EF; t->panel = 0xE6FFFFFF; t->panel_alt = 0xE6ECECE8; t->accent = 0xFFF26522; t->accent_dim = 0xFFF9CDB3;
+    t->text = 0xFF3A3A3C; t->text_dim = 0xFF8A8C8E; t->text_hi = 0xFF1A1A1C; t->sel_bg = 0xFFF26522; t->sel_text = 0xFFFFFFFF;
+    t->badge_j = 0xFFE23D3D; t->badge_u = 0xFF2D6BD1; t->badge_e = 0xFF3DB55A; t->badge_gd = 0xFFF2C229; t->badge_cd = 0xFF8A8C8E; t->shadow = 0x28000000; t->accent2 = 0xFF2D6BD1; t->glow = 0x40F26522;
+    t->layout = 0; t->panel_radius = 8; t->bg_dim = 0; t->cover_frame = 1; t->font_scale = 100; t->orbs = 1; t->vignette = 20;
 }
 
 static int cb(void *u, const char *sec, const char *k, const char *v) {
@@ -57,6 +57,8 @@ int theme_scan(void) {
         }
         fs_close(d);
     }
+    /* keep the order stable: default first, then alphabetical */
+    for (int i = 2; i < n_ids; i++) for (int j = i; j > 1 && strcmp(ids[j - 1], ids[j]) > 0; j--) { char tmp[THEME_ID_LEN]; strcpy(tmp, ids[j]); strcpy(ids[j], ids[j - 1]); strcpy(ids[j - 1], tmp); }
     return n_ids;
 }
 const char *theme_id(int i) { return (i >= 0 && i < n_ids) ? ids[i] : "default"; }

@@ -4,7 +4,8 @@ import struct
 from PIL import Image, ImageDraw, ImageFont
 from . import tex
 
-def build(ttf, px, out_base, weight="Regular", atlas=(512, 256)):
+def build(ttf, px, out_base, weight="Regular", atlas=(512, 256), stroke=0):
+    """stroke: extra outline width in px (fake bold for single-weight fonts)."""
     font = ImageFont.truetype(ttf, px)
     try: font.set_variation_by_name(weight)
     except Exception: pass
@@ -17,14 +18,14 @@ def build(ttf, px, out_base, weight="Regular", atlas=(512, 256)):
     recs = []
     for code in range(32, 256):
         ch = chr(code)
-        bbox = font.getbbox(ch, anchor="ls")  # baseline-left
-        adv = max(1, round(font.getlength(ch)))
+        bbox = font.getbbox(ch, anchor="ls", stroke_width=stroke)  # baseline-left
+        adv = max(1, round(font.getlength(ch)) + stroke)
         if bbox is None or bbox[2] <= bbox[0] or bbox[3] <= bbox[1]:
             recs.append((0, 0, 0, 0, 0, 0, adv)); continue
         gw, gh = bbox[2] - bbox[0], bbox[3] - bbox[1]
         if x + gw + pad > atlas[0]: x = pad; y += row_h + pad; row_h = 0
         if y + gh + pad > atlas[1]: raise SystemExit(f"atlas too small for {px}px")
-        draw.text((x - bbox[0], y - bbox[1]), ch, font=font, fill=(255, 255, 255, 255), anchor="ls")
+        draw.text((x - bbox[0], y - bbox[1]), ch, font=font, fill=(255, 255, 255, 255), anchor="ls", stroke_width=stroke, stroke_fill=(255, 255, 255, 255))
         recs.append((x, y, gw, gh, bbox[0], ascent + bbox[1], adv))
         x += gw + pad; row_h = max(row_h, gh)
     with open(out_base + ".tex", "wb") as f: f.write(tex.encode(atlas_img, "argb4444"))

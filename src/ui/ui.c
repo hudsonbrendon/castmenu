@@ -67,10 +67,9 @@ void ui_boot_progress(int pct, const char *msg) {
     float pulse = 0.5f + 0.5f * sinf(ui_t * 3);
     draw_glow(SCREEN_W / 2, 170, 150 + 30 * pulse, col_scale_alpha(t->glow, 0.8f));
     draw_ring(SCREEN_W / 2, 170, 70 + 10 * pulse, ALPHA(t->accent, 60)); draw_ring(SCREEN_W / 2, 170, 52, ALPHA(t->accent, 90));
-    draw_logo(SCREEN_W / 2 - 36, 134, 72, 255);
-    float w1 = text_width(&g_font_display, "Cast"), w2 = text_width(&g_font_display, "Menu");
-    draw_text_shadow(&g_font_display, SCREEN_W / 2 - (w1 + w2 + 12) / 2, 228, t->text_hi, ALPHA(0x000000, 120), "Cast");
-    draw_text_shadow(&g_font_display, SCREEN_W / 2 - (w1 + w2 + 12) / 2 + w1 + 12, 228, t->accent, ALPHA(0x000000, 120), "Menu");
+    /* controller lockup: swirl on top, name below in logotype grey */
+    draw_logo(SCREEN_W / 2 - 44, 118, 88, 255);
+    draw_text_shadow(&g_font_display, SCREEN_W / 2 - text_width(&g_font_display, "Cast Menu") / 2, 228, t->text_dim, ALPHA(t->text_hi, 60), "Cast Menu");
     draw_text_spaced(&g_font_small, SCREEN_W / 2 - text_width_spaced(&g_font_small, 2, tr(S_READING_LIST)) / 2, 284, 2, t->text_dim, tr(S_READING_LIST));
     float bx = 170, by = 312, bw = 300, f = clampf(pct / 100.0f, 0, 1);
     draw_rect_round(bx, by, bw, 8, 4, ALPHA(t->panel_alt, 255));
@@ -191,7 +190,7 @@ static void draw_grid(void) {
         draw_clear_clip(); draw_set_clip(cx0, cy0, cw, ch);
         draw_rect_round_outline(cx, cy, cs, cs, 8, sel ? t->accent : ALPHA(t->text_hi, 18));
         draw_set_clip((int)cx, (int)cy, (int)cs, (int)cs);
-        draw_text_clipped(&g_font_small, cx + 8, cy + cs - 24, cs - 16, sel ? t->text_hi : t->text, g->name);
+        draw_text_clipped(&g_font_small, cx + 8, cy + cs - 24, cs - 16, sel ? 0xFFFFFFFF : ALPHA(0xFFFFFF, 220), g->name); /* caption sits on a dark gradient in every theme */
         draw_clear_clip(); draw_set_clip(cx0, cy0, cw, ch);
         float bx = cx + 6;
         for (const char *r = g->region; *r; r++) { char s[2] = { *r, 0 }; draw_badge(bx, cy + 6, *r == 'J' ? t->badge_j : *r == 'U' ? t->badge_u : t->badge_e, s); bx += 20; }
@@ -491,8 +490,7 @@ static void sysinfo_draw(void) {
     panel(24, ay, SCREEN_W - 48, ah);
     draw_glow(SCREEN_W - 90, ay + ah / 2, 120, col_scale_alpha(t->glow, 0.5f));
     draw_logo(40, ay + 18, 44, 255);
-    draw_text(&g_font_big, 96, ay + 14, t->text_hi, "Cast");
-    draw_text(&g_font_big, 96 + text_width(&g_font_big, "Cast") + 6, ay + 14, t->accent, "Menu");
+    draw_text(&g_font_big, 96, ay + 14, t->text_dim, "Cast Menu");
     draw_text(&g_font_small, 96 + text_width(&g_font_big, "Cast Menu") + 16, ay + 24, t->accent, "v" CAST_VERSION);
     draw_text(&g_font_small, 96, ay + 44, t->text_dim, "Menu aberto para GDEMU. MIT. github.com/hudsonbrendon/castmenu");
     draw_text(&g_font_small, 96, ay + 60, ALPHA(t->text_dim, 170), "neuroacid (GDMENU) \xb7 Deunan (GDEMU) \xb7 KallistiOS \xb7 megavolt85 \xb7 mrneo240");

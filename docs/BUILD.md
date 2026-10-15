@@ -33,7 +33,7 @@ src/loader/     bridge that hands over to the loader
 ldr/            open bootloader (no OS), linked at 0x8CE00000
 tools/cast_card/  PC tool (Python)
 themes/         editable theme packs
-assets/         fonts (Inter, OFL) + generated romdisk
+assets/         fonts (Dreamcast.ttf = NiseSegaDreamcast, free fan font; Inter, OFL) + brand + generated romdisk
 docs/           this folder; REVERSE_ENGINEERING.md has the evidence trail
 ```
 

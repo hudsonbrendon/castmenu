@@ -42,7 +42,8 @@ void details_draw(void) {
     /* header: cover + facts */
     draw_cover(cur, x + 20, y + 48, 112, 0);
     float fx = x + 150, fy = y + 46;
-    draw_text_clipped(&g_font_big, fx, fy, w - 170, t->text_hi, cur->name); fy += 30;
+    float bw = strlen(cur->region) * 22 + 34 + (cur->vga ? 42 : 0) + (cur->disc[0] ? 46 : 0);
+    draw_text_clipped(&g_font_big, fx, fy, w - 170 - bw - 10, t->text_hi, cur->name); fy += 30;
     char year[8], d[16], regions[48] = "", pt[24], discs[4];
     fmt_date(cur, d, sizeof d);
     snprintf(year, sizeof year, "%s", cur->year[0] ? cur->year : strlen(cur->date) == 8 ? (char[]){ cur->date[0], cur->date[1], cur->date[2], cur->date[3], 0 } : "-");
@@ -58,7 +59,7 @@ void details_draw(void) {
         draw_text(&g_font_small, fx + 110, fy + 2, t->text, rows[i].v);
         fy += 17;
     }
-    region_badges(fx + 240, y + 48, cur);
+    region_badges(x + w - 20 - bw, y + 48, cur);
     if (cur->favorite) draw_text(&g_font, x + w - 34, y + 44, 0xFFFFD166, "\x2a");
     /* synopsis */
     float sy = y + 172;

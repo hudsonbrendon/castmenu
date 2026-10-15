@@ -1,2 +1,2 @@
 #pragma once
-#define CAST_VERSION "0.1.0"
+#define CAST_VERSION "0.2.0"

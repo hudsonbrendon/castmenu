@@ -38,7 +38,8 @@ void hairline(float x, float y, float w) {
 
 /* Dreamcast button glyphs: A red, B blue, X yellow, Y green. */
 uint32_t button_color(const char *b) {
-    switch (b[0]) { case 'A': return 0xFFE0453F; case 'B': return 0xFF3B7BE0; case 'X': return 0xFFE8C13A; case 'Y': return 0xFF3FBF5A; default: return ALPHA(g_theme.text_dim, 255); }
+    /* real controller colours, shared with the region badges: A red, B blue, X yellow, Y green */
+    switch (b[0]) { case 'A': return ALPHA(g_theme.badge_j, 255); case 'B': return ALPHA(g_theme.badge_u, 255); case 'X': return ALPHA(g_theme.badge_gd, 255); case 'Y': return ALPHA(g_theme.badge_e, 255); default: return ALPHA(g_theme.text_dim, 255); }
 }
 float draw_button_glyph(float x, float cy, const char *b, int alpha) {
     int round_btn = strlen(b) == 1 && strchr("ABXY", b[0]);
@@ -108,8 +109,8 @@ void draw_background_tr(void) {
 }
 void draw_logo(float x, float y, float size, int alpha) {
     theme_t *t = &g_theme;
+    if (t->logo_tex.ptr) { float g = size * 0.06f; draw_tex(&t->logo_tex, x - g, y - g, size + 2 * g, size + 2 * g, ALPHA(0xFFFFFF, alpha)); return; }
     draw_glow(x + size / 2, y + size / 2, size * 1.1f, col_scale_alpha(t->glow, alpha / 255.0f));
-    if (t->logo_tex.ptr) { float g = size * 0.12f; draw_tex(&t->logo_tex, x - g, y - g, size + 2 * g, size + 2 * g, ALPHA(0xFFFFFF, alpha)); return; }
     draw_rect_round_grad(x, y, size, size, size / 4, ALPHA(col_lighten(t->accent, 0.2f), alpha), ALPHA(t->accent, alpha));
     draw_ring(x + size / 2, y + size / 2, size * 0.3f, ALPHA(0xFFFFFF, alpha));
     draw_circle(x + size / 2, y + size / 2, size * 0.09f, ALPHA(0xFFFFFF, alpha));
@@ -117,9 +118,7 @@ void draw_logo(float x, float y, float size, int alpha) {
 void draw_wordmark(float x, float y, int alpha) {
     theme_t *t = &g_theme;
     draw_logo(x, y, 32, alpha);
-    draw_text_shadow(&g_font_big, x + 42, y + 2, ALPHA(t->text_hi, alpha), ALPHA(0x000000, alpha / 3), "Cast");
-    float w = text_width(&g_font_big, "Cast");
-    draw_text_shadow(&g_font_big, x + 42 + w + 6, y + 2, ALPHA(t->accent, alpha), ALPHA(0x000000, alpha / 3), "Menu");
+    draw_text_shadow(&g_font_big, x + 42, y + 2, ALPHA(t->text_dim, alpha), ALPHA(t->text_hi, alpha / 5), "Cast Menu");
 }
 void draw_avatar(float x, float y, float size) {
     theme_t *t = &g_theme;
@@ -160,7 +159,7 @@ void draw_topbar(const char *title, const char *subtitle) {
     theme_t *t = &g_theme;
     draw_rect_grad(0, 0, SCREEN_W, 64, ALPHA(t->bg, 200), ALPHA(t->bg, 0));
     draw_logo(24, 12, 32, 255);
-    draw_text_spaced(&g_font_small, 66, 10, 2.0f, t->accent, "CAST MENU");
+    draw_text_spaced(&g_font_small, 66, 10, 2.0f, t->text_dim, "CAST MENU");
     draw_text_shadow(&g_font_big, 66, 22, t->text_hi, ALPHA(0x000000, 90), title);
     if (subtitle) draw_text(&g_font_small, 66 + text_width(&g_font_big, title) + 12, 30, t->text_dim, subtitle);
 }
