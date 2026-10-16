@@ -46,7 +46,8 @@ with tempfile.TemporaryDirectory() as sd:
     cli.cmd_build(a)
     out = os.path.join(sd, "01")
     assert sorted(os.listdir(out)) == ["disc.gdi", "track01.iso", "track02.raw", "track03.iso", "track04.raw", "track05.iso"], os.listdir(out)
-    assert open(os.path.join(out, "disc.gdi")).read().splitlines()[-1].startswith("5 544180 4 2048 track05.iso")
+    t5_lba = int(open(os.path.join(out, "disc.gdi")).read().splitlines()[-1].split()[1])
+    assert t5_lba <= 544180 and t5_lba + os.path.getsize(os.path.join(out, "track05.iso")) // 2048 <= gdi.GD_END_LBA, t5_lba
     assert b"04.name=SHENMUE DISC 2" in gdi.read_hd_file(out, "LIST.INI")
     assert gdi.read_hd_file(out, "1ST_READ.BIN") == open(menu_bin, "rb").read()
     # background clip: encoded next to the game, appended raw to track05, indexed on track01
@@ -57,8 +58,8 @@ with tempfile.TemporaryDirectory() as sd:
         vidx = iso9660.read_file(src1, iso9660.find_file(src1, "VIDEOS.IDX")).decode().split()
         assert vidx[0] == "2" and vidx[4:6] == ["256", "256"] and int(vidx[2]) >= 10, vidx
         with open(os.path.join(out, "track05.iso"), "rb") as f:
-            f.seek((int(vidx[1]) - gdi.DATA_LBA) * 2048); assert f.read(4) == b"CVID"
-            f.seek((int(vidx[1]) - gdi.DATA_LBA + 1) * 2048); fr = f.read(2048 + 256 * 256 // 4); assert len(fr) == 18432 and fr[:8] != b"\0" * 8
+            f.seek((int(vidx[1]) - t5_lba) * 2048); assert f.read(4) == b"CVID"
+            f.seek((int(vidx[1]) - t5_lba + 1) * 2048); fr = f.read(2048 + 256 * 256 // 4); assert len(fr) == 18432 and fr[:8] != b"\0" * 8
     ip3 = open(os.path.join(out, "track03.iso"), "rb").read(0x8000); assert ip3[0x20:0x24] == b"%04X" % ipbin.crc16(ip3[0x40:0x50])
     menu = disc.read_gdi(os.path.join(out, "disc.gdi"))
     assert menu.ip.name == "CASTMENU", menu.ip

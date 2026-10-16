@@ -56,6 +56,19 @@ def fetch_covers(items, kind="Named_Boxarts", force=False, log=print):
             log(f"  !! {it['slot']:03d} {it['name']}: {e}")
     return n
 
+def trim(path, seconds=20):
+    """Keep only the window cvm.encode will use (35 % in, stream copy): a 50 MB download becomes ~1 MB on the card."""
+    import subprocess, tempfile, shutil
+    from . import cvm
+    dur = cvm.duration(path)
+    if dur <= 30: return
+    start = max(0, min(dur * 0.35, dur - seconds))
+    tmp = tempfile.mktemp(suffix=".mp4")
+    r = subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(start), "-i", path, "-t", str(seconds), "-an", "-c", "copy", "-movflags", "+faststart", tmp], capture_output=True)
+    if r.returncode == 0 and os.path.getsize(tmp) > 10000:
+        os.remove(path); shutil.move(tmp, os.path.join(os.path.dirname(path), "video.mp4"))
+    elif os.path.exists(tmp): os.remove(tmp)
+
 def fetch_videos(items, force=False, log=print):
     """yt-dlp: first YouTube hit for '<title> dreamcast gameplay', a short section from ~40 s in."""
     import shutil, subprocess
@@ -74,7 +87,9 @@ def fetch_videos(items, force=False, log=print):
                    f"{search}:{q} dreamcast gameplay", "--match-filter", f"duration<{maxdur} & duration>60", "--max-downloads", "1",
                    "-f", "bv*[height<=360][ext=mp4]/bv*[height<=360]/b[height<=360]/b/18", "--force-overwrites", "-o", out]
             r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)   # exit 101 = max-downloads reached (fine)
-            return cvm.find_video(it["folder"]), (r.stderr or "").strip()[-160:]
+            got = cvm.find_video(it["folder"])
+            if got: trim(got)
+            return got, (r.stderr or "").strip()[-160:]
         try:
             got, err = grab("ytsearch6", 900)
             if not got: got, err = grab("ytsearch10", 2400)
