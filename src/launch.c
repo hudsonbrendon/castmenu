@@ -28,18 +28,26 @@ void launch_exit_to_bios(void) {
     __builtin_unreachable();
 }
 
-void launch_game(const game_t *g) {
+void launch_prepare(const game_t *g) {
     video_stop();
     settings_t *s = settings_get();
     s->last_slot = g->slot; settings_push_recent(g->slot); settings_mark_launch(g->slot, (uint32_t)rtc_unix_secs()); settings_save();
+}
+void launch_mount(const game_t *g) { gdemu_img_set(g->slot); }
+void launch_boot(const game_t *g) {
+    settings_t *s = settings_get();
     loader_params_t p = {
         .region_free = s->region_free, .force_vga = s->force_vga, .igr = s->igr,
         .boot_intro = s->boot_intro, .sega_license = s->sega_license,
         .game_region = g->region[0] == 'J' ? 0 : g->region[0] == 'U' ? 1 : 2,
         .disc_type = g->is_gd, .menu_slot = 1,
     };
-    gdemu_img_set(g->slot);
-    thd_sleep(600);   /* give GDEMU time to mount the new image before the BIOS re-reads the TOC */
     if (s->loader_kind == 1) launch_with_gdmenu_loader(&p);   /* falls through to the open loader if missing */
     loader_run(&p);
+}
+void launch_game(const game_t *g) {
+    launch_prepare(g);
+    launch_mount(g);
+    thd_sleep(600);   /* give GDEMU time to mount the new image before the BIOS re-reads the TOC */
+    launch_boot(g);
 }

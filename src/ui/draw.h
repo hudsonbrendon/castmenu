@@ -64,6 +64,8 @@ void draw_tex_reflect(const texture_t *t, float x, float y, float w, float h, ui
 /* arbitrary quads (perspective covers). xy = 8 floats: tl, tr, bl, br. No clipping. */
 void draw_tex_pts(const texture_t *t, const float *xy, float u0, float v0, float u1, float v1, uint32_t tl, uint32_t tr, uint32_t bl, uint32_t br);
 void draw_rect_pts(const float *xy, uint32_t tl, uint32_t tr, uint32_t bl, uint32_t br);
+/* textured disc: the whole image mapped onto a circle of radius r, rotated by angle (rad) */
+void draw_tex_fan(const texture_t *t, float cx, float cy, float r, float angle, uint32_t tint);
 
 /* text */
 void draw_text(const font_t *f, float x, float y, uint32_t argb, const char *s);

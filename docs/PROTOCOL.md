@@ -33,7 +33,11 @@ the menu itself and is hidden.
 
 ## Launch sequence
 
-1. `gdemu_img_set(slot)` → wait ~250 ms.
+The menu plays a 3 s animation (`src/ui/launch_scene.c`: top view of a Dreamcast, lid opens,
+the game's cover floats in as the disc label, seats and spins, progress bar) and fires the real
+work behind it: settings save at 0.35 s (screen is black), image switch at 2.2 s, loader at 3.0 s.
+
+1. `gdemu_img_set(slot)` → wait ≥ 600 ms (the animation covers it).
 2. Write `loader_params_t` (8 × u32) at `0x8CCFFF00`.
 3. Copy `cast_ldr.bin` to `0x8CE00000`, flush caches, jump through the P2 alias.
 4. Loader restores the BIOS RAM image, patches it and re-enters the BIOS boot

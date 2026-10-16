@@ -2,7 +2,7 @@
 Run from repo root (build.sh does it)."""
 import os, sys, struct
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
-from tools.cast_card import mkfont, tex, themes
+from tools.cast_card import mkfont, tex, themes, mkconsole
 from PIL import Image, ImageDraw
 
 ROOT = os.path.join(os.path.dirname(__file__), "..", "..")
@@ -62,5 +62,5 @@ def vmu_icon():
         f.write("uint8_t cast_vmu_icon[512] = {" + ",".join(str(b) for b in data) + "};\n")
 
 if __name__ == "__main__":
-    fonts(); theme_packs(); vmu_icon()
+    fonts(); theme_packs(); vmu_icon(); mkconsole.build(os.path.join(RD, "console"))
     print("assets ok")

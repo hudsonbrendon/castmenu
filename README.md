@@ -19,7 +19,7 @@ Compatível com cartões já montados pelo GDMENU Card Manager (`LIST.INI`) e co
 própria `cast_card`, que extrai capas das imagens (de qualquer faixa do GDI), baixa as que faltam
 (libretro thumbnails), gera sinopses/categorias e a pasta `01/`. **Vídeo de fundo**: ao parar num jogo,
 um clipe curto de gameplay toca atrás do coverflow (estilo Batocera), gerado pelo card tool a partir de
-`video.mp4` na pasta do jogo ou baixado com `fetch --videos` (yt-dlp).
+`video.mp4` na pasta do jogo ou baixado com `fetch --videos` (yt-dlp). Ao iniciar um jogo, uma **animação do Dreamcast** visto de cima: a tampa abre, o disco com a capa do jogo encaixa e gira enquanto a barra de progresso enche.
 
 Binários prontos em [Releases](https://github.com/hudsonbrendon/castmenu/releases) (gerados pelo CI a cada tag `v*`).
 

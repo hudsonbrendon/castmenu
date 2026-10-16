@@ -190,6 +190,23 @@ static void quad_pts(const float *p, float u0, float v0, float u1, float v1, uin
     v.flags = PVR_CMD_VERTEX_EOL;
     v.x = p[2]; v.y = p[3]; v.u = u1; v.v = v0; v.argb = tr; pvr_prim(&v, sizeof v);
 }
+void draw_tex_fan(const texture_t *t, float cx, float cy, float r, float angle, uint32_t tint) {
+    if (!t || !t->ptr) return;
+    bind_tex(t);
+    const int N = 36;
+    float uc = 0.5f * t->iw / t->w, vc = 0.5f * t->ih / t->h, zz = draw_z_next();
+    pvr_vertex_t v; v.z = zz; v.oargb = 0; v.argb = tint;
+    for (int i = 0; i < N; i++) {
+        float a0 = angle + i * (2 * (float)M_PI / N), a1 = angle + (i + 1) * (2 * (float)M_PI / N);
+        float c0 = cosf(a0), s0 = sinf(a0), c1 = cosf(a1), s1 = sinf(a1);
+        float ca = cosf(angle), sa = sinf(angle);
+        /* texture turns with the disc: uv = centre + R(-angle) * dir */
+        v.flags = PVR_CMD_VERTEX; v.x = cx; v.y = cy; v.u = uc; v.v = vc; pvr_prim(&v, sizeof v);
+        v.x = cx + r * c0; v.y = cy + r * s0; v.u = uc + uc * (c0 * ca + s0 * sa); v.v = vc + vc * (s0 * ca - c0 * sa); pvr_prim(&v, sizeof v);
+        v.flags = PVR_CMD_VERTEX_EOL;
+        v.x = cx + r * c1; v.y = cy + r * s1; v.u = uc + uc * (c1 * ca + s1 * sa); v.v = vc + vc * (s1 * ca - c1 * sa); pvr_prim(&v, sizeof v);
+    }
+}
 void draw_tex_pts(const texture_t *t, const float *xy, float u0, float v0, float u1, float v1, uint32_t tl, uint32_t tr, uint32_t bl, uint32_t br) {
     if (!t || !t->ptr) return;
     bind_tex(t); quad_pts(xy, u0, v0, u1, v1, tl, tr, bl, br);

@@ -13,6 +13,7 @@
 #include "coverflow.h"
 #include "screens.h"
 #include "osk.h"
+#include "launch_scene.h"
 #include "../list.h"
 #include "../settings.h"
 #include "../launch.h"
@@ -36,7 +37,7 @@ static int boot_pct; static char boot_msg[64];
 static int cursor, sel_settings, sel_dialog, letter_idx;
 static float scroll_y, scroll_target, sel_anim, fade, launch_fade, set_scroll, set_scroll_target, cf_pos, cat_anim; static int cat_dir;
 static game_t *disc_set[8]; static int disc_set_n;
-static const game_t *launch_target;
+static const game_t *launch_target; static void launch_from(const game_t *g);
 static int exit_flag;
 static char avatars[16][AVATAR_LEN]; static int n_avatars;
 
@@ -237,7 +238,7 @@ static void browse_update(void) {
     if (in.pressed & BTN_A) {
         disc_set_n = list_disc_set(g, disc_set, 8);
         if (disc_set_n > 1) { sel_dialog = 0; go(ST_DIALOG_DISC); }
-        else { launch_target = g; launch_fade = 0; go(ST_LAUNCH); }
+        else launch_from(g);
     }
     if (in.pressed & BTN_Y) { details_open(g); go(ST_DETAILS); }
     if (view_mode() == 1) {
@@ -548,7 +549,7 @@ static void dialog_disc_update(void) {
     if (in.repeat & BTN_UP) sel_dialog = (sel_dialog + disc_set_n - 1) % disc_set_n;
     if (in.repeat & BTN_DOWN) sel_dialog = (sel_dialog + 1) % disc_set_n;
     if (in.pressed & BTN_B) go(ST_BROWSE);
-    if (in.pressed & BTN_A) { launch_target = disc_set[sel_dialog]; launch_fade = 0; go(ST_LAUNCH); }
+    if (in.pressed & BTN_A) launch_from(disc_set[sel_dialog]);
 }
 static const char LETTERS[] = "#ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 static void letter_draw(void) {
@@ -581,22 +582,9 @@ static void letter_update(void) {
 
 /* ---------- launch / saver ---------- */
 static void launch_draw(void) {
-    theme_t *t = &g_theme;
-    browse_draw();
-    float f = clampf(launch_fade, 0, 1), a = clampf((launch_fade - 0.35f) * 1.8f, 0, 1);
-    draw_rect(0, 0, SCREEN_W, SCREEN_H, RGBA(0, 0, 0, (int)(235 * f)));
-    if (a <= 0) return;
-    float cs = 150 + 20 * ease_out(a);
-    draw_glow(SCREEN_W / 2, 190, 170, col_scale_alpha(t->glow, a));
-    draw_cover(launch_target, SCREEN_W / 2 - cs / 2, 190 - cs / 2, cs, 1);
-    draw_text_center(&g_font_big, SCREEN_W / 2, 330, ALPHA(t->text_hi, (int)(255 * a)), launch_target->name);
-    char dots[8]; int nd = ((int)(ui_t * 3)) % 4; snprintf(dots, sizeof dots, "%.*s", nd, "...");
-    char s[48]; snprintf(s, sizeof s, "%s%s", tr(S_LAUNCHING), dots);
-    draw_text_spaced(&g_font_small, SCREEN_W / 2 - text_width_spaced(&g_font_small, 2, tr(S_LAUNCHING)) / 2, 364, 2, ALPHA(t->text_dim, (int)(255 * a)), s);
-    float bw = 220, bx = (SCREEN_W - bw) / 2, by = 390, p = clampf(launch_fade / 1.4f, 0, 1);
-    draw_rect_round(bx, by, bw, 6, 3, ALPHA(t->panel_alt, (int)(255 * a)));
-    draw_rect_round_grad(bx, by, bw * p, 6, 3, col_lighten(t->accent, 0.2f), t->accent);
-    draw_glow(bx + bw * p, by + 3, 14, col_scale_alpha(t->glow, a));
+    if (launch_fade < LAUNCH_T_SAVE) { browse_draw(); draw_rect(0, 0, SCREEN_W, SCREEN_H, RGBA(0, 0, 0, (int)(255 * clampf(launch_fade / LAUNCH_T_SAVE, 0, 1)))); return; }
+    draw_frame_begin(); draw_rect(0, 0, SCREEN_W, SCREEN_H, 0xFF000000); draw_frame_tr();
+    launch_scene_draw(launch_target, launch_fade, ui_dt);
 }
 static void saver_draw(void) {
     draw_frame_begin(); draw_rect(0, 0, SCREEN_W, SCREEN_H, 0xFF000000); draw_frame_tr();
@@ -634,7 +622,7 @@ void ui_init(void) {
 
 int ui_wants_exit(void) { return exit_flag; }
 
-static void launch_from(const game_t *g) { launch_target = g; launch_fade = 0; go(ST_LAUNCH); }
+static void launch_from(const game_t *g) { launch_target = g; launch_fade = 0; launch_scene_begin(g); go(ST_LAUNCH); }
 
 void ui_frame(void) {
     uint64_t now = timer_ms_gettime64();
@@ -663,7 +651,12 @@ void ui_frame(void) {
     case ST_DIALOG_DISC: dialog_disc_update(); break;
     case ST_LETTER: letter_update(); break;
     case ST_SAVER: if (in.pressed) go(ST_BROWSE); break;
-    case ST_LAUNCH: launch_fade += ui_dt * 2.0f; if (launch_fade > 1.5f) launch_game(launch_target); break;
+    case ST_LAUNCH: {
+        float was = launch_fade; launch_fade += ui_dt;
+        if (was < LAUNCH_T_SAVE && launch_fade >= LAUNCH_T_SAVE) { dbglog(DBG_INFO, "launch: save t=%.2f dt=%.3f\n", (double)launch_fade, (double)ui_dt); launch_prepare(launch_target); }
+        if (was < LAUNCH_T_MOUNT && launch_fade >= LAUNCH_T_MOUNT) { dbglog(DBG_INFO, "launch: mount t=%.2f\n", (double)launch_fade); launch_mount(launch_target); }
+        if (launch_fade >= LAUNCH_T_BOOT) { dbglog(DBG_INFO, "launch: boot t=%.2f\n", (double)launch_fade); launch_boot(launch_target); }
+    } break;
     default: break;
     }
     { int browse = state == ST_BROWSE || state == ST_DETAILS || state == ST_SIDEBAR || state == ST_DIALOG_DISC || state == ST_LETTER;
