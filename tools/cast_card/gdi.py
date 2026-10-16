@@ -54,9 +54,30 @@ def _split_hd(iso_path, t3_path, t5_path):
     with open(t5_path, "wb") as f: f.write(data.ljust(data_sectors * 2048, b"\0"))
     return header_sectors, data_sectors
 
-def build(out_dir, data_dir, ip_bin_path, volid="CASTMENU", boot_files=("1ST_READ.BIN", "LIST.INI", "CASTMENU.INI")):
+def build(out_dir, data_dir, ip_bin_path, volid="CASTMENU", boot_files=("1ST_READ.BIN", "LIST.INI", "CASTMENU.INI"), videos=()):
+    """videos: [(slot, path to .cvm)] appended raw after the boot set on track05 (the low-density area is
+    only ~88 MB); the menu reads them by sector through /cd/videos.idx: 'slot lba frames fps w h'."""
     os.makedirs(out_dir, exist_ok=True)
     mk = _mkisofs()
+    # high density first: the videos.idx written below must land on track01
+    hd = os.path.join(out_dir, "_hd"); shutil.rmtree(hd, ignore_errors=True); os.makedirs(hd)
+    for name in boot_files:
+        p = os.path.join(data_dir, name)
+        if os.path.exists(p): shutil.copy(p, hd)
+    flat = os.path.join(out_dir, "_hd.iso")
+    subprocess.check_call([mk, "-quiet", "-C", f"0,{HD_LBA}", "-V", volid, "-G", ip_bin_path, "-o", flat, hd])
+    t5 = os.path.join(out_dir, "track05.iso")
+    _, data_sectors = _split_hd(flat, os.path.join(out_dir, "track03.iso"), t5)
+    shutil.rmtree(hd); os.remove(flat)
+    lines = []
+    with open(t5, "ab") as out:
+        for slot, path in videos:
+            blob = open(path, "rb").read()
+            if blob[:4] != b"CVID": continue
+            w, h, n, fps = (int.from_bytes(blob[4 + 2 * i:6 + 2 * i], "little") for i in range(4))
+            lines.append(f"{slot} {DATA_LBA + data_sectors} {n} {fps} {w} {h}")
+            pad = (-len(blob)) % 2048; out.write(blob + b"\0" * pad); data_sectors += (len(blob) + pad) // 2048
+    if lines: open(os.path.join(data_dir, "videos.idx"), "w").write("\n".join(lines) + "\n")
     # low density: everything the menu reads at runtime
     t1 = os.path.join(out_dir, "track01.iso")
     _iso(mk, t1, data_dir, ip_bin_path, volid, 0)
@@ -65,15 +86,6 @@ def build(out_dir, data_dir, ip_bin_path, volid="CASTMENU", boot_files=("1ST_REA
         raise SystemExit(f"menu data too large for the low-density track ({sectors} sectors > {MAX_LOW_SECTORS}); drop covers/themes")
     t2_lba = sectors + 150
     with open(os.path.join(out_dir, "track02.raw"), "wb") as f: f.write(b"\0" * 2352)
-    # high density: boot set, plain ISO9660 (no Joliet/RR: the BIOS only needs level-1 names)
-    hd = os.path.join(out_dir, "_hd"); shutil.rmtree(hd, ignore_errors=True); os.makedirs(hd)
-    for name in boot_files:
-        p = os.path.join(data_dir, name)
-        if os.path.exists(p): shutil.copy(p, hd)
-    flat = os.path.join(out_dir, "_hd.iso")
-    subprocess.check_call([mk, "-quiet", "-C", f"0,{HD_LBA}", "-V", volid, "-G", ip_bin_path, "-o", flat, hd])
-    _split_hd(flat, os.path.join(out_dir, "track03.iso"), os.path.join(out_dir, "track05.iso"))
-    shutil.rmtree(hd); os.remove(flat)
     with open(os.path.join(out_dir, "track04.raw"), "wb") as f: f.write(b"\0" * 2352)
     with open(os.path.join(out_dir, "disc.gdi"), "w") as f:
         f.write(f"5\n1 0 4 2048 track01.iso 0\n2 {t2_lba} 0 2352 track02.raw 0\n3 {HD_LBA} 4 2048 track03.iso 0\n4 {AUDIO2_LBA} 0 2352 track04.raw 0\n5 {DATA_LBA} 4 2048 track05.iso 0\n")

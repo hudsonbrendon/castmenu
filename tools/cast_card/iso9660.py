@@ -16,6 +16,28 @@ class FileSectorSource(SectorSource):
         return bytes(out)
     def close(self): self.f.close()
 
+class MultiTrackSource(SectorSource):
+    """Several data tracks of one disc (GDI): maps each LBA to the track that holds it.
+    Game files often live on a later data track than the directory that names them."""
+    def __init__(self, tracks):
+        self.tracks = sorted(tracks, key=lambda t: t["lba"]); self.start = self.tracks[0]["lba"]
+        self.files = {}
+    def read(self, lba, count=1):
+        out = bytearray()
+        for i in range(count):
+            l = lba + i; t = None
+            for cand in self.tracks:
+                if cand["lba"] <= l: t = cand
+            if t is None: out += b"\0" * 2048; continue
+            f = self.files.get(t["file"])
+            if f is None: f = self.files[t["file"]] = open(t["file"], "rb")
+            f.seek(t["off"] + (l - t["lba"]) * t["ss"] + (0 if t["ss"] == 2048 else 16))
+            out += f.read(2048).ljust(2048, b"\0")
+        return bytes(out)
+    def close(self):
+        for f in self.files.values(): f.close()
+        self.files = {}
+
 def _dirent(rec):
     ln = rec[0]
     if ln < 33: return None

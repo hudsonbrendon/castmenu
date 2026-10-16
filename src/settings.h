@@ -32,7 +32,7 @@ typedef struct {
     uint8_t net_auto;         /* connect at boot */
     uint8_t server_user;      /* server was typed by the user: CASTMENU.INI must not override it */
     uint8_t loader_kind;      /* 0 Cast open loader, 1 GDMENU's loader.bin from /cd */
-    uint8_t pad[1];
+    uint8_t no_bg_video;      /* 0 = play the game's background clip (videos.idx) */
     uint32_t last_launch_ts;  /* RTC seconds when the last game was launched (play-time tracking) */
     uint16_t last_launch_slot;
     uint16_t playtime[1000];  /* minutes per slot */

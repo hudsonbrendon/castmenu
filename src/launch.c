@@ -1,3 +1,4 @@
+#include "ui/video.h"
 #include "launch.h"
 #include "gdemu.h"
 #include "settings.h"
@@ -28,6 +29,7 @@ void launch_exit_to_bios(void) {
 }
 
 void launch_game(const game_t *g) {
+    video_stop();
     settings_t *s = settings_get();
     s->last_slot = g->slot; settings_push_recent(g->slot); settings_mark_launch(g->slot, (uint32_t)rtc_unix_secs()); settings_save();
     loader_params_t p = {

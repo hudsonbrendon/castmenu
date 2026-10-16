@@ -26,6 +26,8 @@ with tempfile.TemporaryDirectory() as sd:
     fake_game(os.path.join(sd, "02"), "SONIC ADVENTURE", "MK-51000", "JUE")
     fake_game(os.path.join(sd, "03"), "SHENMUE", "HDR-0016", "E", cover=False)
     fake_game(os.path.join(sd, "04"), "SHENMUE DISC 2", "HDR-0016", "E")
+    have_video = bool(shutil.which("ffmpeg"))
+    if have_video: subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i", "testsrc=size=320x240:rate=30", "-t", "1.5", "-pix_fmt", "yuv420p", os.path.join(sd, "02", "video.mp4")], check=True)
     items = cli.scan(sd)
     assert [i["slot"] for i in items] == [2, 3, 4], items
     assert items[0]["ip"].name == "SONIC ADVENTURE" and items[0]["ip"].region == "JUE" and items[0]["ip"].vga
@@ -47,6 +49,16 @@ with tempfile.TemporaryDirectory() as sd:
     assert open(os.path.join(out, "disc.gdi")).read().splitlines()[-1].startswith("5 544180 4 2048 track05.iso")
     assert b"04.name=SHENMUE DISC 2" in gdi.read_hd_file(out, "LIST.INI")
     assert gdi.read_hd_file(out, "1ST_READ.BIN") == open(menu_bin, "rb").read()
+    # background clip: encoded next to the game, appended raw to track05, indexed on track01
+    if have_video:
+        assert os.path.exists(os.path.join(sd, "02", "video.cvm"))
+        from tools.cast_card import iso9660
+        src1 = iso9660.FileSectorSource(os.path.join(out, "track01.iso"), 0)
+        vidx = iso9660.read_file(src1, iso9660.find_file(src1, "VIDEOS.IDX")).decode().split()
+        assert vidx[0] == "2" and vidx[4:6] == ["256", "256"] and int(vidx[2]) >= 10, vidx
+        with open(os.path.join(out, "track05.iso"), "rb") as f:
+            f.seek((int(vidx[1]) - gdi.DATA_LBA) * 2048); assert f.read(4) == b"CVID"
+            f.seek((int(vidx[1]) - gdi.DATA_LBA + 1) * 2048); fr = f.read(2048 + 256 * 256 // 4); assert len(fr) == 18432 and fr[:8] != b"\0" * 8
     ip3 = open(os.path.join(out, "track03.iso"), "rb").read(0x8000); assert ip3[0x20:0x24] == b"%04X" % ipbin.crc16(ip3[0x40:0x50])
     menu = disc.read_gdi(os.path.join(out, "disc.gdi"))
     assert menu.ip.name == "CASTMENU", menu.ip

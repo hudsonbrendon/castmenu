@@ -4,16 +4,18 @@
   python3 -m tools.cast_card build <sd_root> [--out DIR]     write LIST.INI/CASTMENU.INI, covers, themes, 01/ menu image
   python3 -m tools.cast_card add   <sd_root> <image>...      copy images into the next free folders (then build)
   python3 -m tools.cast_card sort  <sd_root>                 renumber folders alphabetically (02..)
+  python3 -m tools.cast_card fetch <sd_root> [--force]       download missing covers (libretro thumbnails) as cover.png
+  python3 -m tools.cast_card fetch <sd_root> --videos        also grab a gameplay clip per game with yt-dlp (video.mp4)
 
 Folders follow the GDEMU rule: 01 = menu, 02..999 = one image per folder.
 
-Per-game extras next to the image: name.txt, cover.png, genre.txt, year.txt, players.txt,
+Per-game extras next to the image: name.txt, cover.png, video.mp4 (background clip), genre.txt, year.txt, players.txt,
 publisher.txt, category.txt (or platform.txt), synopsis.txt / synopsis.<pt|en|es|de|fr|it>.txt.
 Card root extras: avatars/*.png (profile pictures), server.txt (host:port of the Cast Chat server).
 """
 import argparse, os, re, shutil, sys, tempfile
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
-from tools.cast_card import disc, ipbin, gdi, tex, themes, platforms, romfs
+from tools.cast_card import disc, ipbin, gdi, tex, themes, platforms, romfs, cvm
 LANGS = ["pt", "en", "es", "de", "fr", "it"]
 from PIL import Image
 
@@ -110,6 +112,40 @@ def find_gdmenu_loader(sd):
                 if blob: return blob
     return None
 
+def placeholder_cover(title, size=128):
+    """Shell-grey card, orange swirl, title in the Dreamcast face: for homebrew/hacks with no art anywhere."""
+    from PIL import ImageDraw, ImageFont
+    img = Image.new("RGB", (size, size), (0x26, 0x27, 0x2A))
+    d = ImageDraw.Draw(img)
+    for y in range(size): d.line([(0, y), (size, y)], fill=(0x33 + y // 6, 0x34 + y // 6, 0x38 + y // 6))
+    try:
+        sw = Image.open(os.path.join(ROOT, "assets", "brand", "swirl.png")).convert("RGBA").resize((40, 40), Image.LANCZOS)
+        img.paste(sw, ((size - 40) // 2, 14), sw)
+    except Exception: pass
+    try: font = ImageFont.truetype(os.path.join(ROOT, "assets", "fonts", "Dreamcast.ttf"), 13)
+    except Exception: font = ImageFont.load_default()
+    words, lines, cur = title.upper().split(), [], ""
+    for w in words:
+        t = (cur + " " + w).strip()
+        if d.textlength(t, font=font) <= size - 16: cur = t
+        else: lines.append(cur); cur = w
+    lines.append(cur); lines = [l for l in lines if l][:4]
+    y = 64
+    for l in lines: d.text(((size - d.textlength(l, font=font)) / 2, y), l, font=font, fill=(0xF2, 0x65, 0x22)); y += 15
+    d.rectangle([0, 0, size - 1, size - 1], outline=(0x66, 0x69, 0x6D))
+    return img
+
+def video_clip(folder):
+    """video.cvm next to the image, (re)encoded from video.mp4/mkv/... when missing or older."""
+    src = cvm.find_video(folder)
+    if not src: return None
+    dst = os.path.join(folder, "video.cvm")
+    if not os.path.exists(dst) or os.path.getmtime(dst) < os.path.getmtime(src):
+        print(f"  video {os.path.basename(folder)}: {os.path.basename(src)}")
+        try: cvm.encode(src, dst)
+        except Exception as e: print(f"  !! {os.path.basename(folder)}: video: {e}"); return None
+    return dst
+
 def build_data(items, data_dir, menu_bin, themes_dir, custom_covers=None, sd=None, server=None, gdmenu_loader=None):
     os.makedirs(os.path.join(data_dir, "covers"), exist_ok=True)
     shutil.copy(menu_bin, os.path.join(data_dir, "1ST_READ.BIN"))
@@ -133,11 +169,21 @@ def build_data(items, data_dir, menu_bin, themes_dir, custom_covers=None, sd=Non
         if custom_covers:
             p = os.path.join(custom_covers, it["ip"].product.replace(" ", "") + ".png")
             if os.path.exists(p): png = p
+        if not png and not it.get("cover"):           # same disc under another folder/hack: borrow its art
+            for o in items:
+                if o is not it and "error" not in o and o["ip"].product == it["ip"].product and o["ip"].product:
+                    for ext in ("png", "jpg", "jpeg"):
+                        if os.path.exists(os.path.join(o["folder"], "cover." + ext)): png = os.path.join(o["folder"], "cover." + ext)
+                    if not png and o.get("cover"): it["cover"] = o["cover"]
+                    if png or it.get("cover"): break
         if png:
             img = Image.open(png).convert("RGB").resize((128, 128), Image.LANCZOS)
             open(dst + ".tex", "wb").write(tex.encode(img, "rgb565")); it["cover"] = True
         elif it.get("cover"):
             open(dst + ".pvr", "wb").write(it["cover"])
+        else:                                         # nothing anywhere: a generated card with the title
+            open(dst + ".tex", "wb").write(tex.encode(placeholder_cover(it["name"]), "rgb565")); it["cover"] = True
+        it["cvm"] = video_clip(it["folder"])
     # themes: convert bg.png -> bg.tex (512x512) and copy ini
     for tid in sorted(os.listdir(themes_dir)):
         src = os.path.join(themes_dir, tid)
@@ -173,7 +219,7 @@ def cmd_build(a):
             for f in os.listdir(out):
                 try: os.remove(os.path.join(out, f))
                 except FileNotFoundError: pass   # macOS drops ._AppleDouble files together with their owner
-        gdi.build(out, data, ipp)
+        gdi.build(out, data, ipp, videos=[(it["slot"], it["cvm"]) for it in good if it.get("cvm")])
     cfg = os.path.join(a.sd, "GDEMU.ini")
     if not os.path.exists(cfg):
         open(cfg, "w").write("open_time = 150\ndetect_time = 150\nreset_goto = 1\n")
@@ -198,6 +244,15 @@ def cmd_add(a):
         for f in files: shutil.copy(f, dst)
         used.add(nxt); print(f"{os.path.basename(img)} -> {os.path.basename(dst)}")
 
+def cmd_fetch(a):
+    from tools.cast_card import fetch
+    items = scan(a.sd)
+    n = fetch.fetch_covers(items, force=a.force)
+    print(f"{n} capas baixadas; rode build para gravar")
+    if a.videos:
+        n = fetch.fetch_videos(items, force=a.force)
+        print(f"{n} clipes baixados; rode build para gravar")
+
 def cmd_sort(a):
     items = [i for i in scan(a.sd) if "error" not in i]
     items.sort(key=lambda i: i["name"].lower())
@@ -214,6 +269,7 @@ def main():
     b = sp.add_parser("build"); b.add_argument("sd"); b.add_argument("--out"); b.add_argument("--menu-bin"); b.add_argument("--themes"); b.add_argument("--covers", help="dir with <PRODUCT>.png custom covers"); b.add_argument("--ip-template"); b.add_argument("--server", help="host:port of the Cast Chat server (or sd/server.txt)"); b.add_argument("--gdmenu-loader", help="GDMENU loader.bin (or a GDMENU 1ST_READ.BIN/track file) to ship as the alternative loader"); b.set_defaults(fn=cmd_build)
     ad = sp.add_parser("add"); ad.add_argument("sd"); ad.add_argument("images", nargs="+"); ad.set_defaults(fn=cmd_add)
     so = sp.add_parser("sort"); so.add_argument("sd"); so.set_defaults(fn=cmd_sort)
+    fe = sp.add_parser("fetch"); fe.add_argument("sd"); fe.add_argument("--force", action="store_true", help="also for games that carry 0GDTEX.PVR / already have a clip"); fe.add_argument("--videos", action="store_true", help="download a gameplay clip per game (needs yt-dlp + ffmpeg)"); fe.set_defaults(fn=cmd_fetch)
     a = p.parse_args(); a.fn(a)
 
 if __name__ == "__main__":

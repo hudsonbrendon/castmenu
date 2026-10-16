@@ -1,4 +1,5 @@
 #include "chrome.h"
+#include "video.h"
 #include "covers.h"
 #include "anim.h"
 #include "../settings.h"
@@ -93,6 +94,7 @@ void draw_background(void) {
 /* translucent layer: light sweep, drifting orbs, vignette, optional dim */
 void draw_background_tr(void) {
     theme_t *t = &g_theme;
+    video_draw();
     if (t->orbs) {
         float a = ui_t * 0.11f;
         draw_glow(140 + 90 * sinf(a), 380 + 40 * cosf(a * 1.3f), 210, col_scale_alpha(t->glow, 0.55f));

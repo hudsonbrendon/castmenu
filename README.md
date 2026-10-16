@@ -16,12 +16,16 @@ Controller e mais), tipografia do logotipo Dreamcast, relógio e sinal de rede, 
 **bootloader aberto** com Region Free, Force VGA, In-Game Reset, pular animação de boot e tela SEGA.
 
 Compatível com cartões já montados pelo GDMENU Card Manager (`LIST.INI`) e com a ferramenta
-própria `cast_card`, que extrai capas das imagens, gera sinopses/categorias e a pasta `01/`.
+própria `cast_card`, que extrai capas das imagens (de qualquer faixa do GDI), baixa as que faltam
+(libretro thumbnails), gera sinopses/categorias e a pasta `01/`. **Vídeo de fundo**: ao parar num jogo,
+um clipe curto de gameplay toca atrás do coverflow (estilo Batocera), gerado pelo card tool a partir de
+`video.mp4` na pasta do jogo ou baixado com `fetch --videos` (yt-dlp).
 
 Binários prontos em [Releases](https://github.com/hudsonbrendon/castmenu/releases) (gerados pelo CI a cada tag `v*`).
 
 ```
 ./build.sh                                   # compila (Docker + KallistiOS)
+python3 -m tools.cast_card fetch /Volumes/GDEMU --videos   # capas que faltam + clipes de gameplay (opcional)
 python3 -m tools.cast_card build /Volumes/GDEMU
 python3 server/cast_server.py --ai anthropic  # servidor do Cast Chat / Cast AI (opcional)
 ```

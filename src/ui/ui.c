@@ -6,6 +6,7 @@
 #include "theme.h"
 #include "input.h"
 #include "covers.h"
+#include "video.h"
 #include "anim.h"
 #include "lang.h"
 #include "chrome.h"
@@ -287,14 +288,14 @@ static void browse_draw(void) {
 }
 
 /* ---------- settings ---------- */
-typedef enum { O_NICK, O_AVATAR, O_REGION, O_VGA, O_IGR, O_INTRO, O_LICENSE, O_LOADER, O_THEME, O_VIEW, O_LANG, O_SORT, O_REGIONF, O_MULTI, O_COVERS, O_CHAT, O_AI, O_SERVER, O_NETAUTO, O_CONNECT, O_SAVER, O_SCAN, O_SAVE, O_RESET, O_SYSINFO, O_EXIT, O_COUNT } opt_t;
+typedef enum { O_NICK, O_AVATAR, O_REGION, O_VGA, O_IGR, O_INTRO, O_LICENSE, O_LOADER, O_THEME, O_VIEW, O_LANG, O_SORT, O_REGIONF, O_MULTI, O_COVERS, O_VIDEO, O_CHAT, O_AI, O_SERVER, O_NETAUTO, O_CONNECT, O_SAVER, O_SCAN, O_SAVE, O_RESET, O_SYSINFO, O_EXIT, O_COUNT } opt_t;
 static char nick_edit[NICK_LEN], server_edit[SERVER_LEN]; static int osk_opt;
 static int opt_is_toggle(opt_t o, int *val) {
     settings_t *s = settings_get();
     switch (o) {
     case O_REGION: *val = s->region_free; return 1; case O_VGA: *val = s->force_vga; return 1; case O_IGR: *val = s->igr; return 1;
     case O_INTRO: *val = s->boot_intro; return 1; case O_LICENSE: *val = s->sega_license; return 1;
-    case O_MULTI: *val = s->hide_multidisc; return 1; case O_COVERS: *val = s->cover_mode; return 1; case O_NETAUTO: *val = s->net_auto; return 1;
+    case O_MULTI: *val = s->hide_multidisc; return 1; case O_COVERS: *val = s->cover_mode; return 1; case O_VIDEO: *val = !s->no_bg_video; return 1; case O_NETAUTO: *val = s->net_auto; return 1;
     default: return 0;
     }
 }
@@ -318,11 +319,11 @@ static void opt_value(opt_t o, char *out, int cap) {
     }
 }
 static const char *opt_label(opt_t o) {
-    static const str_id ids[O_COUNT] = { S_NICKNAME, S_AVATAR, S_REGION_FREE, S_FORCE_VGA, S_IGR, S_BOOT_INTRO, S_SEGA_LICENSE, S_LOADER_KIND, S_THEME, S_DEFAULT_VIEW, S_LANGUAGE, S_SORT, S_REGION, S_HIDE_MULTIDISC, S_COVERS, S_CAST_CHAT, S_CAST_AI, S_SERVER, S_NETWORK, S_CONNECT, S_SCREENSAVER, S_SCAN_DELAY, S_SAVE, S_RESET_SETTINGS, S_SYSINFO, S_EXIT_TO_BIOS };
+    static const str_id ids[O_COUNT] = { S_NICKNAME, S_AVATAR, S_REGION_FREE, S_FORCE_VGA, S_IGR, S_BOOT_INTRO, S_SEGA_LICENSE, S_LOADER_KIND, S_THEME, S_DEFAULT_VIEW, S_LANGUAGE, S_SORT, S_REGION, S_HIDE_MULTIDISC, S_COVERS, S_BG_VIDEO, S_CAST_CHAT, S_CAST_AI, S_SERVER, S_NETWORK, S_CONNECT, S_SCREENSAVER, S_SCAN_DELAY, S_SAVE, S_RESET_SETTINGS, S_SYSINFO, S_EXIT_TO_BIOS };
     return tr(ids[o]);
 }
 static const char *opt_desc(opt_t o) {
-    static const str_id ids[O_COUNT] = { S_D_NICK, S_D_AVATAR, S_D_REGION, S_D_VGA, S_D_IGR, S_D_INTRO, S_D_LICENSE, S_D_LOADER_KIND, S_D_THEME, S_D_VIEW, S_D_LANG, S_D_SORT, S_D_REGIONF, S_D_MULTI, S_D_COVERS, S_D_CHAT, S_D_AI, S_D_NET, S_D_NET, S_D_NET, S_D_SAVER, S_D_SCAN, S_D_SAVE, S_D_RESET, S_D_SYSINFO, S_D_EXIT };
+    static const str_id ids[O_COUNT] = { S_D_NICK, S_D_AVATAR, S_D_REGION, S_D_VGA, S_D_IGR, S_D_INTRO, S_D_LICENSE, S_D_LOADER_KIND, S_D_THEME, S_D_VIEW, S_D_LANG, S_D_SORT, S_D_REGIONF, S_D_MULTI, S_D_COVERS, S_D_BG_VIDEO, S_D_CHAT, S_D_AI, S_D_NET, S_D_NET, S_D_NET, S_D_SAVER, S_D_SCAN, S_D_SAVE, S_D_RESET, S_D_SYSINFO, S_D_EXIT };
     return tr(ids[o]);
 }
 static str_id opt_section(opt_t o) {
@@ -350,6 +351,7 @@ static void opt_change(opt_t o, int dir) {
     case O_REGIONF: { static const char cyc[] = { 0, 'J', 'U', 'E' }; int i = 0; while (cyc[i] != g_list.filter_region) i++; g_list.filter_region = cyc[(i + dir + 4) % 4]; list_rebuild_view(); cursor = 0; scroll_target = 0; } break;
     case O_MULTI: s->hide_multidisc ^= 1; g_list.hide_multidisc_extra = s->hide_multidisc; list_rebuild_view(); cursor = 0; break;
     case O_COVERS: s->cover_mode ^= 1; break;
+    case O_VIDEO: s->no_bg_video ^= 1; break;
     case O_CHAT: chat_open(); go(ST_CHAT); break;
     case O_AI: ai_open(); go(ST_AI); break;
     case O_SERVER: strncpy(server_edit, s->server, SERVER_LEN - 1); osk_opt = O_SERVER; osk_open(tr(S_SERVER), server_edit, SERVER_LEN); break;
@@ -617,7 +619,7 @@ static void scan_avatars(void) {
     fs_close(d);
 }
 void ui_init(void) {
-    draw_init(); input_init(); covers_init(); voice_init();
+    draw_init(); input_init(); covers_init(); video_init(); voice_init();
     settings_t *s = settings_get();
     theme_scan(); if (s->theme >= theme_count()) s->theme = 0;
     if (s->view > 2) s->view = 0; if (s->lang >= LANG_COUNT) s->lang = 0;
@@ -664,6 +666,8 @@ void ui_frame(void) {
     case ST_LAUNCH: launch_fade += ui_dt * 2.0f; if (launch_fade > 1.5f) launch_game(launch_target); break;
     default: break;
     }
+    { int browse = state == ST_BROWSE || state == ST_DETAILS || state == ST_SIDEBAR || state == ST_DIALOG_DISC || state == ST_LETTER;
+      video_update(browse && g_list.view_count ? list_view_item(cursor)->slot : 0, ui_dt); }
     scroll_y = lerp_to(scroll_y, scroll_target, 14, ui_dt);
     set_scroll = lerp_to(set_scroll, set_scroll_target, 14, ui_dt);
     sel_anim = clampf(sel_anim + ui_dt * 5, 0, 1);

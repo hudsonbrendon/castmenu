@@ -34,14 +34,16 @@ def read_gdi(gdi_path):
         ip = src.read(t["lba"], 16)
     cover = None
     src.close()
-    for t2 in reversed(data):                     # cover usually sits on the boot track; check the others too
-        s2 = iso9660.FileSectorSource(t2["file"], t2["lba"], t2["ss"], 0 if t2["ss"] == 2048 else 16, t2["off"])
+    multi = iso9660.MultiTrackSource(data)
+    for t2 in reversed(data):                     # directory sits on the boot track; file data may be on any track
+        multi.start = t2["lba"]
         try:
-            e = iso9660.find_file(s2, "0GDTEX.PVR")
-            if e and e["size"] < 2_000_000: cover = iso9660.read_file(s2, e)
+            e = iso9660.find_file(multi, "0GDTEX.PVR")
+            if e and e["size"] < 2_000_000: cover = iso9660.read_file(multi, e)
         except Exception: pass
-        s2.close()
-        if cover: break
+        if cover and cover[:4] in (b"PVRT", b"GBIX"): break
+        cover = None
+    multi.close()
     return DiscInfo(gdi_path, "gdi", ipbin.parse(ip), cover)
 
 def _find_sig(path, chunk=32 << 20):

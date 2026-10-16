@@ -14,8 +14,20 @@ Writing a card:
 ```bash
 python3 -m tools.cast_card scan  /Volumes/GDEMU          # what is there
 python3 -m tools.cast_card add   /Volumes/GDEMU game.gdi  # copy into next free folder
-python3 -m tools.cast_card build /Volumes/GDEMU           # LIST.INI, covers, themes, 01/ image, GDEMU.ini
+python3 -m tools.cast_card fetch /Volumes/GDEMU --videos  # missing covers (libretro) + a gameplay clip per game (yt-dlp)
+python3 -m tools.cast_card build /Volumes/GDEMU           # LIST.INI, covers, themes, videos, 01/ image, GDEMU.ini
 ```
+
+Covers come from the disc's `0GDTEX.PVR` (looked up across every data track of a GDI), then
+`cover.png` next to the image, then a same-product sibling, then a generated title card, so every
+game shows something. `fetch` fills `cover.png` from the libretro thumbnail server (title match,
+region-aware) and, with `--videos`, saves `video.mp4` per game (first YouTube hit under 15 min, 360p).
+
+Background video: `build` turns `video.*` next to each image into `video.cvm` (12 s, 10 fps, 256x256
+PVR VQ frames: no decoding on the console, each frame is one 9-sector read). Clips live after the
+boot set on track05 (the low-density area is only ~88 MB) and are indexed by `videos.idx` on track01;
+the menu starts one 0.7 s after the cursor rests on a game (Settings → Background video). Needs
+`ffmpeg` and `numpy` on the PC (`pip install numpy pillow`).
 
 Per-game overrides live next to the image: `name.txt`, `cover.png`, `genre.txt`, `year.txt`,
 `players.txt`, `publisher.txt`, `category.txt` (or `platform.txt`; Atomiswave / CPS1-CPS2 /
