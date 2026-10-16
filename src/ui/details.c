@@ -31,6 +31,8 @@ int details_update(const input_t *in) {
     if (in->repeat & BTN_L) scroll_target -= SYN_LH * 7;
     scroll_target = clampf(scroll_target, 0, max);
     scroll = lerp_to(scroll, scroll_target, 14, ui_dt);
+    if (in->repeat & BTN_LEFT) return ACT_PREV;
+    if (in->repeat & BTN_RIGHT) return ACT_NEXT;
     if (in->pressed & BTN_B) return ACT_CLOSE;
     if (in->pressed & BTN_A) return ACT_LAUNCH;
     if (in->pressed & BTN_Y) { list_toggle_favorite(cur); settings_save(); show_toast(cur->favorite ? tr(S_FAV_ADDED) : tr(S_FAV_REMOVED), 1); }

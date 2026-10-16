@@ -649,7 +649,15 @@ void ui_frame(void) {
     int act;
     switch (state) {
     case ST_BROWSE: browse_update(); break;
-    case ST_DETAILS: act = details_update(&in); if (act == ACT_CLOSE) go(ST_BROWSE); else if (act == ACT_LAUNCH) launch_from(details_game()); break;
+    case ST_DETAILS:
+        act = details_update(&in);
+        if (act == ACT_CLOSE) go(ST_BROWSE);
+        else if (act == ACT_LAUNCH) launch_from(details_game());
+        else if ((act == ACT_PREV || act == ACT_NEXT) && g_list.view_count > 1) {   /* browse the synopses without leaving the screen */
+            int n = g_list.view_count; cursor = (cursor + (act == ACT_NEXT ? 1 : n - 1)) % n; cf_pos = cursor; sel_anim = 0;
+            details_open(list_view_item(cursor)); ui_enter = 0.6f;
+        }
+        break;
     case ST_SIDEBAR: act = sidebar_update(&in); if (act == ACT_CLOSE) go(ST_BROWSE); else if (act == ACT_LAUNCH) launch_from(sidebar_game()); break;
     case ST_SETTINGS: settings_update(); break;
     case ST_SYSINFO: if (in.pressed & (BTN_B | BTN_A | BTN_START)) go(prev_state == ST_SETTINGS ? ST_SETTINGS : ST_BROWSE); break;

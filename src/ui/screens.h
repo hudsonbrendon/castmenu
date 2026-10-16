@@ -3,7 +3,7 @@
 #include "input.h"
 #include "../list.h"
 
-enum { ACT_NONE = 0, ACT_CLOSE, ACT_LAUNCH, ACT_OPEN_CHAT, ACT_OPEN_AI };
+enum { ACT_NONE = 0, ACT_CLOSE, ACT_LAUNCH, ACT_OPEN_CHAT, ACT_OPEN_AI, ACT_PREV, ACT_NEXT };
 
 /* details modal */
 void details_open(game_t *g);

@@ -13,15 +13,15 @@
 static texture_t body, lid, lid_in; static int loaded;
 static const texture_t *cover; static float spin;
 
-/* body/lid share a 256-space; the lid circle is centred at (128,122) r 90, hinge on its top edge */
+/* body/lid share a 256-space; the lid circle is centred at (128,122) r 96, hinge on its top edge (row 26) */
 #define CS 260.0f                       /* console size on screen */
 #define CX ((SCREEN_W - CS) / 2)
 #define CY 76.0f
 #define K  (CS / 256)
 #define TRAY_X (CX + 128 * K)
 #define TRAY_Y (CY + 122 * K)
-#define HINGE_V (32 / 256.0f)
-#define LID_V1 (213 / 256.0f)
+#define HINGE_V (26 / 256.0f)
+#define LID_V1 (218 / 256.0f)
 
 static float ease_io(float t) { t = clampf(t, 0, 1); return t * t * (3 - 2 * t); }
 
@@ -58,7 +58,7 @@ void launch_scene_draw(const game_t *g, float t, float dt) {
      * lid foreshortens, passes edge-on near 50 degrees and then shows its underside
      * standing behind the console. */
     float th_a = 1.55f * ease_io((t - 0.8f) / 0.7f);          /* 0..89 degrees */
-    float hy = cy + 32 * k, lh = (LID_V1 - HINGE_V) * cs;
+    float hy = cy + 26 * k, lh = (LID_V1 - HINGE_V) * cs;
     float proj = cosf(th_a) * 0.85f - sinf(th_a) * 0.53f;     /* screen-space height factor, camera tilt ~32 deg */
     float fy = hy + lh * proj, ex = cs * 0.14f * (fy - hy) / lh;
     float pts[8] = { cx, hy, cx + cs, hy, cx - ex, fy, cx + cs + ex, fy };
@@ -72,7 +72,7 @@ void launch_scene_draw(const game_t *g, float t, float dt) {
 
     /* disc: floats down from above, lands on the spindle, then spins up */
     float td = clampf((t - 1.4f) / 0.8f, 0, 1), e = ease_out(td);
-    float lift = 1 - e, dr = 80 * k * (1 + 0.45f * lift), dy = ty - 150 * lift, da = clampf(td * 3, 0, 1) * ca;
+    float lift = 1 - e, dr = 76 * k * (1 + 0.45f * lift), dy = ty - 150 * lift, da = clampf(td * 3, 0, 1) * ca;
     if (t >= LAUNCH_T_MOUNT) spin += dt * 14.0f * clampf((t - LAUNCH_T_MOUNT) / 0.8f, 0.15f, 1);
     if (td > 0) {
         draw_glow(tx, ty + 6, dr * (0.9f + 0.5f * lift), ALPHA(0x000000, (int)(150 * e * ca)));  /* shadow in the tray */

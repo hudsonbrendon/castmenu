@@ -38,7 +38,7 @@ jobs:
           V=${GITHUB_REF_NAME#v}
           D=castmenu-$V
           mkdir -p $D
-          cp 1ST_READ.BIN README.md LICENSE $D/
+          cp 1ST_READ.BIN README.md README.pt-BR.md LICENSE $D/
           cp -r themes server docs $D/
           mkdir -p $D/tools && cp -r tools/cast_card $D/tools/ && cp build.sh $D/
           cp -r assets $D/assets
