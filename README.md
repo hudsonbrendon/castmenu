@@ -6,6 +6,7 @@
 <a href="https://github.com/hudsonbrendon/castmenu/actions/workflows/build.yml"><img src="https://github.com/hudsonbrendon/castmenu/actions/workflows/build.yml/badge.svg" alt="build"></a>
 <a href="https://github.com/hudsonbrendon/castmenu/releases"><img src="https://img.shields.io/github/v/release/hudsonbrendon/castmenu" alt="release"></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
+<a href="https://buymeacoffee.com/hudsonbrendon"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-%E2%98%95-FFDD00?logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"></a>
 </p>
 
 Cast Menu replaces GDMENU on the SD card of a GDEMU-modded Dreamcast. It boots as folder `01`,
@@ -341,6 +342,14 @@ Open an issue to vote or to suggest more.
 - Box-back art in the details screen.
 - Dreamcast Now presence from the console (today only DreamPi reports it; the menu shows the online count).
 - Theme editor on the console.
+
+## Support the project
+
+Cast Menu is free and open source. If it saved you an afternoon with your Dreamcast, you can
+[buy me a coffee](https://buymeacoffee.com/hudsonbrendon) ☕ or star the repo. Bug reports and pull
+requests are just as welcome.
+
+<p align="center"><a href="https://buymeacoffee.com/hudsonbrendon"><img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=%E2%98%95&slug=hudsonbrendon&button_colour=FFDD00&font_colour=000000&font_family=Inter&outline_colour=000000&coffee_colour=ffffff" alt="Buy me a coffee"></a></p>
 
 ## Credits and license
 
