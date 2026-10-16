@@ -65,12 +65,3 @@ jobs:
           files: |
             1ST_READ.BIN
             ${{ env.ZIP }}
-          generate_release_notes: true
-          body: |
-            Cast Menu ${{ github.ref_name }} para GDEMU (Sega Dreamcast).
-
-            **Instalar:** descompacte o zip e rode `python3 -m tools.cast_card build /Volumes/GDEMU`
-            (precisa de Python 3 + Pillow + mkisofs). O `1ST_READ.BIN` é o menu já compilado.
-            O servidor do Cast Chat / Cast AI está em `server/cast_server.py`.
-
-            Não testado em hardware real: loader, comandos GDEMU, rede e microfone. Ver docs/REVERSE_ENGINEERING.md §7.
