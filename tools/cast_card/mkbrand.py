@@ -37,7 +37,7 @@ def split(img):
     return sw.crop(sw.getbbox()), wm.crop(wm.getbbox())
 
 def text_img(text, height):
-    font = ImageFont.truetype(TTF, height)
+    font = ImageFont.truetype(TTF, height, layout_engine=ImageFont.Layout.BASIC)
     l, t, r, b = font.getbbox(text)
     img = Image.new("RGBA", (r - l + 8, b - t + 8), (0, 0, 0, 0))
     ImageDraw.Draw(img).text((4 - l, 4 - t), text, font=font, fill=INK + (255,))

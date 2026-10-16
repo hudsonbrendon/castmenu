@@ -66,7 +66,7 @@ def body():
     _wedge(d, LID_C[1] + LID_R - 8, LID_C[1] + LID_R + 10, 8, (124, 124, 120))
     _wedge(d, LID_C[1] + LID_R - 8, LID_C[1] + LID_R + 6, 5, (150, 150, 146))
     # POWER / OPEN
-    font = ImageFont.truetype(TTF, 6 * S)
+    font = ImageFont.truetype(TTF, 6 * S, layout_engine=ImageFont.Layout.BASIC)
     for cx, label in ((36, "POWER"), (220, "OPEN")):
         c = (cx, 226)
         circ(d, c, 13, fill=(190, 188, 182))

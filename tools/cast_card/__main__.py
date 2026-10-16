@@ -147,7 +147,7 @@ def placeholder_cover(title, size=128):
         sw = Image.open(os.path.join(ROOT, "assets", "brand", "swirl.png")).convert("RGBA").resize((40, 40), Image.LANCZOS)
         img.paste(sw, ((size - 40) // 2, 14), sw)
     except Exception: pass
-    try: font = ImageFont.truetype(os.path.join(ROOT, "assets", "fonts", "Dreamcast.ttf"), 13)
+    try: font = ImageFont.truetype(os.path.join(ROOT, "assets", "fonts", "Dreamcast.ttf", layout_engine=ImageFont.Layout.BASIC), 13)
     except Exception: font = ImageFont.load_default()
     words, lines, cur = title.upper().split(), [], ""
     for w in words:

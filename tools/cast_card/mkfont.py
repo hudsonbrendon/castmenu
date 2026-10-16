@@ -6,7 +6,7 @@ from . import tex
 
 def build(ttf, px, out_base, weight="Regular", atlas=(512, 256), stroke=0):
     """stroke: extra outline width in px (fake bold for single-weight fonts)."""
-    font = ImageFont.truetype(ttf, px)
+    font = ImageFont.truetype(ttf, px, layout_engine=ImageFont.Layout.BASIC)
     try: font.set_variation_by_name(weight)
     except Exception: pass
     pad = 1
