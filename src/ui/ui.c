@@ -208,7 +208,7 @@ static void change_category(int dir) {
 static void browse_update(void) {
     int n = g_list.view_count;
     if (in.pressed & BTN_X) { sel_settings = 0; go(ST_SETTINGS); return; }
-    if (in.pressed & BTN_START) { go(ST_SYSINFO); return; }
+    if (in.pressed & BTN_START) { sysinfo_maple(&sys); go(ST_SYSINFO); return; }
     if (in.pressed & BTN_B) { sidebar_open(); go(ST_SIDEBAR); return; }
     if ((in.held & BTN_L) && (in.held & BTN_R) && (in.pressed & (BTN_L | BTN_R))) { letter_idx = 0; go(ST_LETTER); return; }
     if (in.pressed & BTN_L) { change_category(-1); return; }
@@ -362,7 +362,7 @@ static void opt_change(opt_t o, int dir) {
     case O_SCAN: { int v = s->scan_delay_ms + dir * 250; if (v < 250) v = 250; if (v > 5000) v = 5000; s->scan_delay_ms = v; } break;
     case O_SAVE: { int ok = settings_save() == 0; show_toast(ok ? tr(S_SAVED) : tr(S_SAVE_FAIL), ok ? 2 : 3); } break;
     case O_RESET: { settings_t keep = *s; settings_init(); settings_t def = *s; *s = keep; s->region_free = s->force_vga = s->igr = s->boot_intro = s->sega_license = 1; s->theme = 0; s->view = 0; s->screensaver_min = def.screensaver_min; s->scan_delay_ms = def.scan_delay_ms; theme_load(0); } break;
-    case O_SYSINFO: go(ST_SYSINFO); break;
+    case O_SYSINFO: sysinfo_maple(&sys); go(ST_SYSINFO); break;
     case O_EXIT: sel_dialog = 1; go(ST_DIALOG_EXIT); break;
     default: break;
     }
@@ -490,10 +490,19 @@ static void sysinfo_draw(void) {
     const char *lang = sys.lang[0] ? sys.lang : "-", *bios = sys.bios_version[0] ? sys.bios_version : "-";
     const kv_t gd[] = { { S_GDEMU_FW, fw }, { S_GDEMU_BOOT, bl } };
     const kv_t con[] = { { S_BIOS, bios }, { S_SYS_REGION, sys.region }, { S_BROADCAST, sys.broadcast }, { S_CABLE, sys.cable }, { S_LANGUAGE, lang }, { S_NETWORK, ipl } };
-    const kv_t st[] = { { S_GAMES, cnt }, { S_FAVORITES, favs }, { S_LAUNCHES, n } };
+    const char *ports[4] = { "A", "B", "C", "D" };
+    kv_t mp[4]; for (int i = 0; i < 4; i++) { mp[i].k = S_COUNT; mp[i].v = sys.maple[i][0] ? sys.maple[i] : tr(S_PORT_EMPTY); }
     float y = LIST_Y + enter_dy(), gap = 12, cw = (SCREEN_W - 2 * SAFE_X - gap) / 2;
     card(SAFE_X, y, cw, 90, tr(S_SEC_GDEMU), gd, 2, sys.gdemu.valid ? 1 : 0);
-    card(SAFE_X, y + 90 + gap, cw, 108, tr(S_SEC_STATS), st, 3, -1);
+    /* controllers: product name per port + VMU / jump pack / mic sub-devices */
+    panel(SAFE_X, y + 90 + gap, cw, 108);
+    section_label(SAFE_X + 14, y + 90 + gap + 12, tr(S_SEC_MAPLE));
+    for (int i = 0; i < 4; i++) {
+        float ry = y + 90 + gap + 36 + i * 17;
+        draw_rect_round(SAFE_X + 14, ry + 1, 14, 13, 3, ALPHA(sys.maple[i][0] ? t->accent : t->panel_alt, 255));
+        draw_text_center(&g_font_small, SAFE_X + 21, ry, sys.maple[i][0] ? t->sel_text : t->text_dim, ports[i]);
+        draw_text_clipped(&g_font_small, SAFE_X + 36, ry, cw - 50, sys.maple[i][0] ? t->text : ALPHA(t->text_dim, 150), mp[i].v);
+    }
     card(SAFE_X + cw + gap, y, cw, 210, tr(S_SEC_CONSOLE), con, 6, -1);
     float ay = y + 210 + gap, ah = LIST_H - 210 - gap;
     panel(SAFE_X, ay, SCREEN_W - 2 * SAFE_X, ah);
@@ -501,11 +510,10 @@ static void sysinfo_draw(void) {
     float lx = SAFE_X + 68;
     draw_text(&g_font_big, lx, ay + 10, t->text_dim, "Cast Menu");
     draw_text(&g_font_small, lx + text_width(&g_font_big, "Cast Menu") + 12, ay + 20, t->accent, "v" CAST_VERSION);
-    draw_text_clipped(&g_font_small, lx, ay + 38, SCREEN_W - 2 * SAFE_X - 80, t->text_dim, "Menu aberto para GDEMU. MIT. github.com/hudsonbrendon/castmenu");
-    draw_text_clipped(&g_font_small, lx, ay + 54, SCREEN_W - 2 * SAFE_X - 80, ALPHA(t->text_dim, 170), "neuroacid (GDMENU) \xb7 Deunan (GDEMU) \xb7 KallistiOS \xb7 megavolt85 \xb7 mrneo240");
-    float tx = lx;
-    const char *tags[] = { "KallistiOS 2.3", "SH-4", "PVR", "GDEMU 5.13+", "BBA / DreamPi" };
-    for (int i = 0; i < 5; i++) { float w = text_width(&g_font_small, tags[i]) + 14; if (tx + w > SCREEN_W - SAFE_X - 14) break; draw_rect_round(tx, ay + 76, w, 18, 9, ALPHA(t->panel_alt, 255)); draw_rect_round_outline(tx, ay + 76, w, 18, 9, ALPHA(t->accent, 80)); draw_text(&g_font_small, tx + 7, ay + 78, t->accent, tags[i]); tx += w + 8; }
+    char stats[96]; snprintf(stats, sizeof stats, "%s %s  \xb7  %s %s  \xb7  %s %s", cnt, tr(S_GAMES_LOWER), favs, tr(S_FAVORITES), n, tr(S_LAUNCHES));
+    for (char *c = stats; *c; c++) if (*c >= 'A' && *c <= 'Z' && c > stats && c[-1] != ' ' && c[-1] != '\xb7') *c += 32;
+    draw_text_clipped(&g_font_small, lx, ay + 40, SCREEN_W - 2 * SAFE_X - 80, t->text, stats);
+    draw_text_clipped(&g_font_small, lx, ay + 58, SCREEN_W - 2 * SAFE_X - 80, t->text_dim, "MIT \xb7 github.com/hudsonbrendon/castmenu \xb7 neuroacid (GDMENU) \xb7 Deunan (GDEMU) \xb7 KallistiOS");
     if (sys.gdemu.valid && (sys.gdemu.fw_major < 5 || (sys.gdemu.fw_major == 5 && sys.gdemu.fw_minor < 13))) {
         float ww = text_width(&g_font_small, tr(S_NEED_FW)) + 24;
         draw_rect_round((SCREEN_W - ww) / 2, BOTTOM_Y - 32, ww, 22, 11, ALPHA(t->badge_j, 230));
@@ -676,7 +684,7 @@ void ui_frame(void) {
     case ST_SAVER: saver_draw(); break;
     case ST_CHAT: draw_frame_begin(); draw_background(); draw_frame_tr(); draw_background_tr(); chat_draw(); break;
     case ST_AI: draw_frame_begin(); draw_background(); draw_frame_tr(); draw_background_tr(); ai_draw(); break;
-    case ST_DETAILS: { float keep = ui_enter; ui_enter = 1; browse_draw(); ui_enter = keep; details_draw(); } break;
+    case ST_DETAILS: draw_frame_begin(); draw_background(); draw_frame_tr(); draw_background_tr(); details_draw(); break;
     case ST_SIDEBAR: { float keep = ui_enter; ui_enter = 1; browse_draw(); ui_enter = keep; sidebar_draw(1); } break;
     case ST_DIALOG_EXIT: if (prev_state == ST_SETTINGS) settings_draw(); else browse_draw(); dialog_exit_draw(); break;
     case ST_DIALOG_DISC: browse_draw(); dialog_disc_draw(); break;

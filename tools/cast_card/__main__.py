@@ -87,7 +87,7 @@ def write_synopses(items, data_dir):
             if not os.path.exists(src): continue
             d = os.path.join(data_dir, "info", lang); os.makedirs(d, exist_ok=True)
             txt = open(src, encoding="utf-8", errors="replace").read().strip()
-            open(os.path.join(d, "%03d.txt" % it["slot"]), "w", encoding="latin-1", errors="replace").write(txt[:2300])
+            open(os.path.join(d, "%03d.txt" % it["slot"]), "w", encoding="latin-1", errors="replace").write(txt[:3800])
 
 def write_avatars(sd, data_dir):
     src = os.path.join(sd, "avatars")
@@ -135,18 +135,18 @@ def placeholder_cover(title, size=128):
     d.rectangle([0, 0, size - 1, size - 1], outline=(0x66, 0x69, 0x6D))
     return img
 
-def video_clip(folder):
-    """video.cvm next to the image, (re)encoded from video.mp4/mkv/... when missing or older."""
+def video_clip(folder, redo=False):
+    """video.cvm next to the image, (re)encoded from video.mp4/mkv/... when missing or older (or redo)."""
     src = cvm.find_video(folder)
     if not src: return None
     dst = os.path.join(folder, "video.cvm")
-    if not os.path.exists(dst) or os.path.getmtime(dst) < os.path.getmtime(src):
+    if redo or not os.path.exists(dst) or os.path.getmtime(dst) < os.path.getmtime(src):
         print(f"  video {os.path.basename(folder)}: {os.path.basename(src)}")
         try: cvm.encode(src, dst)
         except Exception as e: print(f"  !! {os.path.basename(folder)}: video: {e}"); return None
     return dst
 
-def build_data(items, data_dir, menu_bin, themes_dir, custom_covers=None, sd=None, server=None, gdmenu_loader=None):
+def build_data(items, data_dir, menu_bin, themes_dir, custom_covers=None, sd=None, server=None, gdmenu_loader=None, redo=False):
     os.makedirs(os.path.join(data_dir, "covers"), exist_ok=True)
     shutil.copy(menu_bin, os.path.join(data_dir, "1ST_READ.BIN"))
     if gdmenu_loader:
@@ -183,7 +183,7 @@ def build_data(items, data_dir, menu_bin, themes_dir, custom_covers=None, sd=Non
             open(dst + ".pvr", "wb").write(it["cover"])
         else:                                         # nothing anywhere: a generated card with the title
             open(dst + ".tex", "wb").write(tex.encode(placeholder_cover(it["name"]), "rgb565")); it["cover"] = True
-        it["cvm"] = video_clip(it["folder"])
+        it["cvm"] = video_clip(it["folder"], redo)
     # themes: convert bg.png -> bg.tex (512x512) and copy ini
     for tid in sorted(os.listdir(themes_dir)):
         src = os.path.join(themes_dir, tid)
@@ -211,7 +211,7 @@ def cmd_build(a):
     with tempfile.TemporaryDirectory() as tmp:
         data = os.path.join(tmp, "data"); os.makedirs(data)
         gl = open(a.gdmenu_loader, "rb").read() if getattr(a, "gdmenu_loader", None) else find_gdmenu_loader(a.sd)
-        build_data(items, data, menu_bin, a.themes or os.path.join(ROOT, "themes"), a.covers, sd=a.sd, server=getattr(a, "server", None), gdmenu_loader=gl)
+        build_data(items, data, menu_bin, a.themes or os.path.join(ROOT, "themes"), a.covers, sd=a.sd, server=getattr(a, "server", None), gdmenu_loader=gl, redo=getattr(a, "videos_redo", False))
         ip_tmpl = open(a.ip_template or os.path.join(ROOT, "assets", "IP.BIN"), "rb").read()
         ip = ipbin.patch(ip_tmpl, name="CASTMENU", product="CASTMENU", version="V1.000", date="20261015", company="CASTMENU")
         ipp = os.path.join(tmp, "IP.BIN"); open(ipp, "wb").write(ip)
@@ -249,6 +249,9 @@ def cmd_fetch(a):
     items = scan(a.sd)
     n = fetch.fetch_covers(items, force=a.force)
     print(f"{n} capas baixadas; rode build para gravar")
+    if not a.no_synopses:
+        n = fetch.fetch_synopses(items, force=a.force)
+        print(f"{n} sinopses baixadas (Wikipedia); rode build para gravar")
     if a.videos:
         n = fetch.fetch_videos(items, force=a.force)
         print(f"{n} clipes baixados; rode build para gravar")
@@ -266,10 +269,10 @@ def main():
     p = argparse.ArgumentParser(prog="castmenu-card", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sp = p.add_subparsers(dest="cmd", required=True)
     s = sp.add_parser("scan"); s.add_argument("sd"); s.set_defaults(fn=cmd_scan)
-    b = sp.add_parser("build"); b.add_argument("sd"); b.add_argument("--out"); b.add_argument("--menu-bin"); b.add_argument("--themes"); b.add_argument("--covers", help="dir with <PRODUCT>.png custom covers"); b.add_argument("--ip-template"); b.add_argument("--server", help="host:port of the Cast Chat server (or sd/server.txt)"); b.add_argument("--gdmenu-loader", help="GDMENU loader.bin (or a GDMENU 1ST_READ.BIN/track file) to ship as the alternative loader"); b.set_defaults(fn=cmd_build)
+    b = sp.add_parser("build"); b.add_argument("sd"); b.add_argument("--out"); b.add_argument("--menu-bin"); b.add_argument("--themes"); b.add_argument("--covers", help="dir with <PRODUCT>.png custom covers"); b.add_argument("--ip-template"); b.add_argument("--videos-redo", action="store_true", help="re-encode every clip (after encoder changes)"); b.add_argument("--server", help="host:port of the Cast Chat server (or sd/server.txt)"); b.add_argument("--gdmenu-loader", help="GDMENU loader.bin (or a GDMENU 1ST_READ.BIN/track file) to ship as the alternative loader"); b.set_defaults(fn=cmd_build)
     ad = sp.add_parser("add"); ad.add_argument("sd"); ad.add_argument("images", nargs="+"); ad.set_defaults(fn=cmd_add)
     so = sp.add_parser("sort"); so.add_argument("sd"); so.set_defaults(fn=cmd_sort)
-    fe = sp.add_parser("fetch"); fe.add_argument("sd"); fe.add_argument("--force", action="store_true", help="also for games that carry 0GDTEX.PVR / already have a clip"); fe.add_argument("--videos", action="store_true", help="download a gameplay clip per game (needs yt-dlp + ffmpeg)"); fe.set_defaults(fn=cmd_fetch)
+    fe = sp.add_parser("fetch"); fe.add_argument("sd"); fe.add_argument("--force", action="store_true", help="also for games that carry 0GDTEX.PVR / already have a clip"); fe.add_argument("--videos", action="store_true", help="download a gameplay clip per game (needs yt-dlp + ffmpeg)"); fe.add_argument("--no-synopses", action="store_true", help="skip the Wikipedia synopses"); fe.set_defaults(fn=cmd_fetch)
     a = p.parse_args(); a.fn(a)
 
 if __name__ == "__main__":

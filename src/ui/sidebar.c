@@ -48,7 +48,7 @@ void sidebar_draw(float base_alpha) {
     char lc[32]; snprintf(lc, sizeof lc, "%lu %s", (unsigned long)s->launches, tr(S_GAMES_LOWER));
     draw_text(&g_font_small, px + 70, 50, t->text_dim, lc);
     hairline(px + 16, 82, pw - 32);
-    draw_text_clipped(&g_font_big, px + 16, 92, pw - 32, t->text_hi, tr(S_RECENT));
+    draw_text_clipped(&g_font, px + 16, 96, pw - 32, t->text_hi, tr(S_RECENT));
     if (!n) draw_text(&g_font_small, px + 16, 130, t->text_dim, tr(S_NEVER_PLAYED));
     for (int i = 0; i < n && i < 5; i++) {
         float y = 128 + i * 62; int is = i == sel;

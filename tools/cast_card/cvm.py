@@ -4,7 +4,7 @@
 Layout: b'CVID', u16 w, u16 h, u16 frames, u16 fps, padded to one 2048-byte sector; then frames of
 2048 (codebook: 256 x 4 RGB565 texels, twiddled order) + w*h/4 (indices, twiddled).
 Encoded with a few Lloyd iterations per frame, seeded from the previous frame's codebook."""
-import os, struct, subprocess, json
+import os, re, struct, subprocess, json
 import numpy as np
 
 def _twiddle_index(n):
@@ -51,9 +51,20 @@ def duration(path):
         return float(json.loads(out)["format"]["duration"])
     except Exception: return 0.0
 
-def frames(path, start, seconds, fps, size):
+def detect_crop(path, start, seconds=3):
+    """ffmpeg cropdetect over a few seconds: strips letterbox/pillarbox bars baked into the source."""
+    try:
+        out = subprocess.run(["ffmpeg", "-v", "info", "-ss", str(start), "-t", str(seconds), "-i", path, "-vf", "cropdetect=24:8:0", "-f", "null", "-"],
+                             capture_output=True, text=True).stderr
+        m = re.findall(r"crop=(\d+):(\d+):(\d+):(\d+)", out)
+        if not m: return None
+        w, h, x, y = map(int, m[-1])
+        return f"crop={w}:{h}:{x}:{y}," if w >= 64 and h >= 64 else None
+    except Exception: return None
+
+def frames(path, start, seconds, fps, size, crop=""):
     cmd = ["ffmpeg", "-v", "error", "-ss", str(start), "-i", path, "-t", str(seconds), "-an",
-           "-vf", f"fps={fps},scale={size}:{size}:flags=lanczos", "-f", "rawvideo", "-pix_fmt", "rgb24", "-"]
+           "-vf", f"{crop}fps={fps},scale={size}:{size}:flags=lanczos", "-f", "rawvideo", "-pix_fmt", "rgb24", "-"]
     raw = subprocess.run(cmd, capture_output=True, check=True).stdout
     n = len(raw) // (size * size * 3)
     return np.frombuffer(raw[:n * size * size * 3], dtype=np.uint8).reshape(n, size, size, 3)
@@ -61,7 +72,7 @@ def frames(path, start, seconds, fps, size):
 def encode(src, dst, seconds=12, fps=10, size=256, start=None, log=None):
     dur = duration(src)
     if start is None: start = 0 if dur <= 30 else max(0, min(dur * 0.35, dur - seconds))   # skip intros/menus of long gameplay videos
-    fr = frames(src, start, seconds, fps, size)
+    fr = frames(src, start, seconds, fps, size, detect_crop(src, start) or "")
     if len(fr) == 0: raise ValueError("no frames")
     tw = _twiddle_index(size // 2)
     book = None; rng = np.random.default_rng(1)

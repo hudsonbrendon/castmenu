@@ -66,3 +66,11 @@ void video_draw(void) {
     int light = lum > 128;
     draw_tex(&tex[front], 0, 0, SCREEN_W, SCREEN_H, light ? RGBA(255, 255, 255, (int)(alpha * 135)) : RGBA(165, 165, 165, (int)(alpha * 215)));
 }
+int video_draw_rect(float x, float y, float w, float h, int a) {
+    if (!playing || front < 0) return 0;
+    /* clips are 4:3 frames stored square; a wider window shows a vertical crop instead of a squash */
+    float f = (4.0f / 3) / (w / h); if (f > 1) f = 1;
+    float v0 = (1 - f) / 2, u1 = (float)tex[front].iw / tex[front].w, vh = (float)tex[front].ih / tex[front].h;
+    draw_tex_uv(&tex[front], x, y, w, h, 0, v0 * vh, u1, (v0 + f) * vh, RGBA(255, 255, 255, (int)(a * alpha)));
+    return 1;
+}

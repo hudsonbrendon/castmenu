@@ -17,7 +17,7 @@ Controller e mais), tipografia do logotipo Dreamcast, relógio e sinal de rede, 
 
 Compatível com cartões já montados pelo GDMENU Card Manager (`LIST.INI`) e com a ferramenta
 própria `cast_card`, que extrai capas das imagens (de qualquer faixa do GDI), baixa as que faltam
-(libretro thumbnails), gera sinopses/categorias e a pasta `01/`. **Vídeo de fundo**: ao parar num jogo,
+(libretro thumbnails), baixa **sinopses da Wikipedia** (pt + en), gera categorias e a pasta `01/`. A tela de detalhes (Y) mostra tempo de jogo, o clipe do jogo em janela e a sinopse completa com rolagem; Sistema (START) lista os controles conectados em cada porta. **Vídeo de fundo**: ao parar num jogo,
 um clipe curto de gameplay toca atrás do coverflow (estilo Batocera), gerado pelo card tool a partir de
 `video.mp4` na pasta do jogo ou baixado com `fetch --videos` (yt-dlp). Ao iniciar um jogo, uma **animação do Dreamcast** visto de cima: a tampa abre, o disco com a capa do jogo encaixa e gira enquanto a barra de progresso enche.
 

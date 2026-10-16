@@ -26,8 +26,8 @@ PRODUCT	CÓDIGO	PRODUCT	CÓDIGO	PRODUKT	PRODUIT	CODICE
 VGA	VGA	VGA	VGA	VGA	VGA	VGA
 GDROM	GD-ROM	GD-ROM	GD-ROM	GD-ROM	GD-ROM	GD-ROM
 CDROM	CD-ROM	CD-ROM	CD-ROM	CD-ROM	CD-ROM	CD-ROM
-GENRE	GÊNERO	GENRE	GÉNERO	GENRE	GENRE	GENERE
-PLAYERS	JOGADORES	PLAYERS	JUGADORES	SPIELER	JOUEURS	GIOCATORI
+GENRE	Gênero	GENRE	GÉNERO	GENRE	GENRE	GENERE
+PLAYERS	Jogadores	Players	Jugadores	Spieler	Joueurs	GiocatoriTORI
 CHOOSE_DISC	Escolha o disco	Choose disc	Elige el disco	Disc wählen	Choisir le disque	Scegli il disco
 REGION_FREE	REGION FREE	REGION FREE	REGION FREE	REGION FREE	REGION FREE	REGION FREE
 FORCE_VGA	FORÇAR VGA	FORCE VGA	FORZAR VGA	VGA ERZWINGEN	FORCER VGA	FORZA VGA
@@ -181,3 +181,5 @@ LOADER_CAST	CAST	CAST	CAST	CAST	CAST	CAST
 LOADER_GDMENU	GDMENU	GDMENU	GDMENU	GDMENU	GDMENU	GDMENU
 LOADER_MISSING	GDMENU (ausente)	GDMENU (missing)	GDMENU (falta)	GDMENU (fehlt)	GDMENU (absent)	GDMENU (assente)
 D_BG_VIDEO	Mostra cenas do jogo selecionado atrás do menu (clipes gerados pelo card tool).	Plays scenes of the selected game behind the menu (clips made by the card tool).	Muestra escenas del juego seleccionado detrás del menú (clips del card tool).	Zeigt Szenen des gewählten Spiels hinter dem Menü (Clips vom Card-Tool).	Affiche des scènes du jeu sélectionné derrière le menu (clips du card tool).	Mostra scene del gioco selezionato dietro il menu (clip creati dal card tool).
+SEC_MAPLE	CONTROLES	CONTROLLERS	MANDOS	CONTROLLER	MANETTES	CONTROLLER
+PORT_EMPTY	vazio	empty	vacío	leer	vide	vuoto

@@ -1,5 +1,6 @@
-"""Fetch missing art from the libretro thumbnail server (CC-licensed boxarts and screenshots).
-Writes cover.png next to each game image when the disc itself carries no 0GDTEX.PVR."""
+"""Fetch what the disc does not carry: covers from the libretro thumbnail server (CC boxarts),
+synopses from Wikipedia (lead section, pt + en), gameplay clips with yt-dlp.
+Everything lands next to the game image (cover.png, synopsis.<lang>.txt, video.mp4) so build picks it up."""
 import os, re, difflib, urllib.request, urllib.parse
 
 BASE = "https://thumbnails.libretro.com/Sega%20-%20Dreamcast/"
@@ -110,3 +111,49 @@ if __name__ == "__main__":
     assert match("King of Fighters, The - Dream Match 1999", "U", names).startswith("King of Fighters, The - Dream Match 1999")
     assert match("Resident Evil Code - Veronica Disco 1", "JUE", names) is not None
     print("fetch OK")
+
+
+# ---------- synopses (Wikipedia lead section) ----------
+import json
+UA = {"User-Agent": "castmenu/0.3 (https://github.com/hudsonbrendon/castmenu)"}
+WIKI_LANGS = ("pt", "en")
+def _wiki(lang, params):
+    url = f"https://{lang}.wikipedia.org/w/api.php?" + urllib.parse.urlencode(dict(params, format="json"))
+    for attempt in range(3):
+        try: return json.load(urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30))
+        except Exception:
+            if attempt == 2: raise
+
+def wiki_synopsis(title, lang):
+    """Lead section of the Wikipedia article whose title matches the game (digits must agree); None if unsure."""
+    want = _norm(title)
+    res = _wiki(lang, {"action": "query", "list": "search", "srsearch": f"{title} Dreamcast", "srlimit": 8})["query"]["search"]
+    best = None
+    for r in res:
+        n = _norm(r["title"])
+        if _digits(n) != _digits(want): continue
+        score = difflib.SequenceMatcher(None, want, n).ratio()
+        if n == want or n.startswith(want + " ") and score > 0.6: score += 0.5
+        if score >= 0.8 and (not best or score > best[0]): best = (score, r["title"])
+    if not best: return None
+    pages = _wiki(lang, {"action": "query", "prop": "extracts", "exintro": 1, "explaintext": 1, "redirects": 1, "titles": best[1]})["query"]["pages"]
+    txt = list(pages.values())[0].get("extract", "").strip()
+    if len(txt) < 80 or not re.search(r"dreamcast|jogo|game|videogame|videojuego", txt, re.I): return None
+    txt = re.sub(r"\s*\([^()]*?\b(ドリームキャスト|バイオハザード|[ぁ-んァ-ン一-龯])[^()]*\)", "", txt)   # drop kana/kanji parentheticals
+    return re.sub(r"[ \t]+", " ", txt)[:3800]
+
+def fetch_synopses(items, langs=WIKI_LANGS, force=False, log=print):
+    n = 0
+    for it in items:
+        if "error" in it: continue
+        for lang in langs:
+            dst = os.path.join(it["folder"], f"synopsis.{lang}.txt")
+            if os.path.exists(dst) and not force: continue
+            try: txt = wiki_synopsis(it["name"], lang)
+            except Exception as e: log(f"  {it['name']}: wikipedia {lang} falhou ({e})"); continue
+            if not txt: log(f"  {it['name']}: sem artigo {lang}"); continue
+            open(dst, "w", encoding="utf-8").write(txt + "\n")
+            if lang == "en" and not os.path.exists(os.path.join(it["folder"], "synopsis.txt")):
+                open(os.path.join(it["folder"], "synopsis.txt"), "w", encoding="utf-8").write(txt + "\n")   # fallback for the other menu languages
+            log(f"  {it['name']}: sinopse {lang} ({len(txt)} chars)"); n += 1
+    return n

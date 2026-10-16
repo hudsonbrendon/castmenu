@@ -32,3 +32,21 @@ void sysinfo_collect(sysinfo_t *s) {
     }
     strcpy(s->broadcast, r == FLASHROM_REGION_EUROPE ? "PAL" : "NTSC");
 }
+
+/* Maple devices as the console sees them. Bluetooth adapters (BlueRetro) show up as
+ * the controller/VMU/jump pack they emulate: the bus carries no vendor status. */
+void sysinfo_maple(sysinfo_t *s) {
+    for (int p = 0; p < 4; p++) {
+        char *o = s->maple[p]; o[0] = 0;
+        maple_device_t *d = maple_enum_dev(p, 0);
+        if (!d || !d->valid) continue;
+        int n = 0; while (n < 29 && d->info.product_name[n] && d->info.product_name[n] != ' ' + 0x80) n++;
+        while (n > 0 && d->info.product_name[n - 1] == ' ') n--;
+        snprintf(o, 48, "%.*s", n, d->info.product_name);
+        uint32_t sub = 0;
+        for (int u = 1; u < 6; u++) { maple_device_t *e = maple_enum_dev(p, u); if (e && e->valid) sub |= e->info.functions; }
+        if (sub & MAPLE_FUNC_MEMCARD) strncat(o, " +VMU", 47 - strlen(o));
+        if (sub & MAPLE_FUNC_PURUPURU) strncat(o, " +Vib", 47 - strlen(o));
+        if (sub & MAPLE_FUNC_MICROPHONE) strncat(o, " +Mic", 47 - strlen(o));
+    }
+}

@@ -43,7 +43,11 @@ static void make_soft_textures(void) {
 }
 
 void draw_init(void) {
-    pvr_init_params_t params = { { PVR_BINSIZE_16, PVR_BINSIZE_0, PVR_BINSIZE_32, PVR_BINSIZE_0, PVR_BINSIZE_0 }, 512 * 1024, 0, 0, 0, 0 };
+    /* opb_overflow_count: the UI stacks many small translucent quads per 32x32 tile
+     * (shadows, rounded panels, glyphs); without overflow OPBs the hardware silently
+     * drops whatever exceeds the per-tile bin (patchy panels, missing keys/hints on
+     * real PVR; emulators do not enforce it). */
+    pvr_init_params_t params = { { PVR_BINSIZE_16, PVR_BINSIZE_0, PVR_BINSIZE_32, PVR_BINSIZE_0, PVR_BINSIZE_0 }, 512 * 1024, 0, 0, 0, 6, 0 };
     pvr_init(&params);
     texture_solid(&white);
     make_soft_textures();
