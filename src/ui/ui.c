@@ -7,12 +7,16 @@
 #include "input.h"
 #include "covers.h"
 #include "video.h"
+#include "music.h"
+#include "sfx.h"
 #include "anim.h"
 #include "lang.h"
 #include "chrome.h"
 #include "coverflow.h"
 #include "screens.h"
 #include "osk.h"
+#include "vmu_ui.h"
+#include "../vm2.h"
 #include "launch_scene.h"
 #include "../list.h"
 #include "../settings.h"
@@ -27,7 +31,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-typedef enum { ST_BOOT, ST_BROWSE, ST_DETAILS, ST_SIDEBAR, ST_SETTINGS, ST_SYSINFO, ST_CHAT, ST_AI, ST_DIALOG_EXIT, ST_DIALOG_DISC, ST_LETTER, ST_LAUNCH, ST_SAVER } state_t;
+typedef enum { ST_BOOT, ST_BROWSE, ST_DETAILS, ST_SIDEBAR, ST_SETTINGS, ST_SYSINFO, ST_CHAT, ST_AI, ST_DIALOG_EXIT, ST_DIALOG_DISC, ST_LETTER, ST_LAUNCH, ST_SAVER, ST_VMU } state_t;
 
 static state_t state = ST_BOOT, prev_state;
 static input_t in;
@@ -55,8 +59,11 @@ static char avatars[16][AVATAR_LEN]; static int n_avatars;
 #define GRID_PAD 10.0f
 
 static int view_mode(void) { return settings_get()->view; }   /* 0 coverflow, 1 list, 2 grid */
-static void go(state_t s) { prev_state = state; state = s; ui_enter = 0; }
+static void go(state_t s) { if (state != ST_BOOT) sfx_play(s == ST_BROWSE || s == ST_SETTINGS ? SFX_BACK : SFX_SELECT); prev_state = state; state = s; ui_enter = 0; }
+static char search_edit[24];
 static const char *cat_label(int cat) {
+    static char sb[40];
+    if (g_list.search[0]) { snprintf(sb, sizeof sb, "\"%s\"", g_list.search); return sb; }
     return cat == CAT_ALL ? tr(S_CAT_ALL) : cat == CAT_FAVORITES ? tr(S_CAT_FAVORITES) : cat == CAT_RECENT ? tr(S_CAT_RECENT) : list_category_name(cat);
 }
 
@@ -203,7 +210,7 @@ static void draw_grid(void) {
     draw_clear_clip();
 }
 static void change_category(int dir) {
-    list_set_category(g_list.category + dir); cursor = 0; scroll_target = 0; cf_pos = 0; cat_anim = 0; cat_dir = dir; sel_anim = 0;
+    g_list.search[0] = 0; list_set_category(g_list.category + dir); cursor = 0; scroll_target = 0; cf_pos = 0; cat_anim = 0; cat_dir = dir; sel_anim = 0;
 }
 static void browse_update(void) {
     int n = g_list.view_count;
@@ -233,7 +240,7 @@ static void browse_update(void) {
         if (cursor < 0) cursor = (in.repeat & BTN_UP) && old == 0 ? n - 1 : 0;
         if (cursor >= n) cursor = (in.repeat & BTN_DOWN) && old == n - 1 ? 0 : n - 1;
     }
-    if (cursor != old) sel_anim = 0;
+    if (cursor != old) { sel_anim = 0; sfx_play(SFX_MOVE); }
     game_t *g = list_view_item(cursor);
     if (in.pressed & BTN_A) {
         disc_set_n = list_disc_set(g, disc_set, 8);
@@ -289,18 +296,18 @@ static void browse_draw(void) {
 }
 
 /* ---------- settings ---------- */
-typedef enum { O_NICK, O_AVATAR, O_REGION, O_VGA, O_IGR, O_INTRO, O_LICENSE, O_LOADER, O_THEME, O_VIEW, O_LANG, O_SORT, O_REGIONF, O_MULTI, O_COVERS, O_VIDEO, O_CHAT, O_AI, O_SERVER, O_NETAUTO, O_CONNECT, O_SAVER, O_SCAN, O_SAVE, O_RESET, O_SYSINFO, O_EXIT, O_COUNT } opt_t;
+typedef enum { O_NICK, O_AVATAR, O_REGION, O_VGA, O_IGR, O_INTRO, O_LICENSE, O_LOADER, O_GAMEID, O_VMU, O_THEME, O_VIEW, O_LANG, O_SORT, O_REGIONF, O_MULTI, O_COVERS, O_VIDEO, O_MUSIC, O_BGM, O_SFX, O_CHAT, O_AI, O_SERVER, O_NETAUTO, O_CONNECT, O_SAVER, O_SCAN, O_SAVE, O_RESET, O_SYSINFO, O_EXIT, O_COUNT } opt_t;
 static char nick_edit[NICK_LEN], server_edit[SERVER_LEN]; static int osk_opt;
 static int opt_is_toggle(opt_t o, int *val) {
     settings_t *s = settings_get();
     switch (o) {
     case O_REGION: *val = s->region_free; return 1; case O_VGA: *val = s->force_vga; return 1; case O_IGR: *val = s->igr; return 1;
-    case O_INTRO: *val = s->boot_intro; return 1; case O_LICENSE: *val = s->sega_license; return 1;
-    case O_MULTI: *val = s->hide_multidisc; return 1; case O_COVERS: *val = s->cover_mode; return 1; case O_VIDEO: *val = !s->no_bg_video; return 1; case O_NETAUTO: *val = s->net_auto; return 1;
+    case O_INTRO: *val = s->boot_intro; return 1; case O_LICENSE: *val = s->sega_license; return 1; case O_GAMEID: *val = !s->no_gameid; return 1;
+    case O_MULTI: *val = s->hide_multidisc; return 1; case O_COVERS: *val = s->cover_mode; return 1; case O_VIDEO: *val = !s->no_bg_video; return 1; case O_MUSIC: *val = !s->no_music; return 1; case O_BGM: *val = !s->no_bgm; return 1; case O_SFX: *val = !s->no_sfx; return 1; case O_NETAUTO: *val = s->net_auto; return 1;
     default: return 0;
     }
 }
-static int opt_is_action(opt_t o) { return o == O_CHAT || o == O_AI || o == O_CONNECT || o >= O_SAVE; }
+static int opt_is_action(opt_t o) { return o == O_CHAT || o == O_AI || o == O_CONNECT || o == O_VMU || o >= O_SAVE; }
 static void opt_value(opt_t o, char *out, int cap) {
     settings_t *s = settings_get();
     switch (o) {
@@ -320,11 +327,11 @@ static void opt_value(opt_t o, char *out, int cap) {
     }
 }
 static const char *opt_label(opt_t o) {
-    static const str_id ids[O_COUNT] = { S_NICKNAME, S_AVATAR, S_REGION_FREE, S_FORCE_VGA, S_IGR, S_BOOT_INTRO, S_SEGA_LICENSE, S_LOADER_KIND, S_THEME, S_DEFAULT_VIEW, S_LANGUAGE, S_SORT, S_REGION, S_HIDE_MULTIDISC, S_COVERS, S_BG_VIDEO, S_CAST_CHAT, S_CAST_AI, S_SERVER, S_NETWORK, S_CONNECT, S_SCREENSAVER, S_SCAN_DELAY, S_SAVE, S_RESET_SETTINGS, S_SYSINFO, S_EXIT_TO_BIOS };
+    static const str_id ids[O_COUNT] = { S_NICKNAME, S_AVATAR, S_REGION_FREE, S_FORCE_VGA, S_IGR, S_BOOT_INTRO, S_SEGA_LICENSE, S_LOADER_KIND, S_GAME_ID, S_VMU_SAVES, S_THEME, S_DEFAULT_VIEW, S_LANGUAGE, S_SORT, S_REGION, S_HIDE_MULTIDISC, S_COVERS, S_BG_VIDEO, S_MUSIC, S_BGM, S_SFX, S_CAST_CHAT, S_CAST_AI, S_SERVER, S_NETWORK, S_CONNECT, S_SCREENSAVER, S_SCAN_DELAY, S_SAVE, S_RESET_SETTINGS, S_SYSINFO, S_EXIT_TO_BIOS };
     return tr(ids[o]);
 }
 static const char *opt_desc(opt_t o) {
-    static const str_id ids[O_COUNT] = { S_D_NICK, S_D_AVATAR, S_D_REGION, S_D_VGA, S_D_IGR, S_D_INTRO, S_D_LICENSE, S_D_LOADER_KIND, S_D_THEME, S_D_VIEW, S_D_LANG, S_D_SORT, S_D_REGIONF, S_D_MULTI, S_D_COVERS, S_D_BG_VIDEO, S_D_CHAT, S_D_AI, S_D_NET, S_D_NET, S_D_NET, S_D_SAVER, S_D_SCAN, S_D_SAVE, S_D_RESET, S_D_SYSINFO, S_D_EXIT };
+    static const str_id ids[O_COUNT] = { S_D_NICK, S_D_AVATAR, S_D_REGION, S_D_VGA, S_D_IGR, S_D_INTRO, S_D_LICENSE, S_D_LOADER_KIND, S_D_GAME_ID, S_D_VMU, S_D_THEME, S_D_VIEW, S_D_LANG, S_D_SORT, S_D_REGIONF, S_D_MULTI, S_D_COVERS, S_D_BG_VIDEO, S_D_MUSIC, S_D_BGM, S_D_SFX, S_D_CHAT, S_D_AI, S_D_NET, S_D_NET, S_D_NET, S_D_SAVER, S_D_SCAN, S_D_SAVE, S_D_RESET, S_D_SYSINFO, S_D_EXIT };
     return tr(ids[o]);
 }
 static str_id opt_section(opt_t o) {
@@ -353,7 +360,12 @@ static void opt_change(opt_t o, int dir) {
     case O_MULTI: s->hide_multidisc ^= 1; g_list.hide_multidisc_extra = s->hide_multidisc; list_rebuild_view(); cursor = 0; break;
     case O_COVERS: s->cover_mode ^= 1; break;
     case O_VIDEO: s->no_bg_video ^= 1; break;
+    case O_MUSIC: s->no_music ^= 1; if (s->no_music) music_stop(); break;
+    case O_BGM: s->no_bgm ^= 1; break;
+    case O_SFX: s->no_sfx ^= 1; sfx_play(SFX_SELECT); break;
     case O_CHAT: chat_open(); go(ST_CHAT); break;
+    case O_VMU: vmu_ui_open(); go(ST_VMU); break;
+    case O_GAMEID: s->no_gameid ^= 1; break;
     case O_AI: ai_open(); go(ST_AI); break;
     case O_SERVER: strncpy(server_edit, s->server, SERVER_LEN - 1); osk_opt = O_SERVER; osk_open(tr(S_SERVER), server_edit, SERVER_LEN); break;
     case O_NETAUTO: s->net_auto ^= 1; break;
@@ -382,6 +394,7 @@ static void settings_update(void) {
         if (r == 1) { settings_t *s = settings_get(); if (osk_opt == O_NICK && nick_edit[0]) strncpy(s->nick, nick_edit, NICK_LEN - 1); if (osk_opt == O_SERVER && server_edit[0]) { strncpy(s->server, server_edit, SERVER_LEN - 1); s->server_user = 1; } }
         return;
     }
+    if (in.repeat & (BTN_UP | BTN_DOWN)) sfx_play(SFX_MOVE);
     if (in.repeat & BTN_UP) sel_settings = (sel_settings + O_COUNT - 1) % O_COUNT;
     if (in.repeat & BTN_DOWN) sel_settings = (sel_settings + 1) % O_COUNT;
     int text_or_action = sel_settings == O_NICK || sel_settings == O_SERVER || opt_is_action(sel_settings);
@@ -513,7 +526,21 @@ static void sysinfo_draw(void) {
     char stats[96]; snprintf(stats, sizeof stats, "%s %s  \xb7  %s %s  \xb7  %s %s", cnt, tr(S_GAMES_LOWER), favs, tr(S_FAVORITES), n, tr(S_LAUNCHES));
     for (char *c = stats; *c; c++) if (*c >= 'A' && *c <= 'Z' && c > stats && c[-1] != ' ' && c[-1] != '\xb7') *c += 32;
     draw_text_clipped(&g_font_small, lx, ay + 40, SCREEN_W - 2 * SAFE_X - 80, t->text, stats);
-    draw_text_clipped(&g_font_small, lx, ay + 58, SCREEN_W - 2 * SAFE_X - 80, t->text_dim, "MIT \xb7 github.com/hudsonbrendon/castmenu \xb7 neuroacid (GDMENU) \xb7 Deunan (GDEMU) \xb7 KallistiOS");
+    draw_text_clipped(&g_font_small, lx, ay + 58, 300, t->text_dim, "MIT \xb7 github.com/hudsonbrendon/castmenu");
+    /* statistics: total play time + the three most played games */
+    { settings_t *st = settings_get(); uint32_t total = 0; int top[3] = { -1, -1, -1 };
+      for (int i = 0; i < g_list.count; i++) { uint16_t sl = g_list.items[i].slot; if (sl >= 1000) continue; total += st->playtime[sl];
+          for (int k = 0; k < 3; k++) if (top[k] < 0 || st->playtime[sl] > st->playtime[g_list.items[top[k]].slot]) { for (int m = 2; m > k; m--) top[m] = top[m - 1]; top[k] = i; break; } }
+      float sx = SCREEN_W / 2 + 10, sw = SCREEN_W - SAFE_X - sx - 14;
+      section_label(sx, ay + 12, tr(S_MOST_PLAYED));
+      char tp[24]; fmt_playtime(total > 65535 ? 65535 : total, tp, sizeof tp);
+      draw_text_right(&g_font_small, sx + sw, ay + 12, t->accent, tp);
+      for (int k = 0; k < 3 && top[k] >= 0 && st->playtime[g_list.items[top[k]].slot]; k++) {
+          char pt[24]; fmt_playtime(st->playtime[g_list.items[top[k]].slot], pt, sizeof pt);
+          float ry = ay + 36 + k * 17;
+          draw_text_clipped(&g_font_small, sx, ry, sw - 70, t->text, g_list.items[top[k]].name);
+          draw_text_right(&g_font_small, sx + sw, ry, t->text_dim, pt);
+      } }
     if (sys.gdemu.valid && (sys.gdemu.fw_major < 5 || (sys.gdemu.fw_major == 5 && sys.gdemu.fw_minor < 13))) {
         float ww = text_width(&g_font_small, tr(S_NEED_FW)) + 24;
         draw_rect_round((SCREEN_W - ww) / 2, BOTTOM_Y - 32, ww, 22, 11, ALPHA(t->badge_j, 230));
@@ -572,12 +599,19 @@ static void letter_draw(void) {
         draw_text_center(&g_font, x0 + i * 15 + 7, y, i == letter_idx ? t->sel_text : active ? t->accent : t->text, s);
     }
     draw_hints(SCREEN_W / 2, (SCREEN_H - 140) / 2 + 122, tr(S_HINT_LETTER), 160);
+    osk_draw();
 }
 static void letter_update(void) {
+    if (osk_active()) {
+        int r = osk_update(&in);
+        if (r == 1) { strncpy(g_list.search, search_edit, sizeof g_list.search - 1); g_list.filter_letter = 0; list_rebuild_view(); cursor = 0; scroll_target = 0; cf_pos = 0; go(ST_BROWSE); }
+        return;
+    }
+    if (in.pressed & BTN_Y) { strncpy(search_edit, g_list.search, sizeof search_edit - 1); osk_open(tr(S_SEARCH), search_edit, sizeof search_edit); return; }
     if (in.repeat & BTN_LEFT) letter_idx = (letter_idx + 26) % 27;
     if (in.repeat & BTN_RIGHT) letter_idx = (letter_idx + 1) % 27;
     if (in.pressed & BTN_B) go(ST_BROWSE);
-    if (in.pressed & BTN_X) { g_list.filter_letter = g_list.filter_letter == LETTERS[letter_idx] ? 0 : LETTERS[letter_idx]; list_rebuild_view(); cursor = 0; scroll_target = 0; cf_pos = 0; go(ST_BROWSE); }
+    if (in.pressed & BTN_X) { g_list.search[0] = 0; g_list.filter_letter = g_list.filter_letter == LETTERS[letter_idx] ? 0 : LETTERS[letter_idx]; list_rebuild_view(); cursor = 0; scroll_target = 0; cf_pos = 0; go(ST_BROWSE); }
     if (in.pressed & BTN_A) {
         for (int i = 0; i < g_list.view_count; i++) {
             char c = list_view_item(i)->name[0]; if (c >= 'a' && c <= 'z') c -= 32;
@@ -615,7 +649,7 @@ static void scan_avatars(void) {
     fs_close(d);
 }
 void ui_init(void) {
-    draw_init(); input_init(); covers_init(); video_init(); voice_init();
+    draw_init(); input_init(); covers_init(); video_init(); voice_init(); sfx_init(); music_init();
     settings_t *s = settings_get();
     theme_scan(); if (s->theme >= theme_count()) s->theme = 0;
     if (s->view > 2) s->view = 0; if (s->lang >= LANG_COUNT) s->lang = 0;
@@ -642,6 +676,8 @@ void ui_frame(void) {
         int i = list_view_index_of_slot(s->last_slot); cursor = i >= 0 ? i : 0; cf_pos = cursor;
         scroll_target = clampf((cursor - LIST_ROWS / 2) * ROW_H, 0, (g_list.view_count - LIST_ROWS) * ROW_H); scroll_y = scroll_target;
         if (s->net_auto) net_start();
+        if (vmu_clock_sync()) dbglog(DBG_INFO, "clock set from the VMU\n");
+        if (!s->no_gameid) vm2_send_id("CASTMENU", "Cast Menu");
         go(ST_BROWSE); cat_anim = 1;
     }
     chat_background_poll(); voice_update();
@@ -661,6 +697,7 @@ void ui_frame(void) {
     case ST_SIDEBAR: act = sidebar_update(&in); if (act == ACT_CLOSE) go(ST_BROWSE); else if (act == ACT_LAUNCH) launch_from(sidebar_game()); break;
     case ST_SETTINGS: settings_update(); break;
     case ST_SYSINFO: if (in.pressed & (BTN_B | BTN_A | BTN_START)) go(prev_state == ST_SETTINGS ? ST_SETTINGS : ST_BROWSE); break;
+    case ST_VMU: if (vmu_ui_update(&in) == ACT_CLOSE) go(ST_SETTINGS); break;
     case ST_CHAT: if (chat_update(&in) == ACT_CLOSE) go(ST_SETTINGS); break;
     case ST_AI: if (ai_update(&in) == ACT_CLOSE) go(ST_SETTINGS); break;
     case ST_DIALOG_EXIT: dialog_exit_update(); break;
@@ -676,7 +713,8 @@ void ui_frame(void) {
     default: break;
     }
     { int browse = state == ST_BROWSE || state == ST_DETAILS || state == ST_SIDEBAR || state == ST_DIALOG_DISC || state == ST_LETTER;
-      video_update(browse && g_list.view_count ? list_view_item(cursor)->slot : 0, ui_dt); }
+      uint16_t hov = browse && g_list.view_count ? list_view_item(cursor)->slot : 0;
+      video_update(hov, ui_dt); music_update(state == ST_LAUNCH ? 0 : hov, ui_dt); }
     scroll_y = lerp_to(scroll_y, scroll_target, 14, ui_dt);
     set_scroll = lerp_to(set_scroll, set_scroll_target, 14, ui_dt);
     sel_anim = clampf(sel_anim + ui_dt * 5, 0, 1);
@@ -688,6 +726,7 @@ void ui_frame(void) {
     switch (state) {
     case ST_SETTINGS: settings_draw(); break;
     case ST_SYSINFO: sysinfo_draw(); break;
+    case ST_VMU: draw_frame_begin(); draw_background(); draw_frame_tr(); draw_background_tr(); vmu_ui_draw(); break;
     case ST_LAUNCH: launch_draw(); break;
     case ST_SAVER: saver_draw(); break;
     case ST_CHAT: draw_frame_begin(); draw_background(); draw_frame_tr(); draw_background_tr(); chat_draw(); break;

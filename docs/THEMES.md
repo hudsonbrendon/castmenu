@@ -9,7 +9,7 @@ logo.png    optional 64×64 top-bar logo (ARGB4444)
 ```
 
 `castmenu-card build` converts every theme folder into `themes/<id>/` on the
-menu disc. Pick the theme in **Configurações → Tema**; the choice is saved to the VMU.
+menu disc. Pick the theme in **Settings → Theme**; the choice is saved to the VMU.
 The built-in fallback (`default`) lives in the romdisk so the menu always boots.
 
 ## theme.ini

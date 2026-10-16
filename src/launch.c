@@ -1,4 +1,7 @@
 #include "ui/video.h"
+#include "ui/music.h"
+#include "cheats.h"
+#include "vm2.h"
 #include "launch.h"
 #include "gdemu.h"
 #include "settings.h"
@@ -29,11 +32,11 @@ void launch_exit_to_bios(void) {
 }
 
 void launch_prepare(const game_t *g) {
-    video_stop();
+    video_stop(); music_stop();
     settings_t *s = settings_get();
     s->last_slot = g->slot; settings_push_recent(g->slot); settings_mark_launch(g->slot, (uint32_t)rtc_unix_secs()); settings_save();
 }
-void launch_mount(const game_t *g) { gdemu_img_set(g->slot); }
+void launch_mount(const game_t *g) { gdemu_img_set(g->slot); if (!settings_get()->no_gameid) vm2_send_id(g->product, g->name); }
 void launch_boot(const game_t *g) {
     settings_t *s = settings_get();
     loader_params_t p = {
@@ -42,6 +45,8 @@ void launch_boot(const game_t *g) {
         .game_region = g->region[0] == 'J' ? 0 : g->region[0] == 'U' ? 1 : 2,
         .disc_type = g->is_gd, .menu_slot = 1,
     };
+    { uint32_t pairs[78 * 2]; int n = cheats_collect(g->slot, pairs, 78);
+      if (n) { memcpy((void *)(LDR_CODES | 0x20000000), pairs, n * 8); p.n_codes = n; dbglog(DBG_INFO, "cheats: %d code pairs\n", n); } }
     if (s->loader_kind == 1) launch_with_gdmenu_loader(&p);   /* falls through to the open loader if missing */
     loader_run(&p);
 }

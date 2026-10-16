@@ -52,6 +52,12 @@ static int list_ini_cb(void *user, const char *section, const char *key, const c
         if (!c && g_list.cat_count < CAT_MAX) { copy_field(g_list.cat_names[g_list.cat_count++], CAT_NAME_LEN, value); c = g_list.cat_count; }
         g->category = c;
     }
+    else if (!strcasecmp(k, "collection")) {
+        int c = -1;
+        for (int i = 0; i < g_list.col_count; i++) if (!strcasecmp(g_list.col_names[i], value)) c = i;
+        if (c < 0 && g_list.col_count < 32) { copy_field(g_list.col_names[g_list.col_count], CAT_NAME_LEN, value); c = g_list.col_count++; }
+        if (c >= 0) g->collections |= 1u << c;
+    }
     else if (!strcasecmp(k, "vga")) g->vga = atoi(value) != 0;
     else if (!strcasecmp(k, "gd")) g->is_gd = atoi(value) != 0;
     else if (!strcasecmp(k, "players")) g->players = atoi(value);
@@ -67,7 +73,7 @@ static int scan_slots(void (*progress)(int, const char *)) {
     unsigned char sec[2048] __attribute__((aligned(32)));
     char msg[64];
     for (int slot = 2; slot <= LIST_MAX; slot++) {
-        snprintf(msg, sizeof msg, "Lendo pasta %02d", slot);
+        snprintf(msg, sizeof msg, "Reading folder %02d", slot);
         if (progress) progress(slot * 100 / 200, msg);
         if (gdemu_img_set(slot)) break;
         thd_sleep(settings_get()->scan_delay_ms);
@@ -119,6 +125,11 @@ int list_load(void (*progress)(int, const char *)) {
     return g_list.count;
 }
 
+static int ci_find(const char *hay, const char *needle) {
+    size_t n = strlen(needle);
+    for (; *hay; hay++) if (!strncasecmp(hay, needle, n)) return 1;
+    return 0;
+}
 static int cmp_name(const void *a, const void *b) {
     return strcasecmp(g_list.items[*(const uint16_t *)a].name, g_list.items[*(const uint16_t *)b].name);
 }
@@ -148,7 +159,10 @@ void list_rebuild_view(void) {
         if (g->hidden) continue;
         if (g_list.hide_multidisc_extra && g->disc[0] > '1' && g->disc[2] > '1') continue;
         if (g_list.only_favorites && !g->favorite) continue;
-        if (g_list.category >= CAT_FIRST_NAMED && g->category != g_list.category - CAT_FIRST_NAMED + 1) continue;
+        int cat = g_list.category - CAT_FIRST_NAMED;
+        if (cat >= 0 && cat < g_list.cat_count && g->category != cat + 1) continue;
+        if (cat >= g_list.cat_count && cat - g_list.cat_count < g_list.col_count && !(g->collections & (1u << (cat - g_list.cat_count)))) continue;
+        if (g_list.search[0] && !ci_find(g->name, g_list.search)) continue;
         if (g_list.filter_region && !strchr(g->region, g_list.filter_region)) continue;
         if (g_list.filter_letter) {
             char c = toupper((unsigned char)g->name[0]);
@@ -187,9 +201,10 @@ void list_toggle_favorite(game_t *g) {
     settings_set_favorite(g->slot, g->favorite);
 }
 
-int list_category_total(void) { return CAT_FIRST_NAMED + g_list.cat_count; }
+int list_category_total(void) { return CAT_FIRST_NAMED + g_list.cat_count + g_list.col_count; }
 const char *list_category_name(int cat) {
     if (cat >= CAT_FIRST_NAMED && cat - CAT_FIRST_NAMED < g_list.cat_count) return g_list.cat_names[cat - CAT_FIRST_NAMED];
+    if (cat >= CAT_FIRST_NAMED + g_list.cat_count && cat - CAT_FIRST_NAMED - g_list.cat_count < g_list.col_count) return g_list.col_names[cat - CAT_FIRST_NAMED - g_list.cat_count];
     return cat == CAT_FAVORITES ? "FAVORITES" : cat == CAT_RECENT ? "RECENT" : "ALL"; /* UI maps these through tr() */
 }
 void list_set_category(int cat) {

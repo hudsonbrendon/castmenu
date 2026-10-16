@@ -3,6 +3,7 @@
 #include <dc/maple.h>
 #include <dc/maple/controller.h>
 #include <dc/maple/keyboard.h>
+#include <dc/maple/mouse.h>
 
 static uint32_t prev, rep_btn; static uint64_t rep_t, last_act;
 #define REP_DELAY 320
@@ -37,6 +38,21 @@ void input_poll(input_t *in) {
         if (st->rtrig > 100) b |= BTN_R;
         jx = st->joyx; jy = st->joyy; lt = st->ltrig; rt = st->rtrig;
         break;
+    }
+    /* mouse: motion steps through the library, wheel scrolls, left = A, right = B, side = X */
+    maple_device_t *ms = maple_enum_type(0, MAPLE_FUNC_MOUSE);
+    if (ms) {
+        mouse_state_t *m = maple_dev_status(ms);
+        static int mx, my;
+        if (m) {
+            in->connected = 1;
+            mx += m->dx; my += m->dy;
+            if (mx > 36) { b |= BTN_RIGHT; mx = 0; } else if (mx < -36) { b |= BTN_LEFT; mx = 0; }
+            if (my > 36 || m->dz > 0) { b |= BTN_DOWN; my = 0; } else if (my < -36 || m->dz < 0) { b |= BTN_UP; my = 0; }
+            if (m->buttons & MOUSE_LEFTBUTTON) b |= BTN_A;
+            if (m->buttons & MOUSE_RIGHTBUTTON) b |= BTN_B;
+            if (m->buttons & MOUSE_SIDEBUTTON) b |= BTN_X;
+        }
     }
     /* keyboard: arrows/enter/esc map to dpad/A/B */
     maple_device_t *kb = maple_enum_type(0, MAPLE_FUNC_KEYBOARD);

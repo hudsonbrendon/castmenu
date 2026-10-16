@@ -18,6 +18,12 @@
  *  AI <text>                              AI <text>
  *  AIVOICE <base64>                       AI <text>   (server transcribes)
  *  WHO                                    WHO <nick> ...
+ *  TIME                                   TIME <unix seconds>   (console clock sync)
+ *  VMUPUT <file> <base64>                 VMULIST ...           (cloud backup of a VMU save)
+ *  VMULIST                                VMULIST <file:bytes> ...
+ *  VMUGET <file>                          VMUDATA <file> <base64>
+ *  VMUDEL <file>                          VMULIST ...
+ *  DCNOW                                  DCNOW <online> <nick:game> ...   (dreamcast.online/now, read-only)
  *                                         PRESENCE <nick> 1|0
  *                                         ERR <text>
  */
@@ -28,7 +34,7 @@
 #define PROTO_LINE_MAX 262144   /* voice lines are big */
 #define PROTO_TEXT_MAX 240
 
-typedef enum { PEV_NONE, PEV_WELCOME, PEV_PONG, PEV_ROOMS, PEV_JOINED, PEV_MSG, PEV_PM, PEV_VOICE, PEV_FRIENDS, PEV_PRESENCE, PEV_AI, PEV_WHO, PEV_ERR, PEV_HISTORY_END, PEV_DISCONNECTED } proto_ev_t;
+typedef enum { PEV_NONE, PEV_WELCOME, PEV_PONG, PEV_ROOMS, PEV_JOINED, PEV_MSG, PEV_PM, PEV_VOICE, PEV_FRIENDS, PEV_PRESENCE, PEV_AI, PEV_WHO, PEV_ERR, PEV_HISTORY_END, PEV_DISCONNECTED, PEV_TIME, PEV_VMULIST, PEV_VMUDATA, PEV_DCNOW } proto_ev_t;
 
 typedef struct {
     proto_ev_t type;

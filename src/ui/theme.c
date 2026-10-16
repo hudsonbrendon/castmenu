@@ -1,4 +1,5 @@
 #include "theme.h"
+#include "sfx.h"
 #include "../ini.h"
 #include <kos.h>
 #include <stdio.h>
@@ -79,6 +80,7 @@ int theme_load(int index) {
     }
     snprintf(path, sizeof path, "%s/%s/bg.tex", root, id); texture_load(path, &g_theme.bg_tex);
     snprintf(path, sizeof path, "%s/%s/logo.tex", root, id); texture_load(path, &g_theme.logo_tex);
+    snprintf(path, sizeof path, "%s/%s", root, id); sfx_theme(path);   /* optional move/select/back.wav in the theme folder */
     g_theme.loaded = 1;
     return 0;
 }

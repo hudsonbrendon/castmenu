@@ -24,8 +24,9 @@ src/ui/ui.o: src/ui/ui.c src/ui/ui.h src/ui/../sysinfo.h \
  /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/dc/pvr/pvr_txr.h \
  /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/dc/pvr/pvr_legacy.h \
  src/ui/theme.h src/ui/input.h src/ui/covers.h src/ui/video.h \
- src/ui/anim.h src/ui/lang.h src/ui/lang_ids.h src/ui/chrome.h \
- src/ui/../list.h src/ui/coverflow.h src/ui/screens.h src/ui/osk.h \
+ src/ui/music.h src/ui/sfx.h src/ui/anim.h src/ui/lang.h \
+ src/ui/lang_ids.h src/ui/chrome.h src/ui/../list.h src/ui/coverflow.h \
+ src/ui/screens.h src/ui/osk.h src/ui/vmu_ui.h src/ui/../vm2.h \
  src/ui/launch_scene.h src/ui/../settings.h src/ui/../launch.h \
  src/ui/../version.h src/ui/../voice.h src/ui/../net/netif.h \
  /opt/toolchains/dc/kos/include/kos.h \
@@ -142,6 +143,8 @@ src/ui/theme.h:
 src/ui/input.h:
 src/ui/covers.h:
 src/ui/video.h:
+src/ui/music.h:
+src/ui/sfx.h:
 src/ui/anim.h:
 src/ui/lang.h:
 src/ui/lang_ids.h:
@@ -150,6 +153,8 @@ src/ui/../list.h:
 src/ui/coverflow.h:
 src/ui/screens.h:
 src/ui/osk.h:
+src/ui/vmu_ui.h:
+src/ui/../vm2.h:
 src/ui/launch_scene.h:
 src/ui/../settings.h:
 src/ui/../launch.h:

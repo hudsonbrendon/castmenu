@@ -27,3 +27,20 @@ const texture_t *cover_get(uint16_t slot) {
     }
     return &c[lru].t;
 }
+
+#define SHOT_N 6
+static struct { uint16_t slot; uint8_t n, missing; uint32_t tick; texture_t t; } sc[SHOT_N];
+const texture_t *shot_get(uint16_t slot, int n) {
+    if (!slot) return NULL;
+    tick++;
+    int lru = 0;
+    for (int i = 0; i < SHOT_N; i++) {
+        if (sc[i].slot == slot && sc[i].n == n) { sc[i].tick = tick; return sc[i].missing ? NULL : &sc[i].t; }
+        if (sc[i].tick < sc[lru].tick) lru = i;
+    }
+    texture_free(&sc[lru].t);
+    sc[lru].slot = slot; sc[lru].n = n; sc[lru].tick = tick; sc[lru].missing = 0;
+    char path[64]; snprintf(path, sizeof path, "/cd/shots/%03d_%d.tex", slot, n);
+    if (texture_load(path, &sc[lru].t)) { sc[lru].missing = 1; return NULL; }
+    return &sc[lru].t;
+}

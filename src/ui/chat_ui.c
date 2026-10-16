@@ -1,5 +1,8 @@
 /* Cast Chat: public rooms, friends list, private text + voice messages. */
 #include "screens.h"
+#include "vmu_ui.h"
+#include <arch/rtc.h>
+#include <stdlib.h>
 #include "chrome.h"
 #include "osk.h"
 #include "anim.h"
@@ -64,6 +67,7 @@ static void parse_list(const char *s, int room) {
     }
 }
 
+int dcnow_online = -1; char dcnow_text[120];
 void chat_background_poll(void) {
     if (connect_retry > 0) connect_retry -= ui_dt;
     if (!proto_connected()) return;
@@ -72,7 +76,11 @@ void chat_background_poll(void) {
     proto_event_t ev;
     while (proto_poll(&ev)) {
         switch (ev.type) {
-        case PEV_WELCOME: welcomed = 1; strncpy(motd, ev.text, sizeof motd - 1); proto_send("ROOMS"); proto_send("FRIENDS"); break;
+        case PEV_WELCOME: welcomed = 1; strncpy(motd, ev.text, sizeof motd - 1); proto_send("ROOMS"); proto_send("FRIENDS"); proto_send("TIME"); proto_send("DCNOW"); break;
+        case PEV_TIME: { long t = atol(ev.text); if (t > 978307200 && labs(t - (long)rtc_unix_secs()) > 120) rtc_set_unix_secs(t); } break;
+        case PEV_VMULIST: vmu_ui_on_list(ev.text); break;
+        case PEV_VMUDATA: if (ev.blob) { vmu_ui_on_data(ev.a, ev.blob, ev.blob_len); free(ev.blob); } break;
+        case PEV_DCNOW: dcnow_online = atoi(ev.text); strncpy(dcnow_text, ev.text, sizeof dcnow_text - 1); break;
         case PEV_PONG: net_set_ping((int)(now - ping_sent)); break;
         case PEV_ROOMS: parse_list(ev.text, 1); break;
         case PEV_FRIENDS: parse_list(ev.text, 0); break;
@@ -159,6 +167,7 @@ static void status_line(float rx, float y) {
     draw_text(&g_font_small, rx - w, y, t->text, s);
     draw_glow(rx - w - 14, y + 7, 12, ALPHA(c, 180)); draw_circle(rx - w - 14, y + 7, 4, c);
     if (chatnet_online() && ns.ping_ms >= 0) { char p[24]; snprintf(p, sizeof p, "%s %d ms", tr(S_PING), ns.ping_ms); draw_text(&g_font_small, rx - w - 36 - text_width(&g_font_small, p), y, t->text_dim, p); }
+    if (chatnet_online() && dcnow_online >= 0) { char p[40]; snprintf(p, sizeof p, "Dreamcast Now: %d online", dcnow_online); draw_text(&g_font_small, rx - text_width(&g_font_small, p), y + 16, t->text_dim, p); }
 }
 
 void chat_draw(void) {

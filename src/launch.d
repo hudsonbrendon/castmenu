@@ -1,6 +1,6 @@
-src/launch.o: src/launch.c src/ui/video.h src/launch.h src/list.h \
- src/gdemu.h src/settings.h src/loader/loader.h \
- /opt/toolchains/dc/kos/include/kos.h \
+src/launch.o: src/launch.c src/ui/video.h src/ui/music.h src/cheats.h \
+ src/vm2.h src/launch.h src/list.h src/gdemu.h src/settings.h \
+ src/loader/loader.h /opt/toolchains/dc/kos/include/kos.h \
  /opt/toolchains/dc/kos/include/kos/cdefs.h \
  /opt/toolchains/dc/kos/include/kos/version.h \
  /opt/toolchains/dc/kos/include/kos/fs_romdisk.h \
@@ -107,6 +107,9 @@ src/launch.o: src/launch.c src/ui/video.h src/launch.h src/list.h \
  /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/dc/vmufs.h \
  /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/dc/wdt.h
 src/ui/video.h:
+src/ui/music.h:
+src/cheats.h:
+src/vm2.h:
 src/launch.h:
 src/list.h:
 src/gdemu.h:

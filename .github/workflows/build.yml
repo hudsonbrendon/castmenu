@@ -38,7 +38,7 @@ jobs:
           V=${GITHUB_REF_NAME#v}
           D=castmenu-$V
           mkdir -p $D
-          cp 1ST_READ.BIN README.md README.pt-BR.md LICENSE $D/
+          cp 1ST_READ.BIN README.md CHANGELOG.md LICENSE $D/
           cp -r themes server docs $D/
           mkdir -p $D/tools && cp -r tools/cast_card $D/tools/ && cp build.sh $D/
           cp -r assets $D/assets
@@ -52,10 +52,16 @@ jobs:
           path: |
             1ST_READ.BIN
             ${{ env.ZIP }}
+      - name: Release notes
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: python3 tools/release_notes.py ${GITHUB_REF_NAME#v} > RELEASE_NOTES.md && cat RELEASE_NOTES.md
       - name: Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
+          name: Cast Menu ${{ github.ref_name }}
+          body_path: RELEASE_NOTES.md
+          generate_release_notes: true
           files: |
             1ST_READ.BIN
             ${{ env.ZIP }}

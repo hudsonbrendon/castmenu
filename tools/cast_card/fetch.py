@@ -40,6 +40,24 @@ def match(title, region, names):
             if "(" + REGION.get(r, "?") in c: return c
     return cands[0]
 
+def fetch_shots(items, force=False, log=print):
+    """libretro Named_Snaps -> shot1.png (gameplay), Named_Titles -> shot2.png (title screen)."""
+    n = 0
+    for kind, fname in (("Named_Snaps", "shot1.png"), ("Named_Titles", "shot2.png")):
+        try: names = _index(kind)
+        except Exception as e: log(f"  !! {kind}: {e}"); continue
+        for it in items:
+            if "error" in it: continue
+            dst = os.path.join(it["folder"], fname)
+            if os.path.exists(dst) and not force: continue
+            fn = match(it["name"], it["ip"].region, names) or match(it["ip"].name, it["ip"].region, names)
+            if not fn: continue
+            try:
+                open(dst, "wb").write(urllib.request.urlopen(BASE + kind + "/" + urllib.parse.quote(fn), timeout=60).read()); n += 1
+                log(f"  ok {it['slot']:03d} {it['name']}: {fname}")
+            except Exception as e: log(f"  !! {it['slot']:03d} {it['name']}: {e}")
+    return n
+
 def fetch_covers(items, kind="Named_Boxarts", force=False, log=print):
     names = _index(kind)
     n = 0
@@ -48,7 +66,7 @@ def fetch_covers(items, kind="Named_Boxarts", force=False, log=print):
         dst = os.path.join(it["folder"], "cover.png")
         if os.path.exists(dst) or (it.get("cover") and not force): continue
         fn = match(it["name"], it["ip"].region, names) or match(it["ip"].name, it["ip"].region, names)
-        if not fn: log(f"  ?? {it['slot']:03d} {it['name']}: sem capa no libretro"); continue
+        if not fn: log(f"  ?? {it['slot']:03d} {it['name']}: no libretro cover"); continue
         try:
             data = urllib.request.urlopen(BASE + kind + "/" + urllib.parse.quote(fn), timeout=60).read()
             open(dst, "wb").write(data); n += 1
@@ -70,11 +88,38 @@ def trim(path, seconds=20):
         os.remove(path); shutil.move(tmp, os.path.join(os.path.dirname(path), "video.mp4"))
     elif os.path.exists(tmp): os.remove(tmp)
 
+def fetch_music(items, force=False, log=print):
+    """yt-dlp: audio of the first YouTube hit for '<title> dreamcast ost main theme', trimmed to 60 s as music.mp3."""
+    import shutil, subprocess
+    from . import audio
+    if not shutil.which("yt-dlp") or not shutil.which("ffmpeg"): log("  yt-dlp/ffmpeg not found (brew install yt-dlp ffmpeg)"); return 0
+    n = 0
+    for it in items:
+        if "error" in it: continue
+        if audio.find_music(it["folder"]) and not force: continue
+        q = re.sub(r"\s*(disco?|cd)\s*\d.*$", "", it["name"], flags=re.I)
+        out = os.path.join(it["folder"], "music.%(ext)s")
+        cmd = ["yt-dlp", "-q", "--no-warnings", "--no-playlist", "--extractor-args", "youtube:player_client=android",
+               f"ytsearch6:{q} dreamcast ost main theme", "--match-filter", "duration<420 & duration>45", "--max-downloads", "1",
+               "-f", "bestaudio/best", "-x", "--audio-format", "mp3", "--audio-quality", "6", "--force-overwrites", "-o", out]
+        try:
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+            got = audio.find_music(it["folder"])
+            if got:
+                tmp = got + ".tmp.mp3"
+                if subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", got, "-t", "60", "-c", "copy", tmp], capture_output=True).returncode == 0 and os.path.getsize(tmp) > 10000:
+                    os.remove(got); os.rename(tmp, os.path.join(it["folder"], "music.mp3"))
+                n += 1; log(f"  ok {it['slot']:03d} {it['name']}: music")
+            else: log(f"  ?? {it['slot']:03d} {it['name']}: no music {(r.stderr or '').strip()[-120:]}")
+        except Exception as e:
+            log(f"  !! {it['slot']:03d} {it['name']}: {e}"[:200])
+    return n
+
 def fetch_videos(items, force=False, log=print):
     """yt-dlp: first YouTube hit for '<title> dreamcast gameplay', a short section from ~40 s in."""
     import shutil, subprocess
     from . import cvm
-    if not shutil.which("yt-dlp") or not shutil.which("ffmpeg"): log("  yt-dlp/ffmpeg nao encontrados (brew install yt-dlp ffmpeg)"); return 0
+    if not shutil.which("yt-dlp") or not shutil.which("ffmpeg"): log("  yt-dlp/ffmpeg not found (brew install yt-dlp ffmpeg)"); return 0
     n = 0
     for it in items:
         if "error" in it: continue
@@ -94,8 +139,8 @@ def fetch_videos(items, force=False, log=print):
         try:
             got, err = grab("ytsearch6", 900)
             if not got: got, err = grab("ytsearch10", 2400)
-            if got: n += 1; log(f"  ok {it['slot']:03d} {it['name']}: clipe")
-            else: log(f"  ?? {it['slot']:03d} {it['name']}: sem clipe {err}")
+            if got: n += 1; log(f"  ok {it['slot']:03d} {it['name']}: clip")
+            else: log(f"  ?? {it['slot']:03d} {it['name']}: no clip {err}")
         except Exception as e:
             log(f"  !! {it['slot']:03d} {it['name']}: {e}"[:200])
     return n
@@ -151,9 +196,9 @@ def fetch_synopses(items, langs=WIKI_LANGS, force=False, log=print):
             if os.path.exists(dst) and not force: continue
             try: txt = wiki_synopsis(it["name"], lang)
             except Exception as e: log(f"  {it['name']}: wikipedia {lang} falhou ({e})"); continue
-            if not txt: log(f"  {it['name']}: sem artigo {lang}"); continue
+            if not txt: log(f"  {it['name']}: no {lang} article"); continue
             open(dst, "w", encoding="utf-8").write(txt + "\n")
             if lang == "en" and not os.path.exists(os.path.join(it["folder"], "synopsis.txt")):
                 open(os.path.join(it["folder"], "synopsis.txt"), "w", encoding="utf-8").write(txt + "\n")   # fallback for the other menu languages
-            log(f"  {it['name']}: sinopse {lang} ({len(txt)} chars)"); n += 1
+            log(f"  {it['name']}: synopsis {lang} ({len(txt)} chars)"); n += 1
     return n

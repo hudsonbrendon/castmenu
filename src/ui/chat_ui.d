@@ -1,7 +1,8 @@
 src/ui/chat_ui.o: src/ui/chat_ui.c src/ui/screens.h src/ui/input.h \
- src/ui/../list.h src/ui/chrome.h src/ui/draw.h \
+ src/ui/../list.h src/ui/vmu_ui.h \
+ /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/arch/rtc.h \
+ /opt/toolchains/dc/kos/include/kos/cdefs.h src/ui/chrome.h src/ui/draw.h \
  /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/dc/pvr.h \
- /opt/toolchains/dc/kos/include/kos/cdefs.h \
  /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/dc/memory.h \
  /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/arch/types.h \
  /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/arch/cache.h \
@@ -29,10 +30,12 @@ src/ui/chat_ui.o: src/ui/chat_ui.c src/ui/screens.h src/ui/input.h \
 src/ui/screens.h:
 src/ui/input.h:
 src/ui/../list.h:
+src/ui/vmu_ui.h:
+/opt/toolchains/dc/kos/kernel/arch/dreamcast/include/arch/rtc.h:
+/opt/toolchains/dc/kos/include/kos/cdefs.h:
 src/ui/chrome.h:
 src/ui/draw.h:
 /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/dc/pvr.h:
-/opt/toolchains/dc/kos/include/kos/cdefs.h:
 /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/dc/memory.h:
 /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/arch/types.h:
 /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/arch/cache.h:

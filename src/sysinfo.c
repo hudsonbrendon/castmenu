@@ -22,10 +22,10 @@ void sysinfo_collect(sysinfo_t *s) {
     bios_version(s->bios_version, sizeof s->bios_version);
     int r = flashrom_get_region();
     s->region_code = r == FLASHROM_REGION_JAPAN ? 0 : r == FLASHROM_REGION_US ? 1 : 2;
-    strcpy(s->region, r == FLASHROM_REGION_JAPAN ? "JAPAO" : r == FLASHROM_REGION_US ? "EUA/CANADA" : r == FLASHROM_REGION_EUROPE ? "EUROPA" : "?");
+    strcpy(s->region, r == FLASHROM_REGION_JAPAN ? "JAPAN" : r == FLASHROM_REGION_US ? "USA/CANADA" : r == FLASHROM_REGION_EUROPE ? "EUROPE" : "?");
     int c = vid_check_cable();
     s->cable_code = c;
-    strcpy(s->cable, c == CT_VGA ? "VGA" : c == CT_RGB ? "RGB/SCART" : c == CT_COMPOSITE ? "COMPOSITO/RF" : "?");
+    strcpy(s->cable, c == CT_VGA ? "VGA" : c == CT_RGB ? "RGB/SCART" : c == CT_COMPOSITE ? "COMPOSITE/RF" : "?");
     flashrom_syscfg_t cfg;
     if (flashrom_get_syscfg(&cfg) == 0) {
         strcpy(s->lang, cfg.language == FLASHROM_LANG_JAPANESE ? "JP" : cfg.language == FLASHROM_LANG_ENGLISH ? "EN" : cfg.language == FLASHROM_LANG_GERMAN ? "DE" : cfg.language == FLASHROM_LANG_FRENCH ? "FR" : cfg.language == FLASHROM_LANG_SPANISH ? "ES" : cfg.language == FLASHROM_LANG_ITALIAN ? "IT" : "?");

@@ -1,10 +1,11 @@
 /* Persistent settings, saved to VMU as CASTMENU.SYS (and mirrored in RAM). */
 #pragma once
 #include <stdint.h>
+#include <stddef.h>
 #include "list.h"
 
 #define SETTINGS_MAGIC   0x4E424C41 /* 'NBLA' */
-#define SETTINGS_VERSION 2
+#define SETTINGS_VERSION 3
 #define NICK_LEN 16
 #define AVATAR_LEN 16
 #define SERVER_LEN 40
@@ -36,7 +37,14 @@ typedef struct {
     uint32_t last_launch_ts;  /* RTC seconds when the last game was launched (play-time tracking) */
     uint16_t last_launch_slot;
     uint16_t playtime[1000];  /* minutes per slot */
+    /* v3 */
+    uint8_t no_music;         /* 0 = play the selected game's theme (music.idx) */
+    uint8_t no_bgm;           /* 0 = menu background tracks when the game has none */
+    uint8_t no_sfx;           /* 0 = UI sounds */
+    uint8_t no_gameid;        /* 0 = send the product id to VM2 / VMUPro at launch */
+    uint8_t cheats[1000];     /* per slot: bit i = cheat i enabled */
 } settings_t;
+#define SETTINGS_V2_SIZE offsetof(settings_t, no_music)
 
 settings_t *settings_get(void);
 void settings_init(void);           /* load from VMU or defaults */

@@ -24,7 +24,7 @@ src/ui/details.o: src/ui/details.c src/ui/screens.h src/ui/input.h \
  /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/dc/pvr/pvr_txr.h \
  /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/dc/pvr/pvr_legacy.h \
  src/ui/theme.h src/ui/lang.h src/ui/lang_ids.h src/ui/video.h \
- src/ui/covers.h src/ui/anim.h src/ui/../settings.h
+ src/ui/covers.h src/ui/anim.h src/ui/../settings.h src/ui/../cheats.h
 src/ui/screens.h:
 src/ui/input.h:
 src/ui/../list.h:
@@ -60,3 +60,4 @@ src/ui/video.h:
 src/ui/covers.h:
 src/ui/anim.h:
 src/ui/../settings.h:
+src/ui/../cheats.h:

@@ -21,6 +21,7 @@ class DB:
         create table if not exists friends(owner text, friend text, primary key(owner, friend));
         create table if not exists pm(id integer primary key, ts real, src text, dst text, kind text, body text, delivered int default 0);
         create table if not exists room_msg(id integer primary key, ts real, room text, src text, body text);
+        create table if not exists vmu(owner text, fn text, ts real, data blob, primary key(owner, fn));
         """)
     def friends(self, nick): return [r[0] for r in self.c.execute("select friend from friends where owner=? order by friend", (nick,))]
     def add(self, a, b): self.c.execute("insert or ignore into friends values(?,?)", (a, b)); self.c.commit()
@@ -47,6 +48,21 @@ class Server:
     def presence(self, nick, on):
         for c in self.clients.values():
             if nick in self.db.friends(c.nick): c.send(f"PRESENCE {nick} {1 if on else 0}")
+    def vmu_list(self, nick):
+        rows = self.db.c.execute("select fn, length(data) from vmu where owner=? order by fn", (nick,)).fetchall()
+        return "VMULIST " + " ".join(f"{fn}:{n}" for fn, n in rows)
+    def dcnow_line(self):
+        """dreamcast.online/now users (read-only; presence itself is reported by DreamPi), cached 60 s."""
+        now = time.time()
+        if now - getattr(self, "_dcnow_ts", 0) > 60:
+            self._dcnow_ts = now; self._dcnow = []
+            try:
+                import urllib.request, json
+                req = urllib.request.Request("http://dreamcast.online/now/api/users.json", headers={"User-Agent": "castmenu"})
+                users = json.loads(urllib.request.urlopen(req, timeout=5).read().decode())
+                self._dcnow = [f"{u.get('username','?')}:{(u.get('current_game_display') or u.get('current_game') or '-')}".replace(" ", "_") for u in users if u.get("online")]
+            except Exception: pass
+        return f"DCNOW {len(self._dcnow)} " + " ".join(self._dcnow[:30])
     def friends_line(self, nick): return "FRIENDS " + " ".join(f"{f}:{1 if self.online(f) else 0}" for f in self.db.friends(nick))
 
     async def handle(self, r, w):
@@ -108,6 +124,22 @@ class Server:
                             if m["kind"] == "PM": c.send(f"PM {m['src'] if m['src'] != c.nick else who} {m['body']}" if m["src"] != c.nick else f"PM {who} {m['body']}")
                     c.send("HISTORY_END")
                 elif cmd == "WHO": c.send("WHO " + " ".join(self.clients))
+                elif cmd == "TIME": c.send(f"TIME {int(time.time())}")
+                elif cmd == "DCNOW": c.send(self.dcnow_line())
+                elif cmd == "VMULIST": c.send(self.vmu_list(c.nick))
+                elif cmd == "VMUPUT":
+                    fn, _, b64 = rest.partition(" ")
+                    try: data = base64.b64decode(b64)
+                    except Exception: data = b""
+                    if fn and 0 < len(data) <= 256 * 1024:
+                        self.db.c.execute("insert or replace into vmu values(?,?,?,?)", (c.nick, fn[:12], time.time(), data)); self.db.c.commit()
+                    c.send(self.vmu_list(c.nick))
+                elif cmd == "VMUGET":
+                    row = self.db.c.execute("select data from vmu where owner=? and fn=?", (c.nick, rest.strip()[:12])).fetchone()
+                    if row: c.send(f"VMUDATA {rest.strip()[:12]} {base64.b64encode(row[0]).decode()}")
+                    else: c.send("ERR no such save")
+                elif cmd == "VMUDEL":
+                    self.db.c.execute("delete from vmu where owner=? and fn=?", (c.nick, rest.strip()[:12])); self.db.c.commit(); c.send(self.vmu_list(c.nick))
                 elif cmd == "AI":
                     q = rest[:239]
                     asyncio.create_task(self.ai_reply(c, q))
@@ -175,7 +207,7 @@ async def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--port", type=int, default=7350); ap.add_argument("--host", default="0.0.0.0")
     ap.add_argument("--db", default="cast.sqlite"); ap.add_argument("--ai", choices=["echo", "anthropic"], default="echo")
-    ap.add_argument("--stt-cmd", default=os.environ.get("CAST_STT_CMD", "")); ap.add_argument("--motd", default="Bem-vindo ao Cast Chat!")
+    ap.add_argument("--stt-cmd", default=os.environ.get("CAST_STT_CMD", "")); ap.add_argument("--motd", default="Welcome to Cast Chat!")
     a = ap.parse_args()
     srv = Server(DB(a.db), ai_anthropic if a.ai == "anthropic" else ai_echo, a.stt_cmd, a.motd)
     server = await asyncio.start_server(srv.handle, a.host, a.port, limit=1 << 20)

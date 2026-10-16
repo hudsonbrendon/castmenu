@@ -121,6 +121,13 @@ static int parse(char *line, proto_event_t *ev) {
     else if (!strcmp(cmd, "WHO")) { ev->type = PEV_WHO; TXT(ev->text, rest); }
     else if (!strcmp(cmd, "ERR")) { ev->type = PEV_ERR; TXT(ev->text, rest); }
     else if (!strcmp(cmd, "HISTORY_END")) { ev->type = PEV_HISTORY_END; }
+    else if (!strcmp(cmd, "TIME")) { ev->type = PEV_TIME; TXT(ev->text, rest); }
+    else if (!strcmp(cmd, "VMULIST")) { ev->type = PEV_VMULIST; TXT(ev->text, rest); }
+    else if (!strcmp(cmd, "DCNOW")) { ev->type = PEV_DCNOW; TXT(ev->text, rest); }
+    else if (!strcmp(cmd, "VMUDATA")) {
+        split2(rest, &a, &text); ev->type = PEV_VMUDATA; TXT(ev->a, a);
+        int cap = (int)strlen(text) * 3 / 4 + 4; ev->blob = malloc(cap); ev->blob_len = ev->blob ? b64_decode(text, ev->blob, cap) : 0;
+    }
     else return 0;
 #undef TXT
     return 1;

@@ -70,9 +70,10 @@ def _split_hd(iso_path, t3_path, t5_path, data_lba=DATA_LBA):
     _write_contig(t3_path, bytes(img[:header_sectors * 2048]))
     return header_sectors, data_sectors, bytes(data.ljust(data_sectors * 2048, b"\0"))
 
-def build(out_dir, data_dir, ip_bin_path, volid="CASTMENU", boot_files=("1ST_READ.BIN", "LIST.INI", "CASTMENU.INI"), videos=()):
+def build(out_dir, data_dir, ip_bin_path, volid="CASTMENU", boot_files=("1ST_READ.BIN", "LIST.INI", "CASTMENU.INI"), videos=(), music=()):
     """videos: [(slot, path to .cvm)] appended raw after the boot set on track05 (the low-density area is
-    only ~88 MB); the menu reads them by sector through /cd/videos.idx: 'slot lba frames fps w h'."""
+    only ~88 MB); the menu reads them by sector through /cd/videos.idx: 'slot lba frames fps w h'.
+    music: [(slot, path to .cma)] likewise, indexed by /cd/music.idx: 'slot lba bytes rate' (slots >= 1000 = menu tracks)."""
     os.makedirs(out_dir, exist_ok=True)
     mk = _mkisofs()
     # high density first: the videos.idx written below must land on track01
@@ -86,7 +87,11 @@ def build(out_dir, data_dir, ip_bin_path, volid="CASTMENU", boot_files=("1ST_REA
     for slot, path in videos:
         blob = open(path, "rb").read()
         if blob[:4] == b"CVID": clips.append((slot, blob + b"\0" * ((-len(blob)) % 2048)))
-    total = (os.path.getsize(flat) + 2047) // 2048 + sum(len(b) for _, b in clips) // 2048
+    tracks = []
+    for slot, path in music:
+        blob = open(path, "rb").read()
+        if blob[:4] == b"CAUD": tracks.append((slot, blob + b"\0" * ((-len(blob)) % 2048)))
+    total = (os.path.getsize(flat) + 2047) // 2048 + sum(len(b) for _, b in clips) // 2048 + sum(len(b) for _, b in tracks) // 2048
     data_lba = DATA_LBA if DATA_LBA + total <= GD_END_LBA else max(AUDIO2_LBA + 600, GD_END_LBA - total)
     t5 = os.path.join(out_dir, "track05.iso")
     _, data_sectors, t5_data = _split_hd(flat, os.path.join(out_dir, "track03.iso"), t5, data_lba)
@@ -96,8 +101,14 @@ def build(out_dir, data_dir, ip_bin_path, volid="CASTMENU", boot_files=("1ST_REA
         w, h, n, fps = (int.from_bytes(blob[4 + 2 * i:6 + 2 * i], "little") for i in range(4))
         lines.append(f"{slot} {data_lba + data_sectors} {n} {fps} {w} {h}")
         parts.append(blob); data_sectors += len(blob) // 2048
+    mlines = []
+    for slot, blob in tracks:
+        rate, nbytes = int.from_bytes(blob[4:8], "little"), int.from_bytes(blob[8:12], "little")
+        mlines.append(f"{slot} {data_lba + data_sectors} {nbytes} {rate}")
+        parts.append(blob); data_sectors += len(blob) // 2048
     _write_contig(t5, b"".join(parts))
     if lines: open(os.path.join(data_dir, "videos.idx"), "w").write("\n".join(lines) + "\n")
+    if mlines: open(os.path.join(data_dir, "music.idx"), "w").write("\n".join(mlines) + "\n")
     # low density: everything the menu reads at runtime
     t1 = os.path.join(out_dir, "track01.iso")
     _iso(mk, t1, data_dir, ip_bin_path, volid, 0)

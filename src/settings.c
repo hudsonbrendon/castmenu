@@ -37,9 +37,10 @@ void settings_init(void) {
     uint8_t *buf = malloc(len);
     if (buf && fs_read(f, buf, len) == (ssize_t)len) {
         vmu_pkg_t pkg;
-        if (vmu_pkg_parse(buf, len, &pkg) == 0 && pkg.data_len >= (int)sizeof S) {
-            settings_t tmp; memcpy(&tmp, pkg.data, sizeof tmp);
-            if (tmp.magic == SETTINGS_MAGIC && tmp.version == SETTINGS_VERSION) S = tmp;
+        if (vmu_pkg_parse(buf, len, &pkg) == 0 && pkg.data_len >= 8) {
+            uint32_t magic, version; memcpy(&magic, pkg.data, 4); memcpy(&version, pkg.data + 4, 4);
+            size_t need = version == SETTINGS_VERSION ? sizeof S : version == 2 ? SETTINGS_V2_SIZE : 0;   /* v2 -> v3: new fields keep their defaults */
+            if (magic == SETTINGS_MAGIC && need && pkg.data_len >= (int)need) { memcpy(&S, pkg.data, need); S.version = SETTINGS_VERSION; }
         }
     }
     free(buf); fs_close(f);
@@ -51,7 +52,7 @@ int settings_save(void) {
     char path[48]; if (vmu_path(path, sizeof path)) return -1;
     vmu_pkg_t pkg; memset(&pkg, 0, sizeof pkg);
     strcpy(pkg.desc_short, "Cast Menu");
-    strcpy(pkg.desc_long, "Configuracoes do Cast Menu");
+    strcpy(pkg.desc_long, "Cast Menu settings");
     strcpy(pkg.app_id, "CASTMENU");
     pkg.icon_cnt = 1; pkg.icon_anim_speed = 0; pkg.eyecatch_type = VMUPKG_EC_NONE;
     extern uint8_t cast_vmu_icon[512]; extern const uint16_t cast_vmu_pal[16];

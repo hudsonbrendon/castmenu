@@ -40,6 +40,23 @@ def theme_packs():
     with open(os.path.join(dd, "bg.tex"), "wb") as f: f.write(tex.encode(themes.render_bg(spec).resize((512, 512)), "rgb565"))
     logo(os.path.join(dd, "logo.tex"))
 
+def sfx():
+    """Three short UI sounds (16-bit mono 22050 Hz WAV): move = tick, select = two-note chirp, back = soft down-blip."""
+    import math, struct, wave
+    d = os.path.join(RD, "sfx"); os.makedirs(d, exist_ok=True)
+    def tone(spec, name):
+        rate = 22050; out = []
+        for freq, ms, vol in spec:
+            n = int(rate * ms / 1000)
+            for i in range(n):
+                env = min(1.0, i / (rate * 0.003)) * (1 - i / n) ** 1.6
+                out.append(int(32767 * vol * env * math.sin(2 * math.pi * freq * i / rate)))
+        with wave.open(os.path.join(d, name + ".wav"), "wb") as w:
+            w.setnchannels(1); w.setsampwidth(2); w.setframerate(rate); w.writeframes(struct.pack("<%dh" % len(out), *out))
+    tone([(1400, 28, 0.35)], "move")
+    tone([(880, 45, 0.4), (1320, 90, 0.4)], "select")
+    tone([(700, 40, 0.35), (480, 90, 0.3)], "back")
+
 def vmu_icon():
     """32x32 4-bit paletted icon as KOS vmu_pkg expects (ARGB4444 palette): brand icon on navy."""
     bg = (242, 242, 239)
@@ -62,5 +79,5 @@ def vmu_icon():
         f.write("uint8_t cast_vmu_icon[512] = {" + ",".join(str(b) for b in data) + "};\n")
 
 if __name__ == "__main__":
-    fonts(); theme_packs(); vmu_icon(); mkconsole.build(os.path.join(RD, "console"))
+    fonts(); theme_packs(); vmu_icon(); sfx(); mkconsole.build(os.path.join(RD, "console"))
     print("assets ok")

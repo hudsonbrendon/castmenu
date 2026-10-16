@@ -22,7 +22,7 @@ src/ui/theme.o: src/ui/theme.c src/ui/theme.h src/ui/draw.h \
  /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/dc/pvr/pvr_pal.h \
  /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/dc/pvr/pvr_txr.h \
  /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/dc/pvr/pvr_legacy.h \
- src/ui/../ini.h /opt/toolchains/dc/kos/include/kos.h \
+ src/ui/sfx.h src/ui/../ini.h /opt/toolchains/dc/kos/include/kos.h \
  /opt/toolchains/dc/kos/include/kos/version.h \
  /opt/toolchains/dc/kos/include/kos/fs_romdisk.h \
  /opt/toolchains/dc/kos/include/kos/fs_ramdisk.h \
@@ -130,6 +130,7 @@ src/ui/draw.h:
 /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/dc/pvr/pvr_pal.h:
 /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/dc/pvr/pvr_txr.h:
 /opt/toolchains/dc/kos/kernel/arch/dreamcast/include/dc/pvr/pvr_legacy.h:
+src/ui/sfx.h:
 src/ui/../ini.h:
 /opt/toolchains/dc/kos/include/kos.h:
 /opt/toolchains/dc/kos/include/kos/version.h:

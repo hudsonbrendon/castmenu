@@ -6,6 +6,7 @@
 #include "covers.h"
 #include "anim.h"
 #include "../settings.h"
+#include "../cheats.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -13,17 +14,27 @@
 #define SYN_W (SCREEN_W - SAFE_X - SYN_X)
 #define SYN_LH 19.0f
 static game_t *cur; static char synopsis[4000]; static int has_syn; static float scroll, scroll_target; static int lines;
+static cheat_t cheats[CHEAT_MAX]; static int ncheats, cheat_open, cheat_sel;
 
 void details_open(game_t *g) {
-    cur = g; scroll = scroll_target = 0;
+    cur = g; scroll = scroll_target = 0; cheat_open = 0; cheat_sel = 0; ncheats = cheats_load(g->slot, cheats, CHEAT_MAX);
     has_syn = list_synopsis(g, lang_codes[lang_current()], synopsis, sizeof synopsis) == 0 && synopsis[0];
     lines = draw_text_wrap(&g_font, 0, -1, SYN_W - 40, SYN_LH, 0, has_syn ? synopsis : tr(S_NO_SYNOPSIS));
 }
 game_t *details_game(void) { return cur; }
 
-static float syn_h(void) { return BOTTOM_Y - 16 - CONTENT_Y - 52 - (video_has(cur->slot) ? 144 : 0); }
+static int has_media(void) { return video_has(cur->slot) || shot_get(cur->slot, 1) != NULL; }
+static float syn_h(void) { return BOTTOM_Y - 16 - CONTENT_Y - 52 - (has_media() ? 144 : 0); }
 
 int details_update(const input_t *in) {
+    if (cheat_open) {
+        if (in->repeat & BTN_UP) cheat_sel = (cheat_sel + ncheats - 1) % ncheats;
+        if (in->repeat & BTN_DOWN) cheat_sel = (cheat_sel + 1) % ncheats;
+        if (in->pressed & BTN_A) { if (cheat_sel < 8) cheats_toggle(cur->slot, cheat_sel); else show_toast(tr(S_CHEAT_LIMIT), 3); }
+        if (in->pressed & (BTN_B | BTN_X)) { cheat_open = 0; settings_save(); }
+        return ACT_NONE;
+    }
+    if ((in->pressed & BTN_X) && ncheats) { cheat_open = 1; return ACT_NONE; }
     float max = lines * SYN_LH - (syn_h() - 44); if (max < 0) max = 0;
     if (in->repeat & BTN_DOWN) scroll_target += SYN_LH * 2;
     if (in->repeat & BTN_UP) scroll_target -= SYN_LH * 2;
@@ -75,11 +86,13 @@ void details_draw(void) {
     region_badges(rx + rw - bw, ry + 26, cur);
     if (cur->favorite) draw_text(&g_font, rx + rw - bw - 22, ry + 24, 0xFFFFD166, "\x2a");
     float sy = ry + 52;
-    if (video_has(cur->slot)) {
+    if (has_media()) {
         float vh = 136;
         draw_shadow(rx, sy, rw, vh, 10, t->shadow);
         draw_rect_round(rx, sy, rw, vh, 6, 0xFF000000);
-        if (!video_draw_rect(rx + 2, sy + 2, rw - 4, vh - 4, 255)) {
+        const texture_t *sh = shot_get(cur->slot, 1);
+        if (!video_draw_rect(rx + 2, sy + 2, rw - 4, vh - 4, 255) && sh) draw_tex_uv(sh, rx + 2, sy + 2, rw - 4, vh - 4, 0, 0, (float)sh->iw / sh->w, (float)sh->ih / sh->h, 0xFFFFFFFF);
+        if (!video_has(cur->slot) && !sh) {
             const texture_t *c = settings_get()->cover_mode ? cover_get(cur->slot) : NULL;
             if (c) draw_tex(c, rx + rw / 2 - (vh - 4) / 2, sy + 2, vh - 4, vh - 4, ALPHA(0xFFFFFF, 90));
             draw_text_center(&g_font_small, rx + rw / 2, sy + vh / 2 - 7, ALPHA(t->text_dim, 200), tr(S_LAUNCHING));
@@ -102,5 +115,26 @@ void details_draw(void) {
         draw_rect_round(rx + rw - 12, cy, 3, ch, 1.5f, ALPHA(t->text_dim, 40));
         draw_rect_round(rx + rw - 12, cy + (ch - th) * clampf(scroll / max, 0, 1), 3, th, 1.5f, t->accent);
     }
+    if (ncheats) {   /* cheats available: small tag under the badges */
+        int on = 0; for (int i = 0; i < ncheats && i < 8; i++) on += cheats_enabled(cur->slot, i);
+        char tag[32]; snprintf(tag, sizeof tag, "X %s %d/%d", tr(S_CHEATS), on, ncheats);
+        draw_badge(rx, ry + 26, on ? t->accent : t->badge_cd, tag);
+    }
     draw_bottombar(tr(S_HINT_DETAILS));
+    if (cheat_open) {
+        float w = 420, h = 70 + ncheats * 26; if (h > 360) h = 360;
+        dialog_box(tr(S_CHEATS), w, h);
+        float x = (SCREEN_W - w) / 2 + 16, y = (SCREEN_H - h) / 2 + 44;
+        draw_set_clip((int)x - 8, (int)y - 4, (int)w - 16, (int)h - 60);
+        int first = cheat_sel > 10 ? cheat_sel - 10 : 0;
+        for (int i = first; i < ncheats; i++) {
+            float ry = y + (i - first) * 26; int sel = i == cheat_sel, on = cheats_enabled(cur->slot, i);
+            if (sel) draw_rect_round(x - 6, ry - 2, w - 36, 24, 6, ALPHA(t->sel_bg, 230));
+            draw_text_clipped(&g_font, x + 2, ry + 1, w - 110, sel ? t->sel_text : i >= 8 ? ALPHA(t->text_dim, 150) : t->text, cheats[i].name);
+            toggle_switch(x + w - 86, ry + 1, on, i >= 8 ? 90 : 255);
+        }
+        draw_clear_clip();
+        draw_text_center(&g_font_small, SCREEN_W / 2, (SCREEN_H + h) / 2 - 36, ALPHA(t->text_dim, 200), tr(S_CHEAT_NOTE));
+        draw_hints(SCREEN_W / 2, (SCREEN_H + h) / 2 - 16, tr(S_HINT_CHEATS), 160);
+    }
 }

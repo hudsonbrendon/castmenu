@@ -75,3 +75,64 @@ be_sr:      .long 0x700000F0
 be_target:  .long 0x8C00B500
 be_fpscr:   .long 0x00040001
 be_pr:      .long 0x8CE00000
+
+! ---- cheat engine: hooked in front of the GD-ROM syscall vector (0x8C0000BC), which every game
+! library calls regularly. Walks a table of (code, value) pairs and performs the constant writes
+! (CodeBreaker types 0/1/2 = 8/16/32-bit), then jumps to the original syscall. Position
+! independent: ldr.c copies these bytes to CHEAT_STUB and the table to CHEAT_TABLE.
+    .align 2
+    .global _cheat_hook_start, _cheat_hook_end
+_cheat_hook_start:
+    mov.l   r8, @-r15
+    mov.l   r9, @-r15
+    mov.l   r10, @-r15
+    mov.l   r11, @-r15
+    mov.l   r12, @-r15
+    mov.l   r13, @-r15
+    mov.l   ch_table, r8
+    mov.l   ch_mask, r12
+    mov.l   ch_base, r13
+1:  mov.l   @r8+, r9            ! code word: type in the top nibble, address in the low 24 bits
+    tst     r9, r9
+    bt      9f                  ! 0 terminates the table
+    mov.l   @r8+, r10           ! value
+    mov     r9, r11
+    shlr16  r11
+    shlr8   r11
+    shlr2   r11
+    shlr2   r11                 ! r11 = type
+    and     r12, r9
+    or      r13, r9             ! r9 = 0x8C000000 | addr
+    tst     r11, r11
+    bt      5f
+    dt      r11
+    bt      6f
+    dt      r11
+    bt      7f
+    bra     1b                  ! other code types: ignored
+    nop
+5:  mov.b   r10, @r9
+    bra     1b
+    nop
+6:  mov.w   r10, @r9
+    bra     1b
+    nop
+7:  mov.l   r10, @r9
+    bra     1b
+    nop
+9:  mov.l   @r15+, r13
+    mov.l   @r15+, r12
+    mov.l   @r15+, r11
+    mov.l   @r15+, r10
+    mov.l   @r15+, r9
+    mov.l   @r15+, r8
+    mov.l   ch_orig, r0
+    mov.l   @r0, r0
+    jmp     @r0                 ! original GD syscall entry (saved by ldr.c)
+    nop
+    .align 2
+ch_table:   .long 0x8C003D80
+ch_mask:    .long 0x00FFFFFF
+ch_base:    .long 0x8C000000
+ch_orig:    .long 0x8C003D7C
+_cheat_hook_end:

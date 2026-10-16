@@ -18,7 +18,19 @@
 typedef struct {
     uint32_t region_free, force_vga, igr, boot_intro, sega_license;
     uint32_t game_region, disc_type, need_game_fix;
+    uint32_t n_codes;           /* cheat codes at CODES_SRC: (code, value) pairs */
 } loader_params_t;
+
+/* Cheats: the menu leaves (code, value) pairs at CODES_SRC; we park them next to GDMENU's
+ * region cave (0x8C003CC0..0x8C003D02) and hook the GD-ROM syscall vector with the stub from
+ * start.S. Only constant-write codes (types 0/1/2) are honoured; see docs. */
+#define CODES_SRC   0xACCFF800u
+#define CHEAT_STUB  0xAC003D10u
+#define CHEAT_ORIG  0xAC003D7Cu
+#define CHEAT_TABLE 0xAC003D80u
+#define CHEAT_MAX   78                     /* table must end before 0x8C004000 (GDMENU's clear region) */
+#define GD_VECTOR   0xAC0000BCu
+extern const uint8_t cheat_hook_start[], cheat_hook_end[];   /* start.S (C names get the leading underscore) */
 
 #define PARAMS ((volatile loader_params_t *)0xACCFFF00)
 #define ROM(off)  ((const volatile uint8_t *)(0xA0000000 + (off)))
@@ -128,6 +140,18 @@ static void patch_bios(const loader_params_t *p) {
     }
 }
 
+/* ---- cheats: copy stub + table through P2 (uncached, no stale cache lines), hook the vector ---- */
+static void install_cheats(uint32_t n) {
+    if (n > CHEAT_MAX) n = CHEAT_MAX;
+    const uint8_t *s = cheat_hook_start; uint8_t *d = (uint8_t *)CHEAT_STUB;
+    for (uint32_t i = 0; i < (uint32_t)(cheat_hook_end - cheat_hook_start); i++) d[i] = s[i];
+    volatile uint32_t *src = (volatile uint32_t *)CODES_SRC, *tab = (volatile uint32_t *)CHEAT_TABLE;
+    for (uint32_t i = 0; i < n * 2; i++) tab[i] = src[i];
+    tab[n * 2] = 0;
+    W32(CHEAT_ORIG, R32(GD_VECTOR));
+    W32(GD_VECTOR, 0x8C003D10);
+}
+
 /* ---- step 5 ---- */
 extern void bios_enter(uint32_t media_flag) __attribute__((noreturn));
 
@@ -144,5 +168,6 @@ void loader_main(void) {
     } else {
         patch_bios(&p);
     }
+    if (p.n_codes) install_cheats(p.n_codes);
     bios_enter((R8(0x8C000072) & 7) == 2 ? 0 : 1);
 }

@@ -190,12 +190,12 @@ void draw_badge(float x, float y, uint32_t bg, const char *txt) {
 float region_badges(float x, float y, const game_t *g) {
     for (const char *r = g->region; *r; r++) {
         char s[2] = { *r, 0 };
-        draw_badge(x, y, *r == 'J' ? g_theme.badge_j : *r == 'U' ? g_theme.badge_u : g_theme.badge_e, s);
+        draw_badge(x, y, g_theme.badge_cd, s);                 /* console grey, like the shell: one look for every tag */
         x += 22;
     }
-    draw_badge(x, y, g->is_gd ? g_theme.badge_gd : g_theme.badge_cd, g->is_gd ? "GD" : "CD"); x += 34;
-    if (g->vga) { draw_badge(x, y, g_theme.accent_dim, "VGA"); x += 42; }
-    if (g->disc[0]) { char d[8]; snprintf(d, sizeof d, "D%c/%c", g->disc[0], g->disc[2]); draw_badge(x, y, ALPHA(g_theme.panel_alt, 255), d); x += 46; }
+    draw_badge(x, y, g_theme.badge_cd, g->is_gd ? "GD" : "CD"); x += 34;
+    if (g->vga) { draw_badge(x, y, g_theme.badge_cd, "VGA"); x += 42; }
+    if (g->disc[0]) { char d[8]; snprintf(d, sizeof d, "D%c/%c", g->disc[0], g->disc[2]); draw_badge(x, y, g_theme.badge_cd, d); x += 46; }
     return x;
 }
 /* Cover with frame, shadow and (optional) reflection. Placeholder = gradient + initial. */

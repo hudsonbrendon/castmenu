@@ -24,6 +24,7 @@ typedef struct {
     char publisher[20];
     uint8_t vga, is_gd, players, favorite, has_cover, hidden;
     uint8_t category;           /* index into gamelist_t.cat_names (1-based), 0 = none */
+    uint32_t collections;       /* bit i = member of gamelist_t.col_names[i] (CASTMENU.INI NN.collection=) */
 } game_t;
 
 typedef enum { SORT_SLOT, SORT_NAME, SORT_DATE, SORT_REGION, SORT_COUNT } sort_mode_t;
@@ -43,6 +44,9 @@ typedef struct {
     int  category;              /* CAT_ALL.. ; named categories filter by game_t.category */
     char cat_names[CAT_MAX][CAT_NAME_LEN];
     int  cat_count;             /* named categories (indexes 1..cat_count in game_t.category) */
+    char col_names[32][CAT_NAME_LEN];   /* user collections: carousels after the categories */
+    int  col_count;
+    char search[24];            /* case-insensitive title filter (on-screen keyboard), "" = none */
 } gamelist_t;
 
 extern gamelist_t g_list;

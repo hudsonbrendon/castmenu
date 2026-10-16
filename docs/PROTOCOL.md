@@ -24,9 +24,15 @@ the TOC on the next access, which is what the slow-scan path relies on.
 | Path            | Writer                      | Purpose                                   |
 |-----------------|-----------------------------|-------------------------------------------|
 | `LIST.INI`      | GDMENU Card Manager / castmenu-card | `[GDMENU]` section, keys `NN.name/disc/vga/region/version/date` |
-| `CASTMENU.INI`    | castmenu-card                 | `[CASTMENU]` extras: `product`, `gd`, `cover`, `genre`, `year`, `players`, `hidden` |
+| `CASTMENU.INI`    | castmenu-card                 | `[CASTMENU]` extras: `product`, `gd`, `cover`, `genre`, `year`, `players`, `category`, `collection` (repeatable), `hidden` |
 | `covers/NNN.tex`/`.pvr` | castmenu-card         | 128×128 cover (`.pvr` = original `0GDTEX.PVR` from the game disc) |
-| `themes/<id>/`  | castmenu-card from `themes/`  | `theme.ini`, `bg.tex`, optional `logo.tex` |
+| `themes/<id>/`  | castmenu-card from `themes/`  | `theme.ini`, `bg.tex`, optional `logo.tex`, optional `move/select/back.wav` |
+| `info/<lang>/NNN.txt` | castmenu-card           | synopsis per language (`any` = fallback) |
+| `shots/NNN_1.tex`, `NNN_2.tex` | castmenu-card    | 256×192 screenshots (gameplay, title) |
+| `cheats/NNN.txt` | castmenu-card              | cheat blocks (name + `XXXXXXXX YYYYYYYY` lines) |
+| `videos.idx`    | castmenu-card                 | `slot lba frames fps w h`: CVM clips in the high-density area (track05) |
+| `music.idx`     | castmenu-card                 | `slot lba bytes rate`: ADPCM music in the high-density area; slots ≥ 1000 are menu tracks |
+| `avatars/*.tex` | castmenu-card                 | 64×64 profile pictures |
 
 `NN` is the GDEMU folder number (`02`..`999`, 3 digits from 100 on). Slot 1 is
 the menu itself and is hidden.
