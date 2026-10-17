@@ -3,6 +3,14 @@
 Release notes are taken from this file: each `## x.y.z` section becomes the body of the GitHub release
 for tag `vx.y.z` (CI runs `tools/release_notes.py`), followed by the auto-generated commit list.
 
+## 0.5.1 — 2026-10-17
+
+- Fix: settings, favorites, play time and language were never restored at boot. The VMU file keeps a
+  zero CRC, which KallistiOS rejects; the menu now finds its settings block by its magic number.
+- Fix: A / B / X / Y hint glyphs back in the controller colours; region, GD, VGA and disc tags in console grey.
+- System screen: the statistics line no longer overlaps the most-played list.
+- README: English screenshots of a real card, demo video with sound, shorter page with docs/CARD.md and docs/MENU.md.
+
 ## 0.5.0 — 2026-10-17
 
 - Music: the selected game's theme (`music.mp3` / `fetch --music`), menu background tracks (`/music`),
