@@ -4,10 +4,10 @@ from PIL import Image, ImageDraw, ImageFilter
 
 # Dreamcast palette: the logo red, the four controller buttons, console shell and logotype grey.
 DC = dict(red="#CF3311", orange="#CF3311", btn_red="#E23D3D", blue="#2D6BD1", yellow="#F2C229", green="#3DB55A", shell="#E9E9E5", grey="#66696D", ink="#26272A")
-# Badges (region, GD/CD, VGA, disc) follow the console: shell grey on light themes, slate on dark ones.
-# badge_j / badge_e double as the status colours (error / ok) and stay red / green.
-BUTTONS = dict(badge_j=DC["btn_red"], badge_u="#D6D6D2", badge_e=DC["green"], badge_gd="#D6D6D2", badge_cd="#D6D6D2")
-BUTTONS_DARK = dict(badge_j=DC["btn_red"], badge_u="#4C4C52", badge_e=DC["green"], badge_gd="#4C4C52", badge_cd="#4C4C52")
+# badge_j/u/gd/e are the controller button colours (A red, B blue, X yellow, Y green; also status colours).
+# badge_cd is the tag colour for region / GD-CD / VGA / disc: shell grey on light themes, slate on dark ones.
+BUTTONS = dict(badge_j=DC["btn_red"], badge_u=DC["blue"], badge_e=DC["green"], badge_gd=DC["yellow"], badge_cd="#D6D6D2")
+BUTTONS_DARK = dict(badge_j=DC["btn_red"], badge_u=DC["blue"], badge_e=DC["green"], badge_gd=DC["yellow"], badge_cd="#4C4C52")
 
 THEMES = {
  "dreamcast":      dict(name="Dreamcast", bg="#F2F2EF", panel="#F0FFFFFF", panel_alt="#F0E4E4E0", accent=DC["red"], accent2=DC["grey"], glow="#40CF3311", accent_dim="#F0C4B8", text=DC["ink"], text_dim=DC["grey"], text_hi="#141416", sel_bg=DC["red"], sel_text="#FFFFFF", shadow="#30000000", vignette=16, grad=((245,245,242),(216,216,212)), swirl=(207,51,17), orbs=[(540,90,170,(207,51,17)),(110,420,160,(102,105,109))], **BUTTONS),

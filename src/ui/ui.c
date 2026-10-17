@@ -153,7 +153,7 @@ static void draw_list(void) {
         draw_text_clipped(&g_font, LIST_X + 50, y + 5, LIST_W - 130, col, g->name);
         float bx = LIST_X + LIST_W - 22;
         if (g->favorite) { bx -= 14; draw_text(&g_font_small, bx, y + 7, i == cursor ? t->sel_text : 0xFFFFD166, "\x2a"); }
-        for (int r = strlen(g->region) - 1; r >= 0; r--) { bx -= 19; char s[2] = { g->region[r], 0 }; draw_badge(bx, y + 6, g->region[r] == 'J' ? t->badge_j : g->region[r] == 'U' ? t->badge_u : t->badge_e, s); }
+        for (int r = strlen(g->region) - 1; r >= 0; r--) { bx -= 19; char s[2] = { g->region[r], 0 }; draw_badge(bx, y + 6, t->badge_cd, s); }
     }
     draw_clear_clip();
     draw_rect_grad(LIST_X + 2, ly + 2, LIST_W - 4, 12, ALPHA(t->bg, 160), ALPHA(t->bg, 0));
@@ -203,7 +203,7 @@ static void draw_grid(void) {
         draw_text_clipped(&g_font_small, cx + 6, cy + cs - 20, cs - 12, sel ? 0xFFFFFFFF : ALPHA(0xFFFFFF, 220), g->name); /* caption sits on a dark gradient in every theme */
         draw_clear_clip(); draw_set_clip(cx0, cy0, cw, ch);
         float bx = cx + 6;
-        for (const char *r = g->region; *r; r++) { char s[2] = { *r, 0 }; draw_badge(bx, cy + 5, *r == 'J' ? t->badge_j : *r == 'U' ? t->badge_u : t->badge_e, s); bx += 19; }
+        for (const char *r = g->region; *r; r++) { char s[2] = { *r, 0 }; draw_badge(bx, cy + 5, t->badge_cd, s); bx += 19; }
         if (g->favorite) draw_text(&g_font_small, cx + cs - 16, cy + 4, 0xFFFFD166, "\x2a");
         if (sel) draw_rect_round(cx + 6, cy + cs - 8, cs - 12, 2, 1, ALPHA(t->accent, 200));
     }
