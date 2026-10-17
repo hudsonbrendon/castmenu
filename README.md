@@ -28,15 +28,20 @@ Full feature list and details: [docs/MENU.md](docs/MENU.md).
 
 ## Screenshots
 
+<p align="center"><img src="docs/screenshots/demo.gif" width="480" alt="Cast Menu demo: Crazy Taxi and Resident Evil 3 with clips, then the launch animation"></p>
+
+<p align="center"><a href="https://github.com/hudsonbrendon/castmenu/releases/download/v0.5.0/castmenu-demo.mp4">▶ Full demo video with the game music (2 min)</a></p>
+
 | | |
 |---|---|
 | ![coverflow](docs/screenshots/coverflow.png) | ![details](docs/screenshots/details.png) |
+| ![Resident Evil 3](docs/screenshots/coverflow-re3.png) | ![details with synopsis](docs/screenshots/details-re3.png) |
 | ![launch animation](docs/screenshots/launch.png) | ![last played](docs/screenshots/sidebar.png) |
 | ![list](docs/screenshots/list.png) | ![grid](docs/screenshots/grid.png) |
 | ![settings](docs/screenshots/settings.png) | ![system](docs/screenshots/sysinfo.png) |
-| ![theme Controller](docs/screenshots/theme-controller.png) | ![theme Dreamcast Dark](docs/screenshots/theme-dreamcast-dark.png) |
+| ![theme Controller](docs/screenshots/theme-controller.png) | ![theme Terminal](docs/screenshots/theme-terminal.png) |
 
-Captured in the redream emulator from a real card. More in `docs/screenshots/`.
+Captured in the redream emulator from a real card.
 
 ## Quick start
 
