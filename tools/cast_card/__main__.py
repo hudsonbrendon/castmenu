@@ -248,7 +248,8 @@ def build_data(items, data_dir, menu_bin, themes_dir, custom_covers=None, sd=Non
             p = os.path.join(it["folder"], f"shot{k}.png")
             if os.path.exists(p):
                 os.makedirs(os.path.join(data_dir, "shots"), exist_ok=True)
-                img = Image.open(p).convert("RGB"); img = img.resize((256, 192), Image.LANCZOS)
+                try: img = Image.open(p).convert("RGB").resize((256, 192), Image.LANCZOS)
+                except Exception as e: print(f"  !! {os.path.basename(it['folder'])}: shot{k}.png unreadable ({e}), removed"); os.remove(p); continue
                 open(os.path.join(data_dir, "shots", "%03d_%d.tex" % (it["slot"], k)), "wb").write(tex.encode(img, "rgb565"))
         it["cvm"] = video_clip(it["folder"], redo)
         it["cma"] = music_clip(it["folder"], music_redo)

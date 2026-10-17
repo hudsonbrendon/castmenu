@@ -53,7 +53,9 @@ def fetch_shots(items, force=False, log=print):
             fn = match(it["name"], it["ip"].region, names) or match(it["ip"].name, it["ip"].region, names)
             if not fn: continue
             try:
-                open(dst, "wb").write(urllib.request.urlopen(BASE + kind + "/" + urllib.parse.quote(fn), timeout=60).read()); n += 1
+                data = urllib.request.urlopen(BASE + kind + "/" + urllib.parse.quote(fn), timeout=60).read()
+                if data[:8] != b"\x89PNG\r\n\x1a\n": log(f"  ?? {it['slot']:03d} {it['name']}: {kind} is not a PNG"); continue
+                open(dst, "wb").write(data); n += 1
                 log(f"  ok {it['slot']:03d} {it['name']}: {fname}")
             except Exception as e: log(f"  !! {it['slot']:03d} {it['name']}: {e}")
     return n
