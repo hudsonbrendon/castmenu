@@ -31,17 +31,24 @@ static int vmu_path(char *out, int cap) {
 void settings_init(void) {
     defaults();
 #ifdef _arch_dreamcast
-    char path[48]; if (vmu_path(path, sizeof path)) return;
-    file_t f = fs_open(path, O_RDONLY); if (f < 0) return;
+    char path[48]; if (vmu_path(path, sizeof path)) { dbglog(DBG_INFO, "settings: no VMU\n"); return; }
+    file_t f = fs_open(path, O_RDONLY); if (f < 0) { dbglog(DBG_INFO, "settings: cannot open %s\n", path); return; }
     size_t len = fs_total(f);
     uint8_t *buf = malloc(len);
     if (buf && fs_read(f, buf, len) == (ssize_t)len) {
-        vmu_pkg_t pkg;
-        if (vmu_pkg_parse(buf, len, &pkg) == 0 && pkg.data_len >= 8) {
-            uint32_t magic, version; memcpy(&magic, pkg.data, 4); memcpy(&version, pkg.data + 4, 4);
-            size_t need = version == SETTINGS_VERSION ? sizeof S : version == 2 ? SETTINGS_V2_SIZE : 0;   /* v2 -> v3: new fields keep their defaults */
-            if (magic == SETTINGS_MAGIC && need && pkg.data_len >= (int)need) { memcpy(&S, pkg.data, need); S.version = SETTINGS_VERSION; }
+        /* The settings block follows the VMU package header + icon. vmu_pkg_parse also checks the CRC,
+         * which the file system leaves at 0 on some writes, so locate the block by its magic instead. */
+        const uint8_t *data = NULL; size_t avail = 0;
+        for (size_t off = 0; off + 8 <= len; off += 4) {
+            uint32_t m; memcpy(&m, buf + off, 4);
+            if (m == SETTINGS_MAGIC) { data = buf + off; avail = len - off; break; }
         }
+        if (data) {
+            uint32_t version; memcpy(&version, data + 4, 4);
+            size_t need = version == SETTINGS_VERSION ? sizeof S : version == 2 ? SETTINGS_V2_SIZE : 0;   /* v2 -> v3: new fields keep their defaults */
+            if (need && avail >= need) { memcpy(&S, data, need); S.version = SETTINGS_VERSION; }
+            dbglog(DBG_INFO, "settings: loaded %s (v%lu)\n", path, (unsigned long)version);
+        } else dbglog(DBG_INFO, "settings: no Cast Menu block in %s\n", path);
     }
     free(buf); fs_close(f);
 #endif

@@ -1,5 +1,7 @@
 <p align="center"><img src="assets/brand/logo_sticker.png" width="320" alt="Cast Menu"></p>
 
+<p align="center"><img src="docs/screenshots/demo.gif" width="560" alt="Cast Menu: coverflow with gameplay clips and the launch animation"></p>
+
 <p align="center"><b>An open, good-looking game menu for GDEMU on the Sega Dreamcast.</b></p>
 
 <p align="center">
@@ -28,9 +30,10 @@ Full feature list and details: [docs/MENU.md](docs/MENU.md).
 
 ## Screenshots
 
-<p align="center"><img src="docs/screenshots/demo.gif" width="480" alt="Cast Menu demo: Crazy Taxi and Resident Evil 3 with clips, then the launch animation"></p>
+https://github.com/user-attachments/assets/ceb6fc5b-3d35-4e5d-874f-5cb9dde383df
 
-<p align="center"><a href="https://github.com/hudsonbrendon/castmenu/releases/download/v0.5.0/castmenu-demo.mp4">▶ Full demo video with the game music (2 min)</a></p>
+<p align="center">Demo with sound: Crazy Taxi and Resident Evil 3 with their clips and themes, then the launch animation.
+<a href="https://github.com/hudsonbrendon/castmenu/releases/download/v0.5.0/castmenu-demo.mp4">Download the full-quality video</a>.</p>
 
 | | |
 |---|---|

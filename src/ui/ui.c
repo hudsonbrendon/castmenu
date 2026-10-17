@@ -525,7 +525,7 @@ static void sysinfo_draw(void) {
     draw_text(&g_font_small, lx + text_width(&g_font_big, "Cast Menu") + 12, ay + 20, t->accent, "v" CAST_VERSION);
     char stats[96]; snprintf(stats, sizeof stats, "%s %s  \xb7  %s %s  \xb7  %s %s", cnt, tr(S_GAMES_LOWER), favs, tr(S_FAVORITES), n, tr(S_LAUNCHES));
     for (char *c = stats; *c; c++) if (*c >= 'A' && *c <= 'Z' && c > stats && c[-1] != ' ' && c[-1] != '\xb7') *c += 32;
-    draw_text_clipped(&g_font_small, lx, ay + 40, SCREEN_W - 2 * SAFE_X - 80, t->text, stats);
+    draw_text_clipped(&g_font_small, lx, ay + 40, SCREEN_W / 2 - lx - 10, t->text, stats);   /* left half: most-played list sits on the right */
     draw_text_clipped(&g_font_small, lx, ay + 58, 300, t->text_dim, "MIT \xb7 github.com/hudsonbrendon/castmenu");
     /* statistics: total play time + the three most played games */
     { settings_t *st = settings_get(); uint32_t total = 0; int top[3] = { -1, -1, -1 };
